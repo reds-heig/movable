@@ -31,4 +31,4 @@ entering build/src/test and executing
 ./test_movable <PUT A SIMULATION NAME HERE> <PATH TO THE CLASSIFIER>
 
 If you have any question, or you wish to contribute, please do not hesitate to
-send a message to <roberto.rigamonti@heig-vd.ch>.
+send a message to roberto <dot> rigamonti <at> heig-vd <dot> ch.
