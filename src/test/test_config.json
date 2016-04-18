@@ -1,0 +1,16 @@
+{
+    "resultsDir" : "results_test",
+    "datasetPath": "PUT_YOUR_DATASET_PATH_HERE",
+    "datasetName": "PUT_A_NICE_NAME_FOR_YOUR_DATASET_HERE",
+    "imgPathsFName": "test_imgs.txt",
+    "maskPathsFName": "test_masks.txt",
+    "sampleSize": 51,
+    "channelList": ["IMAGE_GRAY_CH",
+		    "IMAGE_GREEN_CH",
+		    "IMAGE_RED_CH",
+		    "MEDIAN_FILTERING",
+		    "LAPLACIAN_FILTERING",
+		    "GAUSSIAN_FILTERING",
+		    "SOBEL_DRV_X",
+		    "SOBEL_DRV_Y"]
+}
