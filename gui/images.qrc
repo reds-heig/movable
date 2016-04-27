@@ -1,0 +1,24 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+   <file>images/Zoom_in.png</file>
+   <file>images/Zoom_out_2.png</file>
+   <file>images/next.png</file>
+   <file>images/prev.png</file>
+   <file>images/pen_plus.jpg</file>
+   <file>images/pen_minus.jpg</file>
+   <file>images/eraser.png</file>
+   <file>images/erythrocyte.jpg</file>   
+   <file>images/erythrocyte_plus.jpg</file>
+   <file>images/erythrocyte_minus.jpg</file>
+   <file>images/erythrocyte_mouse.jpg</file>
+   <file>images/parasite_mouse.jpg</file>
+   <file>images/pen_parasite.jpg</file>
+   <file>images/pen_undefined_item.jpg</file>
+   <file>images/outil_selecteur.png</file>
+   <file>images/outil_hand.png</file>
+   <file>images/minus.png</file>
+   <file>images/plus.png</file>
+</qresource>
+</RCC>
+
+
