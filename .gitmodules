@@ -1,6 +1,6 @@
-[submodule "Catch"]
-	path = Catch
-	url = https://github.com/philsquared/Catch.git
-[submodule "liblbfgs"]
-	path = liblbfgs
+[submodule "libs/liblbfgs"]
+	path = libs/liblbfgs
 	url = https://github.com/chokkan/liblbfgs.git
+[submodule "libs/Catch"]
+	path = libs/Catch
+	url = https://github.com/philsquared/Catch.git
