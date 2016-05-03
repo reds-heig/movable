@@ -67,4 +67,3 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif (CMAKE_BUILD_TYPE MATCHES Debug)
 
 add_subdirectory (src)
-add_subdirectory (tests)
