@@ -61,11 +61,6 @@ INCLUDEPATH += /usr/local/include/opencv2
 LIBS += -lopencv_core
 #LIBS += -lopencv_cudev
 
-
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/widgets/widgets/imageviewer
 INSTALLS += target

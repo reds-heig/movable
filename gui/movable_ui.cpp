@@ -1,7 +1,6 @@
 #include "movable_ui.h"
 
 #include <QtWidgets>
-
 #ifndef QT_NO_PRINTER
 #include <QPrintDialog>
 #endif
@@ -19,39 +18,52 @@ MovableUI::MovableUI()
 {
     image_viewer = new ImageViewer("Large viewer");
 
+    /*
     //Splitters
     v2Splitter = new QSplitter;
     v2Splitter->setOrientation(Qt::Vertical);
 
     hSplitter = new QSplitter;
     hSplitter->setOrientation(Qt::Horizontal);
+    */
 
     list_images_viewer = new QListWidget(this);
     list_images_viewer->setViewMode(QListWidget::ListMode);
     list_images_viewer->setIconSize(QSize(200,200));
     list_images_viewer->setResizeMode(QListWidget::Adjust);
+    list_images_viewer->setFixedWidth(220);
 
+    /*
     hSplitter->addWidget(list_images_viewer);
     hSplitter->addWidget(v2Splitter);
+    */
 
     list_parasits_viewer = new QListWidget(this);
     list_parasits_viewer->setViewMode(QListWidget::ListMode);
     list_parasits_viewer->setIconSize(QSize(50,50));
     list_parasits_viewer->setResizeMode(QListWidget::Adjust);
     list_parasits_viewer->setFlow(QListWidget::LeftToRight);
-
+    list_parasits_viewer->setFixedHeight(80);
+    /*
     v2Splitter->addWidget(list_parasits_viewer);
     v2Splitter->addWidget(image_viewer);
+    */
+
+    QVBoxLayout *v_layout = new QVBoxLayout;
+    v_layout->addWidget(list_parasits_viewer);
+    v_layout->addWidget(image_viewer);
+
 
     //Layout
     QWidget *widget = new QWidget;
     QHBoxLayout* layout = new QHBoxLayout(widget);
-    layout->addWidget(hSplitter);
+    //layout->addWidget(hSplitter);
+    layout->addWidget(list_images_viewer);
+    layout->addLayout(v_layout);
 
     setCentralWidget(widget);
 
     infos = new QLabel;
-
     statusBar()->addWidget(infos);
 
     createActions();
