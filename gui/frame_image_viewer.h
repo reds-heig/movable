@@ -26,22 +26,25 @@ public:
 
     QGraphicsView *view;
 
+    /* Panel (Manage image)*/
+    QPushButton *save_image;
+    ImageItem *drawing_area;
+    QPushButton *previous_image;
+    QPushButton *next_image;
+
 public slots:
     void loadScene(BloodImage* image);
     void centerOn(int id);
 
 private slots:
-    void selectPreviousImage();
-    void selectNextImage();
     void zoomIn();
     void zoomOut();
 
     /* Tools */
     void setPointerMode();
-//    void setPenPointer();
     void setBigPen();
     void setSmallPen();
-    void saveImage();
+
 
 private:
 
@@ -49,8 +52,6 @@ private:
     void viewDrawedItems();
 
     /* Manage viewer */
-    QPushButton *previous_image;
-    QPushButton *next_image;
     QPushButton *zoom_in;
     QPushButton *zoom_out;
 
@@ -64,16 +65,9 @@ private:
     QToolButton *pen_undefined_item;
     QToolButton *pen_parasite_item;
     QToolButton *eraser;
-//    QPushButton *take_big_cursor;
-//    QPushButton *take_small_cursor;
-
-    /* Panel (Manage image)*/
-    QPushButton *save_image;
 
     //Frame
     QGraphicsScene* scene;
-    ImageItem *drawing_area;
-
     QList<ParasiteItem*>* parasits;
     QList<ErythrocyteItem*> *erythrocytes;
 

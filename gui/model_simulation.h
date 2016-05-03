@@ -14,7 +14,7 @@ class Simulation
         QList<BloodImage*> *getBloodImages();
 
         void addImage(QImage *image, QImage *simulation, QString path_img, QString path);
-
+        QString getInfos(int image_id);
     private:
         QString name;
         QList<BloodImage*> *blood_images;

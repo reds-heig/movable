@@ -126,20 +126,20 @@ bool MovableUI::loadFile(const QString &fileName) {
 
 //        qDebug() << simulation->getBloodImages()->at(0)->parasitemie();
 
-        QString resul;
-        resul.append("Erythrocytes : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
-        resul.append("\tParasites : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
-        resul.append("\tErythrocytes with parasites : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
-        resul.append("\tParasitemia : ");
-        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
-        QString str_score;
-        str_score.setNum(score);
-        resul.append(str_score);
-        resul.append(" %");
-        infos->setText(resul);
+//        QString resul;
+//        resul.append("Erythrocytes : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
+//        resul.append("\tParasites : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
+//        resul.append("\tErythrocytes with parasites : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
+//        resul.append("\tParasitemia : ");
+//        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
+//        QString str_score;
+//        str_score.setNum(score);
+//        resul.append(str_score);
+//        resul.append(" %");
+        infos->setText(simulation->getInfos(0));
 
     }
 
@@ -180,6 +180,13 @@ void MovableUI::resizeWindow(int i)
 {
     qDebug() << "Hello world !!! " << i;
 }
+
+void MovableUI::save()
+{
+    image_viewer->drawing_area->saveImage();
+    selectBloodImage(image_selected);
+}
+
 
 void MovableUI::close()
 {
@@ -247,6 +254,16 @@ void MovableUI::print()
     }
 }
 
+void MovableUI::selectNextBloodImage()
+{
+    selectBloodImage(image_selected+1);
+}
+
+void MovableUI::selectPreviousBloodImage()
+{
+    selectBloodImage(image_selected-1);
+}
+
 void MovableUI::selectBloodImage(int id)
 {
     if(id >= 0 && id < simulation->getBloodImages()->length())
@@ -261,20 +278,23 @@ void MovableUI::selectBloodImage(int id)
 
         selectParasit(0);
 
-        QString resul;
-        resul.append("Erythrocytes : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
-        resul.append("\tParasites : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
-        resul.append("\tErythrocytes with parasites : ");
-        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
-        resul.append("\tParasitemia : ");
-        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
-        QString str_score;
-        str_score.setNum(score);
-        resul.append(str_score);
-        resul.append(" %");
-        infos->setText(resul);
+//        QString resul;
+//        resul.append("Erythrocytes : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
+//        resul.append("\tParasites : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
+//        resul.append("\tErythrocytes with parasites : ");
+//        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
+//        resul.append("\tParasitemia : ");
+//        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
+//        QString str_score;
+//        str_score.setNum(score);
+//        resul.append(str_score);
+//        resul.append(" %");
+//        infos->setText(resul);
+
+        infos->setText(simulation->getInfos(image_selected));
+
     }
 
 }
@@ -310,6 +330,11 @@ void MovableUI::createActions()
 
     connect(list_images_viewer, SIGNAL(currentRowChanged(int)), this, SLOT(selectBloodImage(int)));
     connect(list_parasits_viewer, SIGNAL(currentRowChanged(int)), this, SLOT(selectParasit(int)));
+
+    connect(image_viewer->save_image, SIGNAL(clicked()), this, SLOT(save()));
+
+    connect(image_viewer->previous_image, SIGNAL(clicked()), this, SLOT(selectPreviousBloodImage()));
+    connect(image_viewer->next_image, SIGNAL(clicked()), this, SLOT(selectNextBloodImage()));
 }
 
 void MovableUI::createMenus()

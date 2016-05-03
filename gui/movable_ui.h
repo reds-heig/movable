@@ -31,6 +31,8 @@ public:
     QSplitter* hSplitter;
 
 public slots:
+    void selectNextBloodImage();
+    void selectPreviousBloodImage();
     void selectBloodImage(int id);
     void selectParasit(int id);
 
@@ -41,6 +43,7 @@ private slots:
     void close();
     void about();
     void print();
+    void save();
 private:
     void createActions();
     void createMenus();

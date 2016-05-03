@@ -1,11 +1,6 @@
 
 #include "frame_image_viewer.h"
 
-#ifndef QT_NO_PRINTER
-#include <QPrinter>
-#include <QPrintDialog>
-#endif
-
 #ifndef QT_NO_OPENGL
 #include <QtOpenGL>
 #else
@@ -165,10 +160,6 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     setLayout(main_layout);
 
     zoom_value = 1;
-
-    connect(previous_image, SIGNAL(clicked()), this, SLOT(selectPreviousImage()));
-    connect(next_image, SIGNAL(clicked()), this, SLOT(selectNextImage()));
-
     connect(zoom_in, SIGNAL(clicked()), this, SLOT(zoomIn()));
     connect(zoom_out, SIGNAL(clicked()), this, SLOT(zoomOut()));
 
@@ -181,8 +172,8 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     connect(pen_undefined_item, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
     connect(eraser, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
 
-    connect(save_image, SIGNAL(clicked()), this, SLOT(saveImage()));
-
+    scene = new QGraphicsScene;
+    view->setScene(scene);
 }
 
 BloodImage* ImageViewer::getImage() {
@@ -196,8 +187,9 @@ QList<ParasiteItem*> *ImageViewer::getParasitViews() {
 void ImageViewer::loadScene(BloodImage* image)
 {
     this->image = image;
-    scene = new QGraphicsScene;
-    view->setScene(scene);
+    scene->clear();
+//    scene = new QGraphicsScene;
+//    view->setScene(scene);
 
     /* Background */
     QGraphicsPixmapItem *background = new QGraphicsPixmapItem(QPixmap::fromImage(*image->getImage()));
@@ -267,18 +259,6 @@ void ImageViewer::centerOn(int id)
     view->centerOn(x,y);
 }
 
-void ImageViewer::selectPreviousImage()
-{
-    MovableUI* movable = (MovableUI*)parentWidget()->parentWidget()->parentWidget()->parentWidget();
-    movable->selectBloodImage(image->getId()-1);
-}
-
-void ImageViewer::selectNextImage()
-{
-    MovableUI* movable = (MovableUI*)parentWidget()->parentWidget()->parentWidget()->parentWidget();
-    movable->selectBloodImage(image->getId()+1);
-}
-
 void ImageViewer::zoomIn()
 {
     zoom_value += 0.2;
@@ -319,7 +299,6 @@ void ImageViewer::setPointerMode()
         drawing_area->setParasitePen(pen_parasite_item->isChecked());
     }
     else {
-
         // Edition Mode
         view->setDragMode(mouse->isChecked()
                                      ? QGraphicsView::RubberBandDrag
@@ -346,8 +325,3 @@ void ImageViewer::setSmallPen() {
 
 }
 
-void ImageViewer::saveImage() {
-    drawing_area->saveImage();
-    MovableUI* movable = (MovableUI*)parentWidget()->parentWidget()->parentWidget()->parentWidget();
-    movable->selectBloodImage(image->getId());
-}
