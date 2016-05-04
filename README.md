@@ -58,6 +58,7 @@ These segmentation can be visualized and modified via the the GUI available in m
 ![alt tag](http://reds-data.heig-vd.ch//publications/movable_2016/interface_with_label.png)
 
 **GUI usage video**
+
 [![Alt text](https://img.youtube.com/vi/TWuErkVzPKM/0.jpg)](https://www.youtube.com/watch?v=TWuErkVzPKM)
 
 ## Copyright and license
