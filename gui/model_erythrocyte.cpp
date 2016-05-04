@@ -22,3 +22,4 @@ QPointF Erythrocyte::getPos() {
 qreal Erythrocyte::getRadius() {
     return radius;
 }
+

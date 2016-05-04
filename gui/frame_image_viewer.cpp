@@ -205,6 +205,8 @@ void ImageViewer::loadScene(BloodImage* image)
     /* Erythrocytes */
     erythrocytes = new QList<ErythrocyteItem*>();
 
+    image->foundErythrocytes();
+
     foreach (Erythrocyte *e, *image->getErythrocytes())
     {
         ErythrocyteItem *item = new ErythrocyteItem(e);

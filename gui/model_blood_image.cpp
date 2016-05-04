@@ -1,5 +1,9 @@
 #include "model_blood_image.h"
 
+//#include "opencv2/imgcodecs.hpp"
+//#include "opencv2/highgui/highgui.hpp"
+//#include "opencv2/imgproc/imgproc.hpp"
+
 #include "cv_functions.h"
 
 #include <QDebug>
@@ -11,6 +15,13 @@ BloodImage::BloodImage(int id, QImage *data_image, QImage *data_simulation, QStr
     this->parasits = NULL;
     this->data_path = path;
     this->image_path = path_img;
+
+    this->dp = 1;
+    this->min_dist = 10;
+    this->param1 = 50;
+    this->param2 = 12;
+    this->min_radius = 11;
+    this->max_radius = 20;
 }
 
 int BloodImage::getId() {
@@ -122,7 +133,14 @@ int BloodImage::foundErythrocytes() {
 
     std::vector<cv::Vec3f> *circles = new std::vector<cv::Vec3f>;
 
-    int size = cv_found_erythrocytes(image_path.toLatin1().data(),circles);
+    int size = cv_found_erythrocytes(image_path.toLatin1().data(),
+                                     circles,
+                                     this->dp,
+                                     this->min_dist,
+                                     this->param1,
+                                     this->param2,
+                                     this->min_radius,
+                                     this->max_radius);
 
     qDebug() << size;
 
@@ -169,7 +187,6 @@ int BloodImage::parasitemie() {
 
     return score;
 }
-
 
 void BloodImage::saveImage(QImage *data_simulation, QString filename) {
     this->data = data_simulation;

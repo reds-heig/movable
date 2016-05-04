@@ -36,7 +36,6 @@ public slots:
     void selectBloodImage(int id);
     void selectParasit(int id);
 
-
 private slots:
     void open();
     void resizeWindow(int i);

@@ -1,4 +1,7 @@
+
 #include "movable_ui.h"
+#include "widget_erythrocyte_editor.h"
+
 
 #include <QtWidgets>
 #ifndef QT_NO_PRINTER
@@ -18,25 +21,11 @@ MovableUI::MovableUI()
 {
     image_viewer = new ImageViewer("Large viewer");
 
-    /*
-    //Splitters
-    v2Splitter = new QSplitter;
-    v2Splitter->setOrientation(Qt::Vertical);
-
-    hSplitter = new QSplitter;
-    hSplitter->setOrientation(Qt::Horizontal);
-    */
-
     list_images_viewer = new QListWidget(this);
     list_images_viewer->setViewMode(QListWidget::ListMode);
     list_images_viewer->setIconSize(QSize(200,200));
     list_images_viewer->setResizeMode(QListWidget::Adjust);
     list_images_viewer->setFixedWidth(220);
-
-    /*
-    hSplitter->addWidget(list_images_viewer);
-    hSplitter->addWidget(v2Splitter);
-    */
 
     list_parasits_viewer = new QListWidget(this);
     list_parasits_viewer->setViewMode(QListWidget::ListMode);
@@ -44,20 +33,14 @@ MovableUI::MovableUI()
     list_parasits_viewer->setResizeMode(QListWidget::Adjust);
     list_parasits_viewer->setFlow(QListWidget::LeftToRight);
     list_parasits_viewer->setFixedHeight(80);
-    /*
-    v2Splitter->addWidget(list_parasits_viewer);
-    v2Splitter->addWidget(image_viewer);
-    */
 
+    //Layout
     QVBoxLayout *v_layout = new QVBoxLayout;
     v_layout->addWidget(list_parasits_viewer);
     v_layout->addWidget(image_viewer);
 
-
-    //Layout
     QWidget *widget = new QWidget;
     QHBoxLayout* layout = new QHBoxLayout(widget);
-    //layout->addWidget(hSplitter);
     layout->addWidget(list_images_viewer);
     layout->addLayout(v_layout);
 
@@ -68,6 +51,8 @@ MovableUI::MovableUI()
 
     createActions();
     createMenus();
+
+    loadFile("/home/mylag/Documents/example/simulation.sim");
 }
 
 bool MovableUI::loadFile(const QString &fileName) {
@@ -78,7 +63,6 @@ bool MovableUI::loadFile(const QString &fileName) {
 
     //Read files
     QFile inputFile(fileName);
-
     QString main_path = fileName.left(fileName.size()-fileName.split("/").last().size()-1);
 
     //Load data
@@ -124,24 +108,11 @@ bool MovableUI::loadFile(const QString &fileName) {
         for(int i = 0; i < simulation->getBloodImages()->at(0)->getParasits()->size(); i++)
             list_parasits_viewer->addItem(new QListWidgetItem(QIcon(simulation->getBloodImages()->at(0)->getParasits()->at(i)->getView()), ""));
 
-//        qDebug() << simulation->getBloodImages()->at(0)->parasitemie();
-
-//        QString resul;
-//        resul.append("Erythrocytes : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
-//        resul.append("\tParasites : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
-//        resul.append("\tErythrocytes with parasites : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
-//        resul.append("\tParasitemia : ");
-//        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
-//        QString str_score;
-//        str_score.setNum(score);
-//        resul.append(str_score);
-//        resul.append(" %");
         infos->setText(simulation->getInfos(0));
-
     }
+
+    ErythrocyteEditor* editor = new ErythrocyteEditor(simulation->getBloodImages()->at(0));
+    editor->show();
 
     //Enable options
     /*printAct->setEnabled(true);
@@ -186,7 +157,6 @@ void MovableUI::save()
     image_viewer->drawing_area->saveImage();
     selectBloodImage(image_selected);
 }
-
 
 void MovableUI::close()
 {
@@ -278,23 +248,7 @@ void MovableUI::selectBloodImage(int id)
 
         selectParasit(0);
 
-//        QString resul;
-//        resul.append("Erythrocytes : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getErythrocytes()->size()));
-//        resul.append("\tParasites : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->getParasits()->size()));
-//        resul.append("\tErythrocytes with parasites : ");
-//        resul.append(QString::number(simulation->getBloodImages()->at(0)->parasitemie()));
-//        resul.append("\tParasitemia : ");
-//        qreal score = (float)simulation->getBloodImages()->at(0)->parasitemie() / (float)simulation->getBloodImages()->at(0)->getErythrocytes()->size() * 100;
-//        QString str_score;
-//        str_score.setNum(score);
-//        resul.append(str_score);
-//        resul.append(" %");
-//        infos->setText(resul);
-
         infos->setText(simulation->getInfos(image_selected));
-
     }
 
 }

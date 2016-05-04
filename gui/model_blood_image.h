@@ -6,10 +6,6 @@
 #include "model_parasit.h"
 #include "model_erythrocyte.h"
 
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
 #include <QImage>
 #include <QList>
 
@@ -35,6 +31,14 @@ class BloodImage
         int parasitemie();
 
         void saveImage(QImage *data_simulation, QString filename) ;
+
+        /* Configuration */
+        double dp;
+        double min_dist;
+        double param1;
+        double param2;
+        int min_radius;
+        int max_radius;
 
     private:
 
