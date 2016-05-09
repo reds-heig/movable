@@ -38,7 +38,6 @@ public slots:
 
 private slots:
     void open();
-    void resizeWindow(int i);
     void close();
     void about();
     void print();

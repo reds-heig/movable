@@ -70,22 +70,60 @@ bool MovableUI::loadFile(const QString &fileName) {
 
         QTextStream in(&inputFile);
 
+        QList<QString> path_imgs;
+        QList<QString> path_gts;
+
+        bool imgs_loading = true;
+
         while (!in.atEnd()) {
 
-          QString path_img = in.readLine();
-          path_img.insert(0, main_path);
+//          QString path_img = in.readLine();
+//          path_img.insert(0, main_path);
 
-          QString path_gt = in.readLine();
-          path_gt.insert(0, main_path);
+//          QString path_gt = in.readLine();
+//          path_gt.insert(0, main_path);
 
-          QImage *img = new QImage(path_img);
-          QImage *gt = new QImage(path_gt);
+//          QImage *img = new QImage(path_img);
+//          QImage *gt = new QImage(path_gt);
 
-          qDebug() << path_img;
-          qDebug() << path_gt;
+//          qDebug() << path_img;
+//          qDebug() << path_gt;
 
-          if(img != NULL && gt != NULL)
-              simulation->addImage(img, gt, path_img, path_gt);
+//          if(img != NULL && gt != NULL)
+//              simulation->addImage(img, gt, path_img, path_gt);
+
+            QString path_tmp = in.readLine();
+
+            if(path_tmp.isEmpty())
+                continue;
+
+            if(path_tmp.compare("[imgs]") == 0) {
+                imgs_loading = true;
+                continue;
+            }
+
+            if(path_tmp.compare("[gts]") == 0) {
+                imgs_loading = false;
+                continue;
+            }
+
+            path_tmp.insert(0, main_path);
+
+            if(imgs_loading) {
+                path_imgs.append(path_tmp);
+                qDebug() << "add " << path_tmp << " in [imgs]";
+            }
+            else {
+                path_gts.append(path_tmp);
+                qDebug() << "add " << path_tmp << " in [gts]";
+            }
+
+        }
+
+        for(int i=0; i < path_imgs.size(); i++) {
+            qDebug() << path_imgs.at(i);
+            qDebug() << path_gts.at(i);
+            simulation->addImage(new QImage(path_imgs.at(i)), new QImage(path_gts.at(i)), path_imgs.at(i), path_gts.at(i));
         }
 
         inputFile.close();
@@ -111,8 +149,8 @@ bool MovableUI::loadFile(const QString &fileName) {
         infos->setText(simulation->getInfos(0));
     }
 
-    ErythrocyteEditor* editor = new ErythrocyteEditor(simulation->getBloodImages()->at(0));
-    editor->show();
+//    ErythrocyteEditor* editor = new ErythrocyteEditor(simulation->getBloodImages()->at(0));
+//    editor->show();
 
     //Enable options
     /*printAct->setEnabled(true);
@@ -145,11 +183,6 @@ void MovableUI::open()
     dialog.setNameFilter("SIM (*.sim)");
 
     while (dialog.exec() == QDialog::Accepted && !loadFile(dialog.selectedFiles().first())) {}
-}
-
-void MovableUI::resizeWindow(int i)
-{
-    qDebug() << "Hello world !!! " << i;
 }
 
 void MovableUI::save()
@@ -250,7 +283,6 @@ void MovableUI::selectBloodImage(int id)
 
         infos->setText(simulation->getInfos(image_selected));
     }
-
 }
 
 void MovableUI::selectParasit(int id)

@@ -5,6 +5,7 @@
 #include "item_erythrocyte.h"
 #include "item_parasit.h"
 #include "item_image.h"
+#include "widget_erythrocyte_editor.h"
 
 #include <QFrame>
 #include <QtWidgets>
@@ -44,7 +45,7 @@ private slots:
     void setPointerMode();
     void setBigPen();
     void setSmallPen();
-
+    void showErythrocytesEditor();
 
 private:
 
@@ -55,16 +56,21 @@ private:
     QPushButton *zoom_in;
     QPushButton *zoom_out;
 
-    /* Panel (Viewer)*/
+    /* Panel (Viewer) */
     QToolButton *mouse;
     QToolButton *hand;
     QToolButton *mouse_erythrocytes;
     QToolButton *mouse_parasites;
 
-    /* Panel (Parasites)*/
+    /* Panel (Erythrocytes) */
+    QPushButton *settings;
+
+    /* Panel (Parasites) */
     QToolButton *pen_undefined_item;
     QToolButton *pen_parasite_item;
     QToolButton *eraser;
+
+    ErythrocyteEditor* editor;
 
     //Frame
     QGraphicsScene* scene;

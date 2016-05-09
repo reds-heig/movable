@@ -75,6 +75,11 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     mouse_parasites->setCheckable(true);
     mouse_parasites->setChecked(true);
 
+    /* Panel (Erythrocytes)*/
+    settings = new QPushButton;
+    settings->setIcon(QPixmap(":/images/settings.jpg"));
+    settings->setIconSize(iconSize);
+
     /* Panel (Parasites)*/
     pen_parasite_item = new QToolButton;
     pen_parasite_item->setIcon(QPixmap(":/images/pen_parasite.jpg"));
@@ -104,7 +109,6 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
 //    take_big_cursor = new QPushButton;
 //    take_big_cursor->setIcon(QPixmap(":/images/pen_plus.jpg"));
 //    take_big_cursor->setIconSize(iconSize);
-
 //    take_small_cursor = new QPushButton;
 //    take_small_cursor->setIcon(QPixmap(":/images/pen_minus.jpg"));
 //    take_small_cursor->setIconSize(iconSize);
@@ -132,11 +136,18 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     tools_image_panel->addWidget(new QLabel(tr("|")));
     tools_image_panel->addWidget(mouse_erythrocytes);
     tools_image_panel->addWidget(mouse_parasites);
-
     tools_image_panel->addStretch();
 
     tools_layout->addLayout(tools_image_panel,1,0);
 
+    /* Erythrocytes panel */
+    tools_layout->addWidget(new QLabel(tr("Erythrocytes settings")),0,1);
+    QHBoxLayout *layout_erythrocytes = new QHBoxLayout;
+    layout_erythrocytes->addWidget(settings);
+    layout_erythrocytes->addStretch();
+    tools_layout->addLayout(layout_erythrocytes,1,1);
+
+    /* Draw parasites panel */
     QHBoxLayout *layout_parasites = new QHBoxLayout;
     layout_parasites->addWidget(pen_parasite_item);
     layout_parasites->addWidget(pen_undefined_item);
@@ -168,6 +179,8 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     connect(mouse_erythrocytes, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
     connect(mouse_parasites, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
 
+    connect(settings, SIGNAL(clicked()), this, SLOT(showErythrocytesEditor()));
+
     connect(pen_parasite_item, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
     connect(pen_undefined_item, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
     connect(eraser, SIGNAL(toggled(bool)), this, SLOT(setPointerMode()));
@@ -188,8 +201,6 @@ void ImageViewer::loadScene(BloodImage* image)
 {
     this->image = image;
     scene->clear();
-//    scene = new QGraphicsScene;
-//    view->setScene(scene);
 
     /* Background */
     QGraphicsPixmapItem *background = new QGraphicsPixmapItem(QPixmap::fromImage(*image->getImage()));
@@ -216,20 +227,18 @@ void ImageViewer::loadScene(BloodImage* image)
     }
 
     /* Detected leukocytes */
-//    foreach (ErythrocyteItem *e, *erythrocytes)
-//    {
-//        QList<QGraphicsItem *> list = scene->collidingItems(e);
+    //    foreach (ErythrocyteItem *e, *erythrocytes)
+    //    {
+    //        QList<QGraphicsItem *> list = scene->collidingItems(e);
+    //        if(list.size() > 6) {
+    //            foreach (QGraphicsItem *ery, list) {
+    //                if(ery->pos().rx() != 0 && ery->pos().ry() != 0)
+    //                    scene->removeItem(ery);
+    //            }
+    //        }
+    //    }
 
-//        if(list.size() > 6) {
-
-//            foreach (QGraphicsItem *ery, list) {
-//                if(ery->pos().rx() != 0 && ery->pos().ry() != 0)
-//                    scene->removeItem(ery);
-//            }
-//        }
-//    }
-
-     /* Parasites */
+    /* Parasites */
     parasits = new QList<ParasiteItem*>();
 
     foreach (Parasit* p, *image->getParasits())
@@ -250,9 +259,7 @@ void ImageViewer::loadScene(BloodImage* image)
 void ImageViewer::centerOn(int id)
 {
     parasits->at(parasit_selected)->setSelected(false);
-
     parasit_selected = id;
-
     parasits->at(parasit_selected)->setSelected(true);
 
     qreal x = parasits->at(parasit_selected)->getParasit()->getX();
@@ -278,7 +285,6 @@ void ImageViewer::zoomOut()
     matrix.scale(zoom_value, zoom_value);
     view->setMatrix(matrix);
 }
-
 
 void ImageViewer::setPointerMode()
 {
@@ -318,6 +324,13 @@ void ImageViewer::setPointerMode()
             p->setVisible(mouse_parasites->isChecked());
     }
 }
+
+void ImageViewer::showErythrocytesEditor() {
+    /*ErythrocyteEditor* */
+    editor = new ErythrocyteEditor(image);
+    editor->show();
+}
+
 
 void ImageViewer::setBigPen() {
 

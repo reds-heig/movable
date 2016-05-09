@@ -11,9 +11,15 @@ ErythrocyteEditor::ErythrocyteEditor(BloodImage *image, QWidget *parent)
     this->label = new QLabel;
     this->label->setPixmap(QPixmap::fromImage(*image->getImage()));
 
+//    this->scroll_area = new QScrollArea;
+//    this->scroll_area->setBackgroundRole(QPalette::Dark);
+//    this->scroll_area->setWidget(this->label);
+//    this->scroll_area->setVisible(false);
+
     /* Data */
     QVBoxLayout *img_layout = new QVBoxLayout();
     img_layout->addWidget(this->label);
+//    img_layout->addWidget(this->scroll_area);
 
     /* Sliders */
     QGridLayout *sliders_layout = new QGridLayout;

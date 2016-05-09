@@ -24,6 +24,7 @@ private:
 
     /* Label */
     QLabel *label;
+    QScrollArea *scroll_area;
 
     /* Image */
     BloodImage *image;
