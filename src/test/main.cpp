@@ -29,13 +29,12 @@
 int
 main(int argc, char **argv)
 {
-	if (argc != 3) {
-		log_err("Usage: %s sim_name classifier_path--", argv[0]);
-		return -EXIT_FAILURE;
-	}
-
 	log_info("Loading parameters...");
-	Parameters params(argv[1], argv[2]);
+	Parameters params(argc, argv);
+	if (params.simName == "") {
+		/* Requested 'help' in command line args */
+		return EXIT_SUCCESS;
+	}
 
 	log_info("Loading dataset...");
 	Dataset dataset(params);
@@ -45,9 +44,10 @@ main(int argc, char **argv)
 		return -EXIT_FAILURE;
 	}
 
-	std::ifstream file(argv[2]);
+	std::ifstream file(params.classifierPath);
 	if (!file.is_open()) {
-		log_err("Unable to open classifier file %s", argv[2]);
+		log_err("Unable to open classifier file %s",
+			params.classifierPath.c_str());
 		return -EXIT_FAILURE;
 	}
 

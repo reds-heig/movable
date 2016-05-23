@@ -29,9 +29,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+extern "C" {
+#include "argtable3.h"
+}
 #include "DataTypes.hpp"
 #include "macros.hpp"
 #include "logging.hpp"
+
+/* Default configuration file name */
+const std::string defaultConfigFName = "test_config.json";
 
 /**
  * class Parameters - Set of parameters for the application
@@ -45,7 +51,10 @@
  * @sampleSize     : lateral size (in pixels) of each sample (for
  *                   instance, if this is 51, this means sampling
  *                   51x51 squared around the sample point)
+ * @threshold      : fixed threshold applied when binarizing the image
+ * @baseResDir     : base directory path for output results
  * @channelList    : list of channels requested by user
+ * @configFName    : path of the configuration file
  */
 class Parameters {
 public:
@@ -59,6 +68,8 @@ public:
 
 	unsigned int sampleSize;
 
+	float threshold;
+
 	std::string baseResDir;
 	std::vector< std::string > channelList;
 
@@ -69,49 +80,15 @@ public:
 
 	/**
 	 * Parameters() - Load a set of parameters from the JSON configuration
-	 *                file
+	 *                file and the command line
 	 *
-	 * @simName       : name of the current simulation
-	 * @classifierPath: path of the trained classifier
+	 * @argc: command line's argument count
+	 * @argv: command line's argument list
 	 */
-	Parameters(const std::string &simName,
-		   const std::string &classifierPath)
-		: simName(simName), classifierPath(classifierPath)
-	{
-		std::ifstream configData("test_config.json",
-					 std::ifstream::binary);
-		Json::Reader reader;
-		Json::Value root;
-		if (!reader.parse(configData, root)) {
-			std::cerr << reader.getFormatedErrorMessages() << "\n";
-		}
+	Parameters(int argc, char **argv);
 
-		GET_STRING_PARAM(resultsDir);
-
-		/* Ensure that no previous simulation had the same name */
-		baseResDir = resultsDir + std::string("/") + simName;
-		if (access(baseResDir.c_str(), F_OK) == 0) {
-			log_err("The results directory %s already exist!",
-				baseResDir.c_str());
-			log_err("Please choose another simulation name.");
-			throw std::runtime_error("resultsDirAlreadyExists");
-		}
-
-		GET_STRING_PARAM(datasetPath);
-		CHECK_DIR_EXISTS(datasetPath.c_str());
-
-		GET_STRING_PARAM(datasetName);
-
-		GET_STRING_PARAM(imgPathsFName);
-		CHECK_FILE_EXISTS((datasetPath + std::string("/")
-				   + imgPathsFName).c_str());
-		GET_STRING_PARAM(maskPathsFName);
-		CHECK_FILE_EXISTS((datasetPath + std::string("/")
-				   + maskPathsFName).c_str());
-
-		GET_INT_PARAM(sampleSize);
-		GET_STRING_ARRAY(channelList);
-	}
+private:
+	std::string configFName;
 };
 
 #endif /* PARAMETERS_HPP_ */

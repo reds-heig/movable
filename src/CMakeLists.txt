@@ -17,5 +17,5 @@
 ##  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          ##
 ################################################################################
 
-add_subdirectory (train)
 add_subdirectory (test)
+add_subdirectory (train)

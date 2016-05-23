@@ -52,15 +52,16 @@ set (SHARED_SRCS
 
 set (TRAIN_HDRS
   LineSearch.hpp
-  SmoothingMatrices.hpp
   Parameters.hpp
+  SmoothingMatrices.hpp
   )
 
 set (TRAIN_SRCS
   SmoothingMatrices.cpp
   main.cpp
+  Parameters.cpp
   )
 
 CONFIGURE_FILE (train_config.json train_config.json COPYONLY)
 add_executable (train_movable ${TRAIN_SRCS} ${TRAIN_HDRS} ${SHARED_SRCS} ${SHARED_HDRS})
-target_link_libraries (train_movable ${OpenCV_LIBS} lbfgs ${JSONCPP_LIBS})
+target_link_libraries (train_movable ${OpenCV_LIBS} lbfgs ${JSONCPP_LIBS} argtable3)

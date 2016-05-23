@@ -29,9 +29,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+extern "C" {
+#include "argtable3.h"
+}
+
 #include "DataTypes.hpp"
 #include "macros.hpp"
 #include "logging.hpp"
+
+/* Default configuration file name */
+const std::string defaultConfigFName = "train_config.json";
 
 /**
  * class Parameters - Set of parameters for the application
@@ -72,6 +79,7 @@
  *                   stored
  * @finalResDir    : directory where final results will be stored
  * @channelList    : list of channels requested by user
+ * @configFName    : path of the configuration file
  */
 class Parameters {
 public:
@@ -122,76 +130,15 @@ public:
 
 	/**
 	 * Parameters() - Load a set of parameters from the JSON configuration
-	 *                file
+	 *                file and the command line
 	 *
-	 * @simName: name of the current simulation
+	 * @argc: command line's argument count
+	 * @argv: command line's argument list
 	 */
-	Parameters(const std::string &simName)
-		: simName(simName)
-	{
-		std::ifstream configData("train_config.json",
-					 std::ifstream::binary);
-		Json::Reader reader;
-		Json::Value root;
-		if (!reader.parse(configData, root)) {
-			std::cerr << reader.getFormatedErrorMessages() << "\n";
-		}
+	Parameters(int argc, char **argv);
 
-		GET_STRING_PARAM(resultsDir);
-
-		/* Ensure that no previous simulation had the same name */
-		baseResDir = resultsDir + std::string("/") + simName;
-		if (access(baseResDir.c_str(), F_OK) == 0) {
-			log_err("The results directory %s already exist!",
-				baseResDir.c_str());
-			log_err("Please choose another simulation name.");
-			throw std::runtime_error("resultsDirAlreadyExists");
-		}
-		classifierPath = baseResDir+std::string("/")+"classifier.json";
-
-		GET_STRING_PARAM(datasetPath);
-		CHECK_DIR_EXISTS(datasetPath.c_str());
-
-		GET_STRING_PARAM(datasetName);
-
-		GET_STRING_PARAM(imgPathsFName);
-		CHECK_FILE_EXISTS((datasetPath + std::string("/")
-				   + imgPathsFName).c_str());
-		GET_STRING_PARAM(maskPathsFName);
-		CHECK_FILE_EXISTS((datasetPath + std::string("/")
-				   + maskPathsFName).c_str());
-		GET_STRING_PARAM(gtPathsFName);
-		CHECK_FILE_EXISTS((datasetPath + std::string("/")
-				   + gtPathsFName).c_str());
-
-		GET_FLOAT_PARAM(shrinkageFactor);
-
-		GET_FLOAT_PARAM(regMinVal);
-		GET_FLOAT_PARAM(regMaxVal);
-		GET_FLOAT_PARAM(regValStep);
-		for (float s = regMinVal; s < regMaxVal; s += regValStep) {
-			smoothingValues.push_back(s);
-		}
-
-		GET_INT_ARRAY(gtValues);
-
-		GET_BOOL_PARAM(useColorImages);
-		GET_BOOL_PARAM(datasetBalance);
-
-		GET_INT_PARAM(posSamplesNo);
-		GET_INT_PARAM(negSamplesNo);
-		GET_INT_PARAM(finalSamplesNo);
-		GET_INT_PARAM(randSamplesNo);
-		GET_INT_PARAM(sampleSize);
-		GET_INT_PARAM(filtersPerChNo);
-		GET_INT_PARAM(minFilterSize);
-		GET_INT_PARAM(maxFilterSize);
-		GET_INT_PARAM(wlNo);
-		GET_INT_PARAM(treeDepth);
-		GET_INT_PARAM(finalTreeDepth);
-
-		GET_STRING_ARRAY(channelList);
-	}
+private:
+	std::string configFName;
 };
 
 #endif /* PARAMETERS_HPP_ */

@@ -261,11 +261,23 @@ KernelBoost::KernelBoost(std::string &descr_json,
 				    dataset_final.getBorderSize());
 		cv::Mat normImage;
 
-		normalizeImage(result, dataset_final.getBorderSize(),
-			       normImage);
+		/* Here image normalization has been replaced by border cropping
+		   followed by thresholding with a fixed threshold specified in
+		   the configuration file */
+		// normalizeImage(result, dataset_final.getBorderSize(),
+		// 	       normImage);
+		cv::Mat beforeCrop(result.rows(), result.cols(), CV_32FC1);
+		cv::eigen2cv(result, beforeCrop);
+
+		/* Drop border */
+		normImage = beforeCrop(cv::Range(dataset_final.getBorderSize(),
+					     beforeCrop.rows-dataset_final.getBorderSize()),
+				   cv::Range(dataset_final.getBorderSize(),
+					     beforeCrop.cols-dataset_final.getBorderSize()));
+
 		saveThresholdedImage(normImage,
 				     dataset_final.getMask(i),
-				     binaryThreshold,
+				     params.threshold,
 				     params.baseResDir,
 				     dataset_final.getImageName(i),
 				     dataset_final.getBorderSize());

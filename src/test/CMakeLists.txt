@@ -55,9 +55,10 @@ set (TEST_HDRS
   )
 
 set (TEST_SRCS
+  Parameters.cpp
   main.cpp
   )
 
 CONFIGURE_FILE (test_config.json test_config.json COPYONLY)
 add_executable (test_movable ${SHARED_SRCS} ${SHARED_HDRS} ${TEST_SRCS} ${TEST_HDRS})
-target_link_libraries (test_movable ${OpenCV_LIBS} ${JSONCPP_LIBS})
+target_link_libraries (test_movable ${OpenCV_LIBS} ${JSONCPP_LIBS} argtable3)

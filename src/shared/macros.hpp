@@ -97,6 +97,17 @@
 	 }								\
  } while (0);
 
+#define GET_FLOAT_ARRAY(PARAM_NAME)					\
+ do {								        \
+         if (!root.isMember(#PARAM_NAME)) {				\
+		 log_err("Cannot retrieve parameter %s", #PARAM_NAME);	\
+		 throw std::runtime_error("invalidParameter");		\
+	 }							        \
+	 for (const Json::Value& val : root[#PARAM_NAME]) {	        \
+		 PARAM_NAME.push_back(val.asDouble());			\
+	 }								\
+ } while (0);
+
 #define GET_STRING_ARRAY(PARAM_NAME)					\
  do {								        \
          if (!root.isMember(#PARAM_NAME)) {				\

@@ -33,13 +33,12 @@ main(int argc, char **argv)
 	/* Initialize RNG */
 	srand(12345);
 
-	if (argc != 2) {
-		log_err("Usage: %s sim_name--", argv[0]);
-		return -EXIT_FAILURE;
-	}
-
 	log_info("Loading parameters...");
-	Parameters params(argv[1]);
+	Parameters params(argc, argv);
+	if (params.simName == "") {
+		/* Requested 'help' in command line args */
+		return EXIT_SUCCESS;
+	}
 
 	log_info("Loading dataset...");
 	Dataset dataset(params);

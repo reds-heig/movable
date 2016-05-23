@@ -5,6 +5,7 @@
     "imgPathsFName": "test_imgs.txt",
     "maskPathsFName": "test_masks.txt",
     "sampleSize": 51,
+    "threshold": 2.0,
     "channelList": ["IMAGE_GRAY_CH",
 		    "IMAGE_GREEN_CH",
 		    "IMAGE_RED_CH",

@@ -35,6 +35,7 @@ include_directories (${EXT_PROJECTS_DIR}/Catch/include)
 enable_testing (true)
 
 link_directories (${EXT_PROJECTS_DIR}/liblbfgs/lib/.libs)
+link_directories (${EXT_PROJECTS_DIR}/argtable_3.0.1)
 
 set (EIGEN3_INCLUDE_DIR "${EXT_PROJECTS_DIR}/eigen")
 if (NOT EIGEN3_INCLUDE_DIR)
@@ -50,6 +51,7 @@ endif ()
 
 include_directories (${EXT_PROJECTS_DIR})
 include_directories (${EXT_PROJECTS_DIR}/liblbfgs/include)
+include_directories (${EXT_PROJECTS_DIR}/argtable_3.0.1)
 
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING
@@ -66,4 +68,5 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wcast-align -Wswitch-default -Wundef -O3 -fno-omit-frame-pointer -DDEBUG")
 endif (CMAKE_BUILD_TYPE MATCHES Debug)
 
+add_subdirectory (libs)
 add_subdirectory (src)
