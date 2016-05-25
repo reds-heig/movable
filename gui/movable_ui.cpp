@@ -21,6 +21,8 @@ MovableUI::MovableUI()
 {
     image_viewer = new ImageViewer("Large viewer");
 
+    image_viewer->setDisabled(true);
+
     list_images_viewer = new QListWidget(this);
     list_images_viewer->setViewMode(QListWidget::ListMode);
     list_images_viewer->setIconSize(QSize(200,200));
@@ -52,10 +54,11 @@ MovableUI::MovableUI()
     createActions();
     createMenus();
 
-    loadFile("/home/mylag/Documents/example/simulation.sim");
+    //loadFile("/home/mylag/Documents/example/simulation.sim");
 }
 
 bool MovableUI::loadFile(const QString &fileName) {
+
 
     qDebug() << "Open simulation : " << fileName;
 
@@ -124,6 +127,8 @@ bool MovableUI::loadFile(const QString &fileName) {
             qDebug() << path_imgs.at(i);
             qDebug() << path_gts.at(i);
             simulation->addImage(new QImage(path_imgs.at(i)), new QImage(path_gts.at(i)), path_imgs.at(i), path_gts.at(i));
+
+            image_viewer->setDisabled(false);
         }
 
         inputFile.close();
@@ -187,8 +192,8 @@ void MovableUI::open()
 
 void MovableUI::save()
 {
-    image_viewer->drawing_area->saveImage();
-    selectBloodImage(image_selected);
+        image_viewer->drawing_area->saveImage();
+        selectBloodImage(image_selected);
 }
 
 void MovableUI::close()
@@ -311,7 +316,7 @@ void MovableUI::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    printAct = new QAction(tr("&Save ..."), this);
+    printAct = new QAction(tr("&Print ..."), this);
     connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
 
     connect(list_images_viewer, SIGNAL(currentRowChanged(int)), this, SLOT(selectBloodImage(int)));
