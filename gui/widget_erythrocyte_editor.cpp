@@ -1,4 +1,3 @@
-
 #include "widget_erythrocyte_editor.h"
 #include <QtWidgets>
 
