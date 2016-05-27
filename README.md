@@ -24,15 +24,15 @@ The configuration of the project is stored in the file movable_ui.pro.
 ## Quickstart
 To prepare the data, create a directory (whose path has to be specified in the
 configuration files) and put in it 5 files:
-- a list of paths for training images (absolutes of relatives to the current
+- a list of paths for training images (absolutes or relatives to the current
   execution directory)
-- a list of paths for training masks (absolutes of relatives to the current
+- a list of paths for training masks (absolutes or relatives to the current
   execution directory)
-- a list of paths for training ground-truths (absolutes of relatives to the
+- a list of paths for training ground-truths (absolutes or relatives to the
   current execution directory)
-- a list of paths for test images (absolutes of relatives to the current
+- a list of paths for test images (absolutes or relatives to the current
   execution directory)
-- a list of paths for test masks (absolutes of relatives to the current execution
+- a list of paths for test masks (absolutes or relatives to the current execution
   directory)
 The filenames are free (you have, however, to specify them in the configuration
 files), and the name of the images too,
