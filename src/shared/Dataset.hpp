@@ -651,6 +651,20 @@ private:
 			      const void *opaque);
 
 	/**
+	 * imageBlueCh() - Process an image, taking the blue channel only and
+	 *                 pushing it into the corresponding channel of the
+	 *                 dataset
+	 *
+	 * @src   : input image
+	 * @dst   : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageBlueCh(const cv::Mat &src, EMat &dst,
+			       const void *opaque);
+
+	/**
 	 * gaussianFiltering() - Process an image, taking its green channel and
 	 *                       passing it through a Gaussian filter with sigma
 	 *                       1

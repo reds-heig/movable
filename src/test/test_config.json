@@ -9,6 +9,7 @@
     "channelList": ["IMAGE_GRAY_CH",
 		    "IMAGE_GREEN_CH",
 		    "IMAGE_RED_CH",
+		    "IMAGE_BLUE_CH",
 		    "MEDIAN_FILTERING",
 		    "LAPLACIAN_FILTERING",
 		    "GAUSSIAN_FILTERING",

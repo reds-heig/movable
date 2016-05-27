@@ -48,6 +48,9 @@ Dataset::Dataset(const Parameters &params)
 	if (checkChannelPresent("IMAGE_RED_CH", params.channelList)) {
 		imageOps.push_back(&Dataset::imageRedCh);
 	}
+	if (checkChannelPresent("IMAGE_BLUE_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageBlueCh);
+	}
 	if (checkChannelPresent("MEDIAN_FILTERING", params.channelList)) {
 		imageOps.push_back(&Dataset::medianFiltering);
 	}
@@ -665,6 +668,47 @@ Dataset::imageRedCh(const cv::Mat &src, EMat &dst, const void *opaque)
 		redCh.setTo(cv::Scalar(0));
 	}
 	cv::imshow("RED", redCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageBlueCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+       std::vector< cv::Mat> colorCh(3);
+       const unsigned int borderSize = *((unsigned int *)opaque);
+
+       cv::split(src, colorCh);
+
+       cv::Mat blueCh = colorCh[0];
+
+       cv::Mat imgCenter = blueCh(cv::Range(borderSize,
+                                            blueCh.rows-borderSize+1),
+                                 cv::Range(borderSize,
+                                            blueCh.cols-borderSize+1));
+       cv::Scalar mean;
+       cv::Scalar std_dev;
+       cv::meanStdDev(imgCenter, mean, std_dev);
+       blueCh -= mean[0];
+       blueCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+       dst.resize(src.rows, src.cols);
+       cv::cv2eigen(blueCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+       cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+       cv::imshow("ImgColor", src);
+       cv::namedWindow("BLUE", cv::WINDOW_NORMAL);
+       double min, max;
+       cv::minMaxLoc(blueCh, &min, &max);
+       if (max-min > 1e-4) {
+               blueCh = (blueCh-min)/(max-min);
+       } else {
+               blueCh.setTo(cv::Scalar(0));
+       }
+       cv::imshow("BLUE", blueCh);
 	cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 
