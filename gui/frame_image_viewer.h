@@ -48,7 +48,6 @@ private slots:
     void showErythrocytesEditor();
 
 private:
-
     void viewAllItems();
     void viewDrawedItems();
 

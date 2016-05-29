@@ -36,3 +36,13 @@ mkdir build
 cd build
 cmake ..
 make -j 8
+
+# Build gui 
+cd gui
+mkdir build
+cd build
+qmake ../movable_ui.pro
+make
+
+./movable_ui ../example/example.sim
+

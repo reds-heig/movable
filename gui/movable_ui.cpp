@@ -1,9 +1,9 @@
-
 #include "movable_ui.h"
 #include "widget_erythrocyte_editor.h"
-
+#include "dialog_new_simulation.h"
 
 #include <QtWidgets>
+
 #ifndef QT_NO_PRINTER
 #include <QPrintDialog>
 #endif
@@ -53,22 +53,17 @@ MovableUI::MovableUI()
 
     createActions();
     createMenus();
-
-    //loadFile("/home/mylag/Documents/example/simulation.sim");
 }
 
 bool MovableUI::loadFile(const QString &fileName) {
 
-
     qDebug() << "Open simulation : " << fileName;
-
     simulation = new Simulation;
 
     //Read files
     QFile inputFile(fileName);
-    QString main_path = fileName.left(fileName.size()-fileName.split("/").last().size()-1);
+    QString main_path;
 
-    //Load data
     if (inputFile.open(QIODevice::ReadOnly)) {
 
         QTextStream in(&inputFile);
@@ -79,21 +74,6 @@ bool MovableUI::loadFile(const QString &fileName) {
         bool imgs_loading = true;
 
         while (!in.atEnd()) {
-
-//          QString path_img = in.readLine();
-//          path_img.insert(0, main_path);
-
-//          QString path_gt = in.readLine();
-//          path_gt.insert(0, main_path);
-
-//          QImage *img = new QImage(path_img);
-//          QImage *gt = new QImage(path_gt);
-
-//          qDebug() << path_img;
-//          qDebug() << path_gt;
-
-//          if(img != NULL && gt != NULL)
-//              simulation->addImage(img, gt, path_img, path_gt);
 
             QString path_tmp = in.readLine();
 
@@ -107,6 +87,17 @@ bool MovableUI::loadFile(const QString &fileName) {
 
             if(path_tmp.compare("[gts]") == 0) {
                 imgs_loading = false;
+                continue;
+            }
+
+            if(path_tmp.compare("[relative_path]") == 0) {
+                main_path = fileName.left(fileName.size()-fileName.split("/").last().size()-1);
+                main_path.append("/");
+                continue;
+            }
+
+            if(path_tmp.compare("[absolute_path]") == 0) {
+                main_path = "";
                 continue;
             }
 
@@ -124,10 +115,7 @@ bool MovableUI::loadFile(const QString &fileName) {
         }
 
         for(int i=0; i < path_imgs.size(); i++) {
-            qDebug() << path_imgs.at(i);
-            qDebug() << path_gts.at(i);
             simulation->addImage(new QImage(path_imgs.at(i)), new QImage(path_gts.at(i)), path_imgs.at(i), path_gts.at(i));
-
             image_viewer->setDisabled(false);
         }
 
@@ -154,9 +142,6 @@ bool MovableUI::loadFile(const QString &fileName) {
         infos->setText(simulation->getInfos(0));
     }
 
-//    ErythrocyteEditor* editor = new ErythrocyteEditor(simulation->getBloodImages()->at(0));
-//    editor->show();
-
     //Enable options
     /*printAct->setEnabled(true);
     fitToWindowAct->setEnabled(true);
@@ -166,6 +151,31 @@ bool MovableUI::loadFile(const QString &fileName) {
     setWindowFilePath(fileName);*/
 
     return true;
+}
+
+void MovableUI::openCreatedSimulation(int /*result*/) {
+
+    qDebug() << "Open created simulation : " << *simulation_file;
+
+//    qDebug() << result << QDialog::Accepted;
+//    if(result == QDialog::Accepted){
+//        loadFile(*simulation_file);
+//        return;
+//    }
+
+    if(!simulation_file->isEmpty()) {
+        loadFile(*simulation_file);
+        return;
+    }
+
+}
+
+void MovableUI::create()
+{
+    simulation_file = new QString();
+    new_simulation_editor = new FindDialog(simulation_file);
+    new_simulation_editor->show();
+    QObject::connect(new_simulation_editor, SIGNAL(finished (int)), this, SLOT(openCreatedSimulation(int)));
 }
 
 void MovableUI::open()
@@ -188,12 +198,13 @@ void MovableUI::open()
     dialog.setNameFilter("SIM (*.sim)");
 
     while (dialog.exec() == QDialog::Accepted && !loadFile(dialog.selectedFiles().first())) {}
+    simulation_file = new QString(dialog.selectedFiles().first());
 }
 
 void MovableUI::save()
 {
-        image_viewer->drawing_area->saveImage();
-        selectBloodImage(image_selected);
+    image_viewer->drawing_area->saveImage();
+    selectBloodImage(image_selected);
 }
 
 void MovableUI::close()
@@ -302,6 +313,10 @@ void MovableUI::selectParasit(int id)
 
 void MovableUI::createActions()
 {
+    newAct = new QAction(tr("&New ..."), this);
+    newAct->setShortcut(tr("Ctrl+N"));
+    connect(newAct, SIGNAL(triggered()), this, SLOT(create()));
+
     openAct = new QAction(tr("&Open ..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -331,6 +346,7 @@ void MovableUI::createActions()
 void MovableUI::createMenus()
 {
     fileMenu = new QMenu(tr("&File"), this);
+    fileMenu->addAction(newAct);
     fileMenu->addAction(openAct);
     fileMenu->addAction(printAct);
 

@@ -12,11 +12,11 @@ RCC_DIR = tmp/rcc
 
 RESOURCES += images.qrc
 
-HEADERS += movable_ui.h frame_image_viewer.h item_parasit.h item_erythrocyte.h item_image.h widget_erythrocyte_editor.h
+HEADERS += movable_ui.h frame_image_viewer.h item_parasit.h item_erythrocyte.h item_image.h widget_erythrocyte_editor.h dialog_new_simulation.h
 HEADERS += cv_functions.h
 HEADERS += model_simulation.h model_blood_image.h model_parasit.h model_erythrocyte.h
 
-SOURCES += main.cpp movable_ui.cpp frame_image_viewer.cpp item_parasit.cpp item_erythrocyte.cpp item_image.cpp widget_erythrocyte_editor.cpp
+SOURCES += main.cpp movable_ui.cpp frame_image_viewer.cpp item_parasit.cpp item_erythrocyte.cpp item_image.cpp widget_erythrocyte_editor.cpp dialog_new_simulation.cpp
 SOURCES += cv_functions.cpp
 SOURCES += model_simulation.cpp model_blood_image.cpp model_parasit.cpp model_erythrocyte.cpp
 

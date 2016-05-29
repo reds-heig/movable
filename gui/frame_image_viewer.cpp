@@ -1,5 +1,7 @@
 
 #include "frame_image_viewer.h"
+#include "movable_ui.h"
+#include "item_image.h"
 
 #ifndef QT_NO_OPENGL
 #include <QtOpenGL>
@@ -8,9 +10,6 @@
 #endif
 
 #include <qmath.h>
-
-#include "movable_ui.h"
-#include "item_image.h"
 
 ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     : QFrame(parent) {
@@ -159,7 +158,6 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
 
     tools_layout->addWidget(new QLabel(tr("Draw parasites")),0,2);
     tools_layout->addLayout(layout_parasites,1,2);
-
     tools_layout->addWidget(save_image,1,3);
 
     /* Main layout */
@@ -171,6 +169,7 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     setLayout(main_layout);
 
     zoom_value = 1;
+
     connect(zoom_in, SIGNAL(clicked()), this, SLOT(zoomIn()));
     connect(zoom_out, SIGNAL(clicked()), this, SLOT(zoomOut()));
 
@@ -330,7 +329,6 @@ void ImageViewer::showErythrocytesEditor() {
     editor = new ErythrocyteEditor(image);
     editor->show();
 }
-
 
 void ImageViewer::setBigPen() {
 

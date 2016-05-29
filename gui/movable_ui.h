@@ -3,6 +3,7 @@
 
 #include "model_simulation.h"
 #include "frame_image_viewer.h"
+#include "dialog_new_simulation.h"
 
 #include <QMainWindow>
 #include <QtWidgets>
@@ -37,11 +38,14 @@ public slots:
     void selectParasit(int id);
 
 private slots:
+    void create();
     void open();
     void close();
     void about();
     void print();
     void save();
+    void openCreatedSimulation(int result);
+
 private:
     void createActions();
     void createMenus();
@@ -50,6 +54,7 @@ private:
     QPrinter printer;
 #endif
 
+    QAction *newAct;
     QAction *openAct;
     QAction *resizeWindowAct;
     QAction *exitAct;
@@ -61,6 +66,8 @@ private:
     QMenu *helpMenu;
 
     //Frames
+    FindDialog *new_simulation_editor;
+
     ImageViewer* image_viewer;
 
     QListWidget* list_images_viewer;
@@ -70,6 +77,7 @@ private:
 
     //Models
     Simulation* simulation;
+    QString *simulation_file;
 
     int image_selected;
     int parasit_selected;

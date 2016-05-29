@@ -142,7 +142,7 @@ int BloodImage::foundErythrocytes() {
                                      this->min_radius,
                                      this->max_radius);
 
-    qDebug() << size;
+//    qDebug() << size;
 
     erythrocytes = new QList<Erythrocyte*>();
 
