@@ -114,6 +114,11 @@ bool MovableUI::loadFile(const QString &fileName) {
 
         }
 
+        if(path_imgs.size() != path_gts.size()) {
+            qDebug() << "Error : *.sim corrupted.";
+            return false;
+        }
+
         for(int i=0; i < path_imgs.size(); i++) {
             simulation->addImage(new QImage(path_imgs.at(i)), new QImage(path_gts.at(i)), path_imgs.at(i), path_gts.at(i));
             image_viewer->setDisabled(false);

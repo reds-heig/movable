@@ -6,7 +6,7 @@
 
 #include <QtWidgets>
 
-class ErythrocyteEditor : public QWidget
+class ErythrocyteEditor : public QDialog
 {
     Q_OBJECT
 
@@ -45,6 +45,7 @@ private:
     /* Buttons */
     QPushButton *btn_refresh;
     QPushButton *btn_save;
+    QPushButton *btn_save_for_all;
 };
 
 #endif

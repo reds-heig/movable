@@ -17,6 +17,8 @@ class FindDialog : public QDialog
 public:
     FindDialog(QString *simulation_file, QWidget *parent = 0);
 
+    bool removeDir(const QString &dirName);
+
 public slots:
     void cancelSimulation();
     void createSimulation();
@@ -42,64 +44,8 @@ private:
     QPushButton *btn_browse_images;
     QPushButton *btn_browse_masks;
     QPushButton *btn_browse_classifier;
+
+    QLabel *lbl_progression;
 };
 
 #endif
-
-//#ifndef SIMULATIONEDITOR_H
-//#define SIMULATIONEDITOR_H
-
-//#include <QtWidgets>
-
-//class SimulationEditor : public QWidget
-//{
-//    Q_OBJECT
-
-//public:
-//    explicit SimulationEditor(QString title, QWidget *parent = 0);
-
-//private slots:
-//    void createSimulation();
-//    void cancelSimulation();
-
-//private:
-//    QLineEdit *simulation_name;
-//    QLineEdit *simulation_path;
-//    QLineEdit *images_path;
-//    QLineEdit *masks_path;
-
-//    QPushButton *btn_cancel;
-//    QPushButton *btn_create;
-//};
-
-//#endif
-
-
-////#ifndef DIALOGNEWSIMULATION_H
-////#define DIALOGNEWSIMULATION_H
-
-////#include <QtWidgets>
-
-////class NewSimulation : public QDialog
-////{
-////    //Q_OBJECT
-////public:
-//////    NewSimulation(QWidget *parent = 0);
-//////    ~NewSimulation();
-////    NewSimulation();
-
-////public slots:
-////    void cancelSimulation();
-////    void createSimulation();
-
-////private:
-////    QLineEdit *simulation_name;
-////    QLineEdit *simulation_path;
-////    QLineEdit *images_path;
-////    QLineEdit *masks_path;
-
-////    QPushButton *btn_cancel;
-////    QPushButton *btn_create;
-////};
-
-////#endif

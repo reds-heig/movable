@@ -2,7 +2,7 @@
 #include <QtWidgets>
 
 ErythrocyteEditor::ErythrocyteEditor(BloodImage *image, QWidget *parent)
-    : QWidget(parent) {
+    : QDialog(parent) {
 
     /* Initialisation */
     this->image = image;
@@ -153,5 +153,7 @@ void ErythrocyteEditor::save() {
     this->image->param2 = this->slider_param2->value();
     this->image->min_radius = getIntegerParams(this->txt_min_radius->toPlainText());
     this->image->max_radius = getIntegerParams(this->txt_max_radius->toPlainText());
+
+    this->close();
 }
 

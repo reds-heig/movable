@@ -4,13 +4,11 @@
 #include "movable_ui.h"
 #include "model_blood_image.h"
 
-//#include "dialog_new_simulation.h"
+#include "process_test_movable.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-//    FindDialog dialog;
-//    dialog.show();
     QGuiApplication::setApplicationDisplayName(MovableUI::tr("Image Viewer"));
 
     QCommandLineParser commandLineParser;

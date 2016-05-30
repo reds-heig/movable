@@ -1,4 +1,5 @@
 #include <QtWidgets>
+#include <QApplication>
 
 #include "dialog_new_simulation.h"
 
@@ -23,6 +24,8 @@ FindDialog::FindDialog(QString *simulation_file, QWidget *parent) : QDialog(pare
 
     btn_cancel = new QPushButton("Cancel");
     btn_create = new QPushButton("Create");
+
+    lbl_progression = new QLabel("Ready...");
 
     QVBoxLayout *layout = new QVBoxLayout();
 
@@ -51,6 +54,9 @@ FindDialog::FindDialog(QString *simulation_file, QWidget *parent) : QDialog(pare
 
     layout->addLayout(config_layout);
     layout->addLayout(btn_layout);
+    layout->addSpacing(10);
+
+    layout->addWidget(lbl_progression);
 
     setLayout(layout);
 
@@ -80,11 +86,18 @@ void FindDialog::createSimulation() {
         return;
     }
 
+//    if(removeDir(simulation_path->text().append("/").append(simulation_name->text())))
+//        qDebug() << "Remove simulation...";
+
     qDebug() << "Create simulation ...";
 
     /* Create directory of project */
     QDir project_dir(simulation_path->text());
-    project_dir.mkdir(simulation_name->text());
+    if(!project_dir.mkdir(simulation_name->text())) {
+        qDebug() << simulation_name->text() << " already exist.";
+        lbl_progression->setText(QString(simulation_name->text()).append(" already exist."));
+        return;
+    }
     project_dir.cd(simulation_name->text());
 
     qDebug() << "Simulation's project :" << project_dir.absolutePath();
@@ -100,6 +113,7 @@ void FindDialog::createSimulation() {
     for(int i=0; i < images.size(); i++) {
         images.replace(i, images_dir.absolutePath().append("/").append(images.at(i)));
     }
+
     qDebug() << "Images : \n" << images;
 
     QDir masks_dir(masks_path->text());
@@ -119,12 +133,13 @@ void FindDialog::createSimulation() {
     /* File : config.json */
     QTextStream out_config_file(&config_file);
     out_config_file << "{" << endl;
-    out_config_file << "\"resultsDir\" : \"" << project_dir.absolutePath().append("\results_test") << "\"," << endl;
+    out_config_file << "\"resultsDir\" : \"" << project_dir.absolutePath().append("/results_test") << "\"," << endl;
     out_config_file << "\"datasetPath\": \"" << project_dir.absolutePath() << "\"," << endl;
     out_config_file << "\"datasetName\": \"" << simulation_name->text() << "\"," << endl;
     out_config_file << "\"imgPathsFName\": \"test_imgs.txt\"," << endl;
     out_config_file << "\"maskPathsFName\": \"test_masks.txt\"," << endl;
     out_config_file << "\"sampleSize\": 51," << endl;
+    out_config_file << "\"threshold\": 2.0," << endl;
     out_config_file << "\"channelList\": [" << endl;
     out_config_file << "\"IMAGE_GRAY_CH\"," << endl;
     out_config_file << "\"IMAGE_GREEN_CH\"," << endl;
@@ -169,16 +184,33 @@ void FindDialog::createSimulation() {
     test_masks_file.close();
 
     /* Call classifier */
-    qDebug() << "Call classifier... " << QFile::copy("/home/mylag/Documents/1412151257-100x-0012_segm.png", project_dir.absolutePath().append("/results_test/1412151257-100x-0012_segm.png"));
-//    QProcess *process = new QProcess(this);
-//    QString program = "../../build/src/test/test_movable";
-//    QString params = "";
+//    qApp->processEvents();
+    lbl_progression->setText(QString("Extract parasitemia from ").append(QString::number(images.size())).append(" images.This process can take several minutes."));
+    this->setEnabled(false);
+    this->repaint();
+    //qDebug() << "Call classifier... " << QFile::copy("/home/mylag/Documents/1412151257-100x-0012_segm.png", project_dir.absolutePath().append("/results_test/1412151257-100x-0012_segm.png"));
+
+    //    QProcess *process = new QProcess(this);
+    QString program = "../../build/src/test/test_movable";
+    QString params =
+            " --config-file=\"" + project_dir.absolutePath().append("/config.json") +
+            "\" --classifier=\"" + classifier_path->text() + "\" --sim-name=\"" + simulation_name->text() + "\"";
+
+    qDebug() << "Call classifier " << program << " " << params;
+
+    system(QString(program).append(params).toStdString().c_str());
+
 //    process->start(program, QStringList() << params);
+//    process->waitForFinished(60000 * images.size());
+//    qDebug() << process->readAllStandardOutput();
 
     /* Get paths of results */
-    QDir results_dir(project_dir.absolutePath().append("/results_test"));
+    QDir results_dir(project_dir.absolutePath().append("/results_test/").append(simulation_name->text()));
+
+    results_dir.setNameFilters(QStringList()<<"*.png_thresh.png");
+
     QStringList results = results_dir.entryList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
-    for(int i=0; i < results.size(); i++) {
+    for(int i=0; i < results.size(); i++) {    
         results.replace(i, results_dir.absolutePath().append("/").append(results.at(i)));
     }
     qDebug() << "Results of analysis : \n" << results;
@@ -210,6 +242,29 @@ void FindDialog::createSimulation() {
 
     this->setResult(QDialog::Accepted);
     this->close();
+}
+
+bool FindDialog::removeDir(const QString &dirName)
+{
+    bool result = true;
+    QDir dir(dirName);
+
+    if (dir.exists()) {
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst)) {
+            if (info.isDir()) {
+                result = removeDir(info.absoluteFilePath());
+            }
+            else {
+                result = QFile::remove(info.absoluteFilePath());
+            }
+
+            if (!result) {
+                return result;
+            }
+        }
+        result = dir.rmdir(dirName);
+    }
+    return result;
 }
 
 void FindDialog::browseSimulation()

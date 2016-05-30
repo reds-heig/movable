@@ -36,6 +36,7 @@ public:
 public slots:
     void loadScene(BloodImage* image);
     void centerOn(int id);
+    void refreshImageAfterConfig(int signal);
 
 private slots:
     void zoomIn();
@@ -46,6 +47,7 @@ private slots:
     void setBigPen();
     void setSmallPen();
     void showErythrocytesEditor();
+
 
 private:
     void viewAllItems();

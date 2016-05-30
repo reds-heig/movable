@@ -244,7 +244,7 @@ void ImageViewer::loadScene(BloodImage* image)
     {
         ParasiteItem *item = new ParasiteItem(p);
         parasits->push_back(item);
-        item->setPos(p->getImageX(),p->getImageY());        
+        item->setPos(p->getImageX(),p->getImageY());
         scene->addItem(item);
     }
 
@@ -324,10 +324,15 @@ void ImageViewer::setPointerMode()
     }
 }
 
+void ImageViewer::refreshImageAfterConfig(int signal) {
+    loadScene(image);
+}
+
 void ImageViewer::showErythrocytesEditor() {
     /*ErythrocyteEditor* */
     editor = new ErythrocyteEditor(image);
     editor->show();
+    QObject::connect(editor, SIGNAL(finished (int)), this, SLOT(refreshImageAfterConfig(int)));
 }
 
 void ImageViewer::setBigPen() {
