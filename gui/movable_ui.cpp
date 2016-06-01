@@ -57,6 +57,12 @@ MovableUI::MovableUI()
 
 bool MovableUI::loadFile(const QString &fileName) {
 
+    list_images_viewer->clear();
+    list_parasits_viewer->clear();
+    infos->clear();
+    parasit_selected = 0;
+    image_selected = 0;
+
     qDebug() << "Open simulation : " << fileName;
     simulation = new Simulation;
 
@@ -316,6 +322,7 @@ void MovableUI::selectParasit(int id)
     }
 }
 
+
 void MovableUI::createActions()
 {
     newAct = new QAction(tr("&New ..."), this);
@@ -346,6 +353,7 @@ void MovableUI::createActions()
 
     connect(image_viewer->previous_image, SIGNAL(clicked()), this, SLOT(selectPreviousBloodImage()));
     connect(image_viewer->next_image, SIGNAL(clicked()), this, SLOT(selectNextBloodImage()));
+
 }
 
 void MovableUI::createMenus()

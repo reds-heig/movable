@@ -79,6 +79,8 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     settings->setIcon(QPixmap(":/images/settings.jpg"));
     settings->setIconSize(iconSize);
 
+    settings_for_all = new QPushButton("Config. all images");
+
     /* Panel (Parasites)*/
     pen_parasite_item = new QToolButton;
     pen_parasite_item->setIcon(QPixmap(":/images/pen_parasite.jpg"));
@@ -143,6 +145,7 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     tools_layout->addWidget(new QLabel(tr("Erythrocytes settings")),0,1);
     QHBoxLayout *layout_erythrocytes = new QHBoxLayout;
     layout_erythrocytes->addWidget(settings);
+//    layout_erythrocytes->addWidget(settings_for_all);
     layout_erythrocytes->addStretch();
     tools_layout->addLayout(layout_erythrocytes,1,1);
 

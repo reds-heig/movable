@@ -30,12 +30,14 @@ class Parasit
 
         QList<QPointF>* getPixels();
 
+        bool used;
     private:
         int id;
 
         QList<QPointF>* pixels;
 
         unsigned int gt;  /* Parasit / Negatif / Undefined */
+
 
         int pos_x;  /* Parasit */
         int pos_y;  /* Parasit */

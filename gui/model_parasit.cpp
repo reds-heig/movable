@@ -13,6 +13,8 @@ Parasit::Parasit(int id, QImage image, int pos_x, int pos_y, int size_kernel, un
 
     this->gt = gt;
 
+    this->used = false;
+
     QPixmap pixmap = QPixmap::fromImage(image);
 
     int delta = (size_kernel-1)/2;
@@ -28,6 +30,8 @@ Parasit::Parasit(int id, QImage image, int pos_x, int pos_y, int size_kernel, un
 Parasit::Parasit(int id, QImage image, QList<QPointF>* pixels, unsigned int gt) {
 
     this->id = id;
+
+     this->used = false;
 
     QPixmap pixmap = QPixmap::fromImage(image);
 

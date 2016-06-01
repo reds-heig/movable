@@ -38,6 +38,7 @@ public slots:
     void centerOn(int id);
     void refreshImageAfterConfig(int signal);
 
+
 private slots:
     void zoomIn();
     void zoomOut();
@@ -65,6 +66,7 @@ private:
 
     /* Panel (Erythrocytes) */
     QPushButton *settings;
+    QPushButton *settings_for_all;
 
     /* Panel (Parasites) */
     QToolButton *pen_undefined_item;

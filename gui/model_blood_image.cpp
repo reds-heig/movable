@@ -164,26 +164,28 @@ int BloodImage::parasitemie() {
     //Parcours tous les parasites
     for(int i = 0; i < parasits->size(); i++) {
 
-        //Cherche erythrocytes
-        for(int k = 0; k < erythrocytes->size(); k++) {
+            //Cherche erythrocytes
+            for(int k = 0; k < erythrocytes->size(); k++) {
 
-            Erythrocyte* e = erythrocytes->at(k);
+                Erythrocyte* e = erythrocytes->at(k);
 
-            //Pixels
-            QPointF average = parasits->at(i)->getPixels()->first();
+                //Pixels
+                QPointF average = parasits->at(i)->getPixels()->first();
 
-            for(int j=1; j < parasits->at(i)->getPixels()->size(); j++) {
-                average += parasits->at(i)->getPixels()->at(j);
+                for(int j=1; j < parasits->at(i)->getPixels()->size(); j++) {
+                    average += parasits->at(i)->getPixels()->at(j);
+                }
+
+                average /= parasits->at(i)->getPixels()->size();
+
+                if(e->getPos().rx() <= average.rx() && average.rx() <= e->getPos().rx() + e->getRadius()*2 &&
+                        e->getPos().ry() <= average.ry() && average.ry() <= e->getPos().ry() + e->getRadius()*2) {
+                    score++;
+                    break;
+                }
             }
-
-            average /= parasits->at(i)->getPixels()->size();
-
-            if(e->getPos().rx() <= average.rx() && average.rx() <= e->getPos().rx() + e->getRadius()*2 &&
-                    e->getPos().ry() <= average.ry() && average.ry() <= e->getPos().ry() + e->getRadius()*2) {
-                score++;
-            }
-        }
     }
+
 
     return score;
 }
