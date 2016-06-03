@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 #include <chrono>
@@ -51,6 +51,15 @@ Dataset::Dataset(const Parameters &params)
 	if (checkChannelPresent("IMAGE_BLUE_CH", params.channelList)) {
 		imageOps.push_back(&Dataset::imageBlueCh);
 	}
+	if (checkChannelPresent("IMAGE_HUE_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageHueCh);
+	}
+	if (checkChannelPresent("IMAGE_SATUR_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageSaturCh);
+	}
+	if (checkChannelPresent("IMAGE_VALUE_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageValueCh);
+	}
 	if (checkChannelPresent("MEDIAN_FILTERING", params.channelList)) {
 		imageOps.push_back(&Dataset::medianFiltering);
 	}
@@ -83,7 +92,7 @@ Dataset::Dataset(const Parameters &params)
 	std::vector< std::string > gt_paths;
 
 	if (loadPaths(params, img_paths, mask_paths,
-		gt_paths) != EXIT_SUCCESS) {
+		      gt_paths) != EXIT_SUCCESS) {
 		throw std::runtime_error("loadPaths");
 	}
 
@@ -192,9 +201,9 @@ Dataset::Dataset(const Dataset &srcDataset,
 #ifndef TESTS
 #ifdef MOVABLE_TRAIN
 			saveClassifiedImage(data[dataChNo+bc][i],
-				            params.intermedResDir[bc],
-				            imageNames[i],
-				            borderSize);
+					    params.intermedResDir[bc],
+					    imageNames[i],
+					    borderSize);
 #endif /* MOVABLE_TRAIN */
 #endif /* TESTS */
 
@@ -204,7 +213,7 @@ Dataset::Dataset(const Dataset &srcDataset,
 		end = std::chrono::system_clock::now();
 		std::chrono::duration< double > elapsed_s = end-start;
 		log_info("\t\tImage %d/%d DONE! (took %.3fs)",
-			i+1, imagesNo, elapsed_s.count());
+			 i+1, imagesNo, elapsed_s.count());
 #endif /* TESTS */
 	}
 	dataChNo += boostedClassifiers.size();
@@ -321,9 +330,9 @@ Dataset::addImage(const std::string &imgPath,
 		  const std::string &maskPath,
 		  const std::string &gtPath)
 #else
-int
-Dataset::addImage(const std::string &imgPath,
-		  const std::string &maskPath)
+	int
+	Dataset::addImage(const std::string &imgPath,
+			  const std::string &maskPath)
 #endif /* MOVABLE_TRAIN */
 {
 	CHECK_FILE_EXISTS(imgPath.c_str());
@@ -503,10 +512,10 @@ Dataset::loadPaths(const Parameters &params,
 		   std::vector< std::string > &mask_paths,
 		   std::vector< std::string > &gt_paths)
 #else
-int
-Dataset::loadPaths(const Parameters &params,
-		   std::vector< std::string > &img_paths,
-		   std::vector< std::string > &mask_paths)
+	int
+	Dataset::loadPaths(const Parameters &params,
+			   std::vector< std::string > &img_paths,
+			   std::vector< std::string > &mask_paths)
 #endif /* MOVABLE_TRAIN */
 {
 	if (loadPathFile(params.datasetPath, params.imgPathsFName,
@@ -677,38 +686,167 @@ Dataset::imageRedCh(const cv::Mat &src, EMat &dst, const void *opaque)
 int
 Dataset::imageBlueCh(const cv::Mat &src, EMat &dst, const void *opaque)
 {
-       std::vector< cv::Mat> colorCh(3);
-       const unsigned int borderSize = *((unsigned int *)opaque);
+	std::vector< cv::Mat> colorCh(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
 
-       cv::split(src, colorCh);
+	cv::split(src, colorCh);
 
-       cv::Mat blueCh = colorCh[0];
+	cv::Mat blueCh = colorCh[0];
 
-       cv::Mat imgCenter = blueCh(cv::Range(borderSize,
-                                            blueCh.rows-borderSize+1),
-                                 cv::Range(borderSize,
-                                            blueCh.cols-borderSize+1));
-       cv::Scalar mean;
-       cv::Scalar std_dev;
-       cv::meanStdDev(imgCenter, mean, std_dev);
-       blueCh -= mean[0];
-       blueCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+	cv::Mat imgCenter = blueCh(cv::Range(borderSize,
+					     blueCh.rows-borderSize+1),
+				   cv::Range(borderSize,
+					     blueCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	blueCh -= mean[0];
+	blueCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
 
-       dst.resize(src.rows, src.cols);
-       cv::cv2eigen(blueCh, dst);
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(blueCh, dst);
 
 #ifdef VISUALIZE_IMG_DATA
-       cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
-       cv::imshow("ImgColor", src);
-       cv::namedWindow("BLUE", cv::WINDOW_NORMAL);
-       double min, max;
-       cv::minMaxLoc(blueCh, &min, &max);
-       if (max-min > 1e-4) {
-               blueCh = (blueCh-min)/(max-min);
-       } else {
-               blueCh.setTo(cv::Scalar(0));
-       }
-       cv::imshow("BLUE", blueCh);
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("BLUE", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(blueCh, &min, &max);
+	if (max-min > 1e-4) {
+		blueCh = (blueCh-min)/(max-min);
+	} else {
+		blueCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("BLUE", blueCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageHueCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> hsv_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat hsv_image;
+	cv::cvtColor(src, hsv_image, cv::COLOR_BGR2HSV);
+	cv::split(hsv_image, hsv_channels);
+
+	cv::Mat hueCh = hsv_channels[0];
+
+	cv::Mat imgCenter = hueCh(cv::Range(borderSize,
+					    hueCh.rows-borderSize+1),
+				  cv::Range(borderSize,
+					    hueCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	hueCh -= mean[0];
+	hueCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(hueCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("HUE", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(hueCh, &min, &max);
+	if (max-min > 1e-4) {
+		hueCh = (hueCh-min)/(max-min);
+	} else {
+		hueCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("HUE", hueCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageSaturCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> hsv_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat hsv_image;
+	cv::cvtColor(src, hsv_image, cv::COLOR_BGR2HSV);
+	cv::split(hsv_image, hsv_channels);
+
+	cv::Mat saturCh = hsv_channels[1];
+
+	cv::Mat imgCenter = saturCh(cv::Range(borderSize,
+					      saturCh.rows-borderSize+1),
+				    cv::Range(borderSize,
+					      saturCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	saturCh -= mean[0];
+	saturCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(saturCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("SATUR", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(saturCh, &min, &max);
+	if (max-min > 1e-4) {
+		saturCh = (saturCh-min)/(max-min);
+	} else {
+		saturCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("SATUR", saturCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageValueCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> hsv_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat hsv_image;
+	cv::cvtColor(src, hsv_image, cv::COLOR_BGR2HSV);
+	cv::split(hsv_image, hsv_channels);
+
+	cv::Mat valueCh = hsv_channels[2];
+
+	cv::Mat imgCenter = valueCh(cv::Range(borderSize,
+					      valueCh.rows-borderSize+1),
+				    cv::Range(borderSize,
+					      valueCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	valueCh -= mean[0];
+	valueCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(valueCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("VALUE", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(valueCh, &min, &max);
+	if (max-min > 1e-4) {
+		valueCh = (valueCh-min)/(max-min);
+	} else {
+		valueCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("VALUE", valueCh);
 	cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 
@@ -754,7 +892,7 @@ Dataset::gaussianFiltering(const cv::Mat &src, EMat &dst, const void *opaque)
 	cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 
-        return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 int

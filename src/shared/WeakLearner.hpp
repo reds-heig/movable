@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef WEAK_LEARNER_HPP_
 #define WEAK_LEARNER_HPP_
@@ -44,10 +44,10 @@
 /**
  * class WeakLearner - Weak learner for the boosting classifier
  *
- * @fb   : filter bank
- * @rt   : regression tree
+ * @fb	 : filter bank
+ * @rt	 : regression tree
  * @alpha: weak learner's weight
- * @MR   : weak learner's misclassification rate
+ * @MR	 : weak learner's misclassification rate
  * @loss : weak learner's loss
  */
 class WeakLearner : public JSONSerializable {
@@ -55,19 +55,19 @@ public:
 #ifdef MOVABLE_TRAIN
 	/**
 	 * WeakLearner() - Create a weak learner starting from parameters and
-	 *                 data
+	 *		   data
 	 *
-	 * @params         : simulation's parameters
-	 * @SM             : pre-computed smoothing matrices
-	 * @dataset        : simulation's dataset
+	 * @params	   : simulation's parameters
+	 * @SM		   : pre-computed smoothing matrices
+	 * @dataset	   : simulation's dataset
 	 * @samplePositions: position of the sampling points
-	 * @weights        : weight of each individual sampling point (used to
-	 *                   update the current's weights too, therefore it is a
-	 *                   in/out variable)
-	 * @labels         : label of each individual sampling point
+	 * @weights	   : weight of each individual sampling point (used to
+	 *		     update the current's weights too, therefore it is a
+	 *		     in/out variable)
+	 * @labels	   : label of each individual sampling point
 	 * @currentResponse: current response of the classifier (used to update
-	 *                   this response too, therefore it is a in/out
-	 *                   variable)
+	 *		     this response too, therefore it is a in/out
+	 *		     variable)
 	 */
 	WeakLearner(const Parameters &params,
 		    const SmoothingMatrices &SM,
@@ -80,10 +80,10 @@ public:
 
 	/**
 	 * WeakLearner() - Build a weak learner starting from its JSON
-	 *                 description(de-serialization)
+	 *		   description(de-serialization)
 	 *
 	 * @descr_json: string containing the JSON's description of the weak
-	 *              learner
+	 *		learner
 	 */
 	WeakLearner(std::string &descr_json);
 
@@ -185,11 +185,11 @@ public:
 	/**
 	 * evaluate() - Evaluate a weak learner on a given set of samples
 	 *
-	 * @dataset     : source dataset for the samples
+	 * @dataset	: source dataset for the samples
 	 * @samplePoints: sampling points
 	 *
 	 * @predictions : resulting (weighted) predictions for the current weak
-	 *                learner on the considered data
+	 *		  learner on the considered data
 	 */
 	void evaluate(const Dataset &dataset,
 		      const sampleSet &samplePositions,
@@ -218,10 +218,10 @@ public:
 	 *
 	 * @imgVec    : vector containing the channels associated with the image
 	 * @borderSize: size of the border that has to be excluded from the
-	 *              result
+	 *		result
 	 *
 	 * @wlResponse: response produced by the weak learner, already weighted
-	 *              by the weak learner's importance
+	 *		by the weak learner's importance
 	 */
 	void evaluateOnImage(const std::vector< cv::Mat > &imgVec,
 			     const unsigned int borderSize,
@@ -246,10 +246,10 @@ public:
 
 	/**
 	 * getMR() - Return the weak learner's misclassification rate on train
-	 *           data
+	 *	     data
 	 *
 	 * Return: Weak learner's misclassification rate on the samples used for
-	 *         training it
+	 *	   training it
 	 */
 	float getMR() const { return MR; };
 

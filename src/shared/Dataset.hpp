@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef DATASET_HPP_
 #define DATASET_HPP_
@@ -58,41 +58,41 @@ class BoostedClassifier;
 /**
  * class Dataset - Represent a dataset with all associated images and paths
  *
- * @data          : set of data vectors (one vector per channel)
- * @dataChNo      : number of data channels
- * @imageOps      : set of operations performed on the loaded images (each
- *                  operation will lead to an additional channel)
- * @imagesNo      : number of loaded images
- * @imageNames    : names of the loaded images
- * @sampleSize    : size of a sampled patch
- * @borderSize    : size of the replicated border around the image
- * @masks         : image masks
- * @gts           : set of ground-truth vectors (one vector per gt pair)
- * @originalGts   : original ground-truth images (used for final classification)
- * @gtValues      : values available in gt
+ * @data	  : set of data vectors (one vector per channel)
+ * @dataChNo	  : number of data channels
+ * @imageOps	  : set of operations performed on the loaded images (each
+ *		    operation will lead to an additional channel)
+ * @imagesNo	  : number of loaded images
+ * @imageNames	  : names of the loaded images
+ * @sampleSize	  : size of a sampled patch
+ * @borderSize	  : size of the replicated border around the image
+ * @masks	  : image masks
+ * @gts		  : set of ground-truth vectors (one vector per gt pair)
+ * @originalGts	  : original ground-truth images (used for final classification)
+ * @gtValues	  : values available in gt
  * @gtPairValues  : gt pairs numeric values (each pair will require a boosted
- *                  classifier)
- * @gtPairsNo     : number of ground-truth pairs
+ *		    classifier)
+ * @gtPairsNo	  : number of ground-truth pairs
  */
 class Dataset {
 public:
 	/**
 	 * Dataset() - Initialize the data channels, then load the data
 	 *
-	 * @params      : parameters used for dataset initialization
+	 * @params	: parameters used for dataset initialization
 	 */
 	Dataset(const Parameters &params);
 
 	/**
 	 * Dataset() - Create a new dataset where the channels are those
-	 *             inherited by the source dataset complemented with the
-	 *             results obtained by applying the specified boosted
-	 *             classifiers to these images
+	 *	       inherited by the source dataset complemented with the
+	 *	       results obtained by applying the specified boosted
+	 *	       classifiers to these images
 	 *
-	 * @params            : simulation's parameters
-	 * @srcDataset        : source dataset
+	 * @params	      : simulation's parameters
+	 * @srcDataset	      : source dataset
 	 * @boostedClassifiers: classifiers used for the generation of the
-	 *                      additional channels
+	 *			additional channels
 	 */
 #ifndef TESTS
 #ifdef MOVABLE_TRAIN
@@ -111,13 +111,13 @@ public:
 #ifdef MOVABLE_TRAIN
 	/**
 	 * getGt() - Get a reference to a specific ground-truth for the
-	 *           specified gt pair
+	 *	     specified gt pair
 	 *
 	 * @pairNo : image pair to which the ground-truth belongs to
 	 * @imageNo: number of the image for which to return the ground-truth
 	 *
 	 * Return: reference to the specified gt if available, reference to an
-	 *         empty EMat otherwise
+	 *	   empty EMat otherwise
 	 */
 	const EMat& getGt(const int pairNo,
 			  const unsigned int imageNo) const
@@ -136,7 +136,7 @@ public:
 
 	/**
 	 * getGtNegativePairValue() - Get the value of the negative class for a
-	 *                            given gt pair
+	 *			      given gt pair
 	 *
 	 * @gtPair: considered gt pair
 	 *
@@ -154,7 +154,7 @@ public:
 
 	/**
 	 * getGtPositivePairValue() - Get the value of the positive class for a
-	 *                            given gt pair
+	 *			      given gt pair
 	 *
 	 * @gtPair: considered gt pair
 	 *
@@ -191,7 +191,7 @@ public:
 	 * @pairNo: number of the desired gt pair
 	 *
 	 * Return: reference to the specified gt vector if set, reference to an
-	 *         empty one otherwise
+	 *	   empty one otherwise
 	 */
 	const gtVector& getGtVector(const int pairNo) const
 	{
@@ -207,12 +207,12 @@ public:
 
 	/**
 	 * getOriginalGt() - Get a reference to a specific original ground-truth
-	 *                   image
+	 *		     image
 	 *
 	 * @imageNo: number of the image for which to return the ground-truth
 	 *
 	 * Return: reference to the specified gt if available, reference to an
-	 *         empty EMat otherwise
+	 *	   empty EMat otherwise
 	 */
 	const EMat& getOriginalGt(const unsigned int imageNo) const
 	{
@@ -230,13 +230,13 @@ public:
 	 * getSampleMatrix() - Fill a matrix with a specified set of samples
 	 *
 	 * @samplePositions: list of available sampling positions
-	 * @samplesIdx     : indexes of the subset of patches to sample
-	 * @chNo           : channel from which to sample from
-	 * @rowOffset      : row offset to impose while sampling
-	 * @colOffset      : col offset to impose while sampling
-	 * @size           : size of the samples to extract
+	 * @samplesIdx	   : indexes of the subset of patches to sample
+	 * @chNo	   : channel from which to sample from
+	 * @rowOffset	   : row offset to impose while sampling
+	 * @colOffset	   : col offset to impose while sampling
+	 * @size	   : size of the samples to extract
 	 *
-	 * @samples        : resulting matrix filled with the extracted samples
+	 * @samples	   : resulting matrix filled with the extracted samples
 	 *
 	 * Samples are taken from the given upper-left corner plus the offsets.
 	 * Samples are row-major (that is, each sample is taken row-by-row).
@@ -267,17 +267,17 @@ public:
 
 	/**
 	 * getSamplePositions() - Get a set of sampling positions from the
-	 *                        dataset
+	 *			  dataset
 	 *
-	 * @sampleClass    : class to sample (either POS_GT_CLASS or
-	 *                   NEG_GT_CLASS)
-	 * @gtPair         : specify which gt pair has to be considered
-	 * @samplesNo      : number of samples requested
+	 * @sampleClass	   : class to sample (either POS_GT_CLASS or
+	 *		     NEG_GT_CLASS)
+	 * @gtPair	   : specify which gt pair has to be considered
+	 * @samplesNo	   : number of samples requested
 	 *
 	 * @samplePositions: output sampled positions
 	 *
 	 * Return: Number of sampling positions collected on success,
-	 *         -EXIT_FAILURE otherwise
+	 *	   -EXIT_FAILURE otherwise
 	 */
 	int getSamplePositions(const int sampleClass,
 			       const unsigned int gtPair,
@@ -296,8 +296,8 @@ public:
 
 	/**
 	 * isFeedbackImage() - Returns whether an image given as a parameter has
-	 *                     been returned by a technician as feedback or not
-	 *                     (this increases the weight of its samples)
+	 *		       been returned by a technician as feedback or not
+	 *		       (this increases the weight of its samples)
 	 *
 	 * @imageNo: number of the image to check
 	 *
@@ -313,10 +313,10 @@ public:
 
 	/**
 	 * shrinkSamplePositions() - Drop samples from a sample set until the
-	 *                           desired size is reached
+	 *			     desired size is reached
 	 *
 	 * @samplePositions: considered sampling points
-	 * @desiredSize    : desired size of the sampling set
+	 * @desiredSize	   : desired size of the sampling set
 	 */
 	static void shrinkSamplePositions(sampleSet &samplePositions,
 					  const unsigned int desiredSize)
@@ -347,7 +347,7 @@ public:
 
 	/**
 	 * getChsForImage() - Get the channels corresponding to a specified
-	 *                    image in OpenCV format and enlarged by borderSize
+	 *		      image in OpenCV format and enlarged by borderSize
 	 *
 	 * @n  : image number
 	 *
@@ -358,13 +358,13 @@ public:
 
 	/**
 	 * getData() - Get a reference to the data of a specific image-channel
-	 *             pair
+	 *	       pair
 	 *
 	 * @channelNo: number of the desired channel
 	 * @imageNo  : number of the desired image
 	 *
 	 * Return: reference to the specified data if available, reference to an
-	 *         empty EMat otherwise
+	 *	   empty EMat otherwise
 	 */
 	const EMat& getData(const unsigned int channelNo,
 			    const unsigned int imageNo) const
@@ -389,12 +389,12 @@ public:
 
 	/**
 	 * getDataVector() - Get a reference to the specific data channel
-	 *                   vector
+	 *		     vector
 	 *
 	 * @channelNo: number of the desired channel
 	 *
 	 * Return: reference to the desired channel if available, reference to
-	 *         an empty one otherwise
+	 *	   an empty one otherwise
 	 */
 	const dataVector& getDataVector(const unsigned int channelNo) const
 	{
@@ -416,7 +416,7 @@ public:
 	 * @imageNo  : number of the desired image
 	 *
 	 * Return: filename of the desired image if found, an empty string
-	 *         otherwise
+	 *	   otherwise
 	 */
 	std::string getImageName(const unsigned int imageNo) const
 	{
@@ -441,7 +441,7 @@ public:
 	 * @imageNo: number of the image whose mask is requested
 	 *
 	 * Return: reference to the desired mask if available, reference to
-	 *         an empty EMat otherwise
+	 *	   an empty EMat otherwise
 	 */
 	const EMat& getMask(const unsigned int imageNo) const
 	{
@@ -491,8 +491,8 @@ private:
 
 	/**
 	 * addGt() - Preprocess the ground-truth image passed as parameter, and
-	 *           then push it into the dataset, exploding it on the
-	 *           different gt pairs
+	 *	     then push it into the dataset, exploding it on the
+	 *	     different gt pairs
 	 *
 	 * @src: input ground-truth image
 	 *
@@ -502,14 +502,14 @@ private:
 
 	/**
 	 * addImage() - Add an image along with its ground-truth and mask,
-	 *              computing the additional channels from the image itself
+	 *		computing the additional channels from the image itself
 	 *
 	 * @imgPath : path of the input image
 	 * @maskPath: path of the input mask
 	 * @gtPath  : path of the input ground-truth
 	 *
 	 * Return: -EXIT_FAILURE if one of more of the input paths are invalid
-	 *         or an image has invalid size, EXIT_SUCCESS otherwise
+	 *	   or an image has invalid size, EXIT_SUCCESS otherwise
 	 */
 
 	int addImage(const std::string &imgPath,
@@ -518,16 +518,16 @@ private:
 
 	/*
 	 * collectAllSamplePositions() - Collect all the possible samples of the
-	 *                               given class from the specified gt
-	 *                               vector
+	 *				 given class from the specified gt
+	 *				 vector
 	 *
-	 * @gt               : vector of gt images used in sampling
-	 * @sampleClass      : identifier of the class to sample
+	 * @gt		     : vector of gt images used in sampling
+	 * @sampleClass	     : identifier of the class to sample
 	 *
 	 * @availableSamples : returned vector of samples, where samples are
-	 *                     split over images
+	 *		       split over images
 	 * @samplesPerImageNo: number of samples of the desired class for each
-	 *                     separate image
+	 *		       separate image
 	 *
 	 * Return: total number of sampled points
 	 */
@@ -539,7 +539,7 @@ private:
 
 	/**
 	 * createGtPairs() - Create a set of gt pairs, starting from a list of
-	 *                   values
+	 *		     values
 	 *
 	 * @gtValues: set of desired ground-truth values to classify
 	 */
@@ -547,11 +547,11 @@ private:
 
 	/**
 	 * getAvailableSamples() - Extract a set of samples of the desired size
-	 *                         from the given gt vector
+	 *			   from the given gt vector
 	 *
-	 * @gt             : vector of gt images used in sampling
-	 * @sampleClass    : identifier of the class to sample
-	 * @samplesNo      : requested number of samples
+	 * @gt		   : vector of gt images used in sampling
+	 * @sampleClass	   : identifier of the class to sample
+	 * @samplesNo	   : requested number of samples
 	 *
 	 * @samplePositions: output sampled positions
 	 *
@@ -581,13 +581,13 @@ private:
 #else
 	/**
 	 * addImage() - Add an image along with its mask, computing the
-	 *              additional channels from the image itself
+	 *		additional channels from the image itself
 	 *
 	 * @imgPath : path of the input image
 	 * @maskPath: path of the input mask
 	 *
 	 * Return: -EXIT_FAILURE if one of more of the input paths are invalid
-	 *         or an image has invalid size, EXIT_SUCCESS otherwise
+	 *	   or an image has invalid size, EXIT_SUCCESS otherwise
 	 */
 
 	int addImage(const std::string &imgPath,
@@ -610,11 +610,11 @@ private:
 
 	/**
 	 * imageGrayCh() - Process an image, converting it to grayscale and
-	 *                 pushing it into the corresponding channel of the
-	 *                 dataset
+	 *		   pushing it into the corresponding channel of the
+	 *		   dataset
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -624,11 +624,11 @@ private:
 
 	/**
 	 * imageGreenCh() - Process an image, taking the green channel only and
-	 *                  pushing it into the corresponding channel of the
-	 *                  dataset
+	 *		    pushing it into the corresponding channel of the
+	 *		    dataset
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -638,11 +638,11 @@ private:
 
 	/**
 	 * imageRedCh() - Process an image, taking the red channel only and
-	 *                pushing it into the corresponding channel of the
-	 *                dataset
+	 *		  pushing it into the corresponding channel of the
+	 *		  dataset
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -652,11 +652,11 @@ private:
 
 	/**
 	 * imageBlueCh() - Process an image, taking the blue channel only and
-	 *                 pushing it into the corresponding channel of the
-	 *                 dataset
+	 *		   pushing it into the corresponding channel of the
+	 *		   dataset
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -665,12 +665,54 @@ private:
 			       const void *opaque);
 
 	/**
-	 * gaussianFiltering() - Process an image, taking its green channel and
-	 *                       passing it through a Gaussian filter with sigma
-	 *                       1
+	 * imageHueCh() - Process an image, taking the hue channel only and
+	 *		  pushing it into the corresponding channel of the
+	 *		  dataset
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageHueCh(const cv::Mat &src, EMat &dst,
+			      const void *opaque);
+
+	/**
+	 * imageSaturCh() - Process an image, taking the saturation channel only
+	 *		    and pushing it into the corresponding channel of the
+	 *		    dataset
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageSaturCh(const cv::Mat &src, EMat &dst,
+				const void *opaque);
+
+	/**
+	 * imageValueCh() - Process an image, taking the value channel only and
+	 *		    pushing it into the corresponding channel of the
+	 *		    dataset
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageValueCh(const cv::Mat &src, EMat &dst,
+				const void *opaque);
+
+	/**
+	 * gaussianFiltering() - Process an image, taking its green channel and
+	 *			 passing it through a Gaussian filter with sigma
+	 *			 1
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -680,10 +722,10 @@ private:
 
 	/**
 	 * laplacianFiltering() - Process an image, taking its green channel and
-	 *                        passing it through a Laplacian filter of size 9
+	 *			  passing it through a Laplacian filter of size 9
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -693,12 +735,12 @@ private:
 
 	/**
 	 * medianFiltering() - Process an image, converting it to grayscale and
-	 *                     then passing it through a median filter with 3
-	 *                     pixel of radius (1.5 would have been better, but
-	 *                     must be > 1, odd, and not fractional in OpenCV)
+	 *		       then passing it through a median filter with 3
+	 *		       pixel of radius (1.5 would have been better, but
+	 *		       must be > 1, odd, and not fractional in OpenCV)
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
@@ -708,35 +750,35 @@ private:
 
 	/**
 	 * sobelDrvX() - Process an image, taking its green channel and
-	 *               passing it through a Sobel derivative filter in the X
-	 *               direction
+	 *		 passing it through a Sobel derivative filter in the X
+	 *		 direction
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
 	 */
 	static int sobelDrvX(const cv::Mat &src, EMat &dst,
-				      const void *opaque);
+			     const void *opaque);
 
 	/**
 	 * sobelDrvY() - Process an image, taking its green channel and
-	 *               passing it through a Sobel derivative filter in the Y
-	 *               direction
+	 *		 passing it through a Sobel derivative filter in the Y
+	 *		 direction
 	 *
-	 * @src   : input image
-	 * @dst   : converted image
+	 * @src	  : input image
+	 * @dst	  : converted image
 	 * @opaque: opaque pointer to useful data (here: border size)
 	 *
 	 * Return: EXIT_SUCCESS
 	 */
 	static int sobelDrvY(const cv::Mat &src, EMat &dst,
-				      const void *opaque);
+			     const void *opaque);
 
 	/**
 	 * addMask() - Preprocess the mask passed as parameter, and then push it
-	 *             into the dataset
+	 *	       into the dataset
 	 *
 	 * @src: input image mask
 	 *
@@ -748,7 +790,7 @@ private:
 	 * loadPathFile() - Load a list of paths from a file
 	 *
 	 * @dataset_path: path of the dataset
-	 * @fname       : name of the file containing the path list
+	 * @fname	: name of the file containing the path list
 	 *
 	 * @loaded_paths: output list of file paths
 	 *

@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 #include <vector>
@@ -130,7 +130,7 @@ WeakLearner::WeakLearner(const Parameters &params,
 	std::chrono::duration< double > elapsed_s = end-start;
 
 	log_info("\tWeak learner trained, MR = %.3f, loss = %.3f, took %.3fs",
-		MR, loss, elapsed_s.count());
+		 MR, loss, elapsed_s.count());
 #endif /* TESTS */
 }
 #endif /* MOVABLE_TRAIN */

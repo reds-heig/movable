@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef DATATYPES_HPP_
 #define DATATYPES_HPP_
@@ -27,8 +27,8 @@
 
 typedef Eigen::Matrix< float, Eigen::Dynamic,
 		       Eigen::Dynamic, Eigen::RowMajor > EMat;
-typedef Eigen::Matrix< float, Eigen::Dynamic, 1        > EVec;
-typedef Eigen::Matrix< float, 1,         Eigen::Dynamic> ERowVector;
+typedef Eigen::Matrix< float, Eigen::Dynamic, 1	       > EVec;
+typedef Eigen::Matrix< float, 1,	 Eigen::Dynamic> ERowVector;
 typedef Eigen::Matrix< double, Eigen::Dynamic,
 		       Eigen::Dynamic, Eigen::RowMajor > EMatD;
 typedef Eigen::VectorXd EVecD;
@@ -91,7 +91,7 @@ typedef struct samplePos {
 	 * @s2: second sample position in the comparison
 	 *
 	 * Return: true if the two sample positions are identical, false
-	 *         otherwise
+	 *	   otherwise
 	 */
 	friend bool
 	operator==(const samplePos &s1, const samplePos &s2)
@@ -109,7 +109,7 @@ typedef struct samplePos {
 	 * @s2: second sample position in the comparison
 	 *
 	 * Return: true if the two sample positions are different, false
-	 *         otherwise
+	 *	   otherwise
 	 */
 	friend bool
 	operator!=(const samplePos &s1, const samplePos &s2)

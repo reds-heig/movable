@@ -5,7 +5,7 @@
  * http://sites.google.com/site/carlosbecker
  *
  * MOVABLE project: MicrOscopic VisuAlization of BLood cElls for the Detection
- *                  of Malaria and CD4+
+ *		    of Malaria and CD4+
  *
  * Alberto Dassatti, Magali Fröhlich, Roberto Rigamonti
  * HES-SO
@@ -41,8 +41,8 @@ RegTree::RegTree(const EMat &featuresF,
 	log_trace("Training a new tree (max depth: %d), feature matrix: %dx%d",
 		  maxDepth, samplesNo, featuresNo);
 
-        nodes.clear();
-        nodes.reserve(AVG_TREE_SIZE);
+	nodes.clear();
+	nodes.reserve(AVG_TREE_SIZE);
 
 	unsigned int curNodeIdx = 0;
 	std::vector < struct NodeStackEntry > stack;
@@ -89,8 +89,8 @@ RegTree::RegTree(const EMat &featuresF,
 		std::vector < struct StumpNode > stumpResults(featuresNo);
 #pragma omp parallel for schedule(dynamic)
 		for (unsigned int iFeat = 0; iFeat < featuresNo; ++iFeat) {
-		        trainStump(features, responses, weights,
-			           top.idxs, iFeat, stumpResults[iFeat]);
+			trainStump(features, responses, weights,
+				   top.idxs, iFeat, stumpResults[iFeat]);
 		}
 
 		/* Find the best-performing stump */

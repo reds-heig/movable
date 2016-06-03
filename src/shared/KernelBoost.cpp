@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 #include <vector>
@@ -147,7 +147,7 @@ KernelBoost::KernelBoost(Parameters &params,
 				     params.finalResDir,
 				     dataset_final.getImageName(i),
 				     dataset_final.getBorderSize());
-        }
+	}
 
 	/* Save WL distribution statistics */
 	std::string statsFName = params.baseResDir + "/statistics.txt";
@@ -265,15 +265,15 @@ KernelBoost::KernelBoost(std::string &descr_json,
 		   followed by thresholding with a fixed threshold specified in
 		   the configuration file */
 		// normalizeImage(result, dataset_final.getBorderSize(),
-		// 	       normImage);
+		//	       normImage);
 		cv::Mat beforeCrop(result.rows(), result.cols(), CV_32FC1);
 		cv::eigen2cv(result, beforeCrop);
 
 		/* Drop border */
 		normImage = beforeCrop(cv::Range(dataset_final.getBorderSize(),
-					     beforeCrop.rows-dataset_final.getBorderSize()),
-				   cv::Range(dataset_final.getBorderSize(),
-					     beforeCrop.cols-dataset_final.getBorderSize()));
+						 beforeCrop.rows-dataset_final.getBorderSize()),
+				       cv::Range(dataset_final.getBorderSize(),
+						 beforeCrop.cols-dataset_final.getBorderSize()));
 
 		saveThresholdedImage(normImage,
 				     dataset_final.getMask(i),
@@ -292,7 +292,7 @@ KernelBoost::KernelBoost(std::string &descr_json,
 #endif /* MOVABLE_TRAIN */
 
 void
-KernelBoost::Serialize(Json::Value &root)
+KernelBoost::Serialize(Json::Value &root, const Parameters &params)
 {
 	Json::Value kb_json(Json::objectValue);
 	Json::Value boostedClassifiers_json(Json::arrayValue);
@@ -306,8 +306,13 @@ KernelBoost::Serialize(Json::Value &root)
 
 	Json::Value final_bc_json(Json::objectValue);
 	finalClassifier->Serialize(final_bc_json);
-        kb_json["FinalClassifier"] = final_bc_json;
+	kb_json["FinalClassifier"] = final_bc_json;
 	kb_json["binaryThreshold"] = binaryThreshold;
+
+	kb_json["sampleSize"] = params.sampleSize;
+	for (unsigned int i = 0; i < params.channelList.size(); ++i) {
+		kb_json["Channels"].append(params.channelList[i]);
+	}
 
 	root["KernelBoost"] = kb_json;
 }
@@ -321,7 +326,7 @@ KernelBoost::Deserialize(Json::Value &root)
 		BoostedClassifier *bc = new BoostedClassifier(*it);
 		boostedClassifiers.push_back(bc);
 	}
-        finalClassifier =
+	finalClassifier =
 		new BoostedClassifier(root["KernelBoost"]["FinalClassifier"]);
 	binaryThreshold =
 		root["KernelBoost"]["binaryThreshold"].asDouble();

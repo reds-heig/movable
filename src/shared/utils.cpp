@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 #include <random>
@@ -379,12 +379,12 @@ saveThresholdedImage(const cv::Mat &classResult,
 	cv::drawContours(finalBinary, hull, -1, cv::Scalar(255), -1);
 
 	/* Finally, fill all holes with floodfill (idea taken from
-           http://www.learnopencv.com/filling-holes-in-an-image-using-opencv-python-c/ */
-        cv::Mat im_floodfill = finalBinary.clone();
-        cv::Mat im_floodfill_inv;
-        cv::floodFill(im_floodfill, cv::Point(0,0), cv::Scalar(255));
-        cv::bitwise_not(im_floodfill, im_floodfill_inv);
-        finalBinary = (finalBinary | im_floodfill_inv);
+	   http://www.learnopencv.com/filling-holes-in-an-image-using-opencv-python-c/ */
+	cv::Mat im_floodfill = finalBinary.clone();
+	cv::Mat im_floodfill_inv;
+	cv::floodFill(im_floodfill, cv::Point(0,0), cv::Scalar(255));
+	cv::bitwise_not(im_floodfill, im_floodfill_inv);
+	finalBinary = (finalBinary | im_floodfill_inv);
 
 	/* Save resulting image */
 	std::string dstPath = dirPath + "/" + imgName + "_thresh.png";
@@ -395,8 +395,8 @@ saveThresholdedImage(const cv::Mat &classResult,
 int
 createDirectories(Parameters &params, const Dataset &dataset)
 #else
-int
-createDirectories(Parameters &params)
+	int
+	createDirectories(Parameters &params)
 #endif /* MOVABLE_TRAIN */
 {
 	std::string base_path;

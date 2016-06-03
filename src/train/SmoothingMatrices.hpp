@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef SMOOTHING_MATRICES_HPP_
 #define SMOOTHING_MATRICES_HPP_
@@ -31,19 +31,19 @@
 /**
  * class SmoothingMatrices - Smoothing matrices used in filter learning
  *
- * @M              : set of smoothing matrices
- * @sizes          : base set of filters sizes used for building the matrices
+ * @M		   : set of smoothing matrices
+ * @sizes	   : base set of filters sizes used for building the matrices
  * @smoothingValues: base set of lambda values used for building the matrices
  */
 class SmoothingMatrices {
 public:
 	/**
 	 * SmoothingMatrices() - Construct a matrix of smoothing matrices for
-	 *                       the desired size range (only ODD values are
-	 *                       considered!) and smoothing values
+	 *			 the desired size range (only ODD values are
+	 *			 considered!) and smoothing values
 	 *
-	 * @minSize        : minimum considered size
-	 * @maxSize        : maximum considered size
+	 * @minSize	   : minimum considered size
+	 * @maxSize	   : maximum considered size
 	 * @smoothingValues: vector containing the desired smoothing values
 	 */
 	SmoothingMatrices(const unsigned int minSize,
@@ -52,7 +52,7 @@ public:
 
 	/**
 	 * getSmoothingMatrix() - Get a reference to the smoothing matrix for a
-	 *                        specific size-lambda pair
+	 *			  specific size-lambda pair
 	 *
 	 * @filterSize: considered filter size
 	 * @lambda    : smoothing value
@@ -131,25 +131,25 @@ private:
 
 	/**
 	 * createSmoothingMatrixOnes() - Compute a smoothing matrix given its
-	 *                               size and put ones (or minus ones) at
-	 *                               the appropriate positions
+	 *				 size and put ones (or minus ones) at
+	 *				 the appropriate positions
 	 *
 	 * @size: size of the subpatch this matrix smooths
 	 *
 	 * Return: Matrix of the appropriate size with ones in the desired
-	 *         positions
+	 *	   positions
 	 */
 	EMat createSmoothingMatrixOnes(const unsigned int size) const;
 
 	/**
 	 * getPosLambda() - Get the position of the considered matrix according
-	 *                  to its smoothing value (the cols int the matrix of
-	 *                  values)
+	 *		    to its smoothing value (the cols int the matrix of
+	 *		    values)
 	 *
 	 * @lambda: considered lambda value
 	 *
 	 * Return: The desired position if the lambda value is present in the
-	 *         smoothing values vector, -1 otherwise
+	 *	   smoothing values vector, -1 otherwise
 	 */
 	int
 	getPosLambda(const float lambda) const {
@@ -164,12 +164,12 @@ private:
 
 	/**
 	 * getPosSize() - Get the position of the considered matrix according to
-	 *                its size (the rows int the matrix of values)
+	 *		  its size (the rows int the matrix of values)
 	 *
 	 * @size: considered size
 	 *
 	 * Return: The desired position if the size is present in the size
-	 *         vector, -1 otherwise
+	 *	   vector, -1 otherwise
 	 */
 	int
 	getPosSize(const unsigned int size) const {

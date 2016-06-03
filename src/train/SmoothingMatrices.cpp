@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 #include <vector>
@@ -33,20 +33,20 @@
  *
  * Note: requires the variables queue, size, and connections to be defined!
  */
-#define TRY(dx, dy)						\
- do {						                \
-	 PixLoc newLoc(loc.r + (dx), loc.c + (dy), (int)size);	\
-	 if (!newLoc.isValid()) {				\
-		 break;						\
-	 }							\
-	 if (tmp.coeff(newLoc.r, newLoc.c) != 0) {		\
-		 break;						\
-	 }							\
-	 queue.push(newLoc);					\
-								\
-	 connections.push_back(Connection(loc,			\
-					  newLoc, size));	\
- } while (0);
+#define TRY(dx, dy)							\
+	do {								\
+		PixLoc newLoc(loc.r + (dx), loc.c + (dy), (int)size);	\
+		if (!newLoc.isValid()) {				\
+			break;						\
+		}							\
+		if (tmp.coeff(newLoc.r, newLoc.c) != 0) {		\
+			break;						\
+		}							\
+		queue.push(newLoc);					\
+									\
+		connections.push_back(Connection(loc,			\
+						 newLoc, size));	\
+	} while (0);
 
 SmoothingMatrices::SmoothingMatrices(const unsigned int minSize,
 				     const unsigned int maxSize,
@@ -113,9 +113,9 @@ SmoothingMatrices::createSmoothingMatrixOnes(const unsigned int size) const
 		}
 
 		/* Check pixels in a 4-neighborhood */
-		TRY( 1,  0);
-		TRY( 0,  1);
-		TRY(-1,  0);
+		TRY( 1,	 0);
+		TRY( 0,	 1);
+		TRY(-1,	 0);
 		TRY( 0, -1);
 
 		/* Mark as visited */

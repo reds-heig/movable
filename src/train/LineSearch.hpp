@@ -5,7 +5,7 @@
  * http://sites.google.com/site/carlosbecker
  *
  * MOVABLE project: MicrOscopic VisuAlization of BLood cElls for the Detection
- *                  of Malaria and CD4+
+ *		    of Malaria and CD4+
  *
  * Alberto Dassatti, Magali Fröhlich, Roberto Rigamonti
  * HES-SO
@@ -28,7 +28,7 @@
  *
  * @labels    : true labels of the samples
  * @prevScores: cumulated scores for the samples -- that is, responses of the
- *              previous weak learners already weighted
+ *		previous weak learners already weighted
  * @newScores : scores obtained by the newly-computed regression tree
  * @lossScale : scaling factor for the loss
  */
@@ -42,7 +42,7 @@ private:
 public:
 	/**
 	 * LineSearch() - Initialize the class by referencing to original
-	 *                vectors
+	 *		  vectors
 	 *
 	 * @labels    : true labels of the samples
 	 * @prevScores: previous scores
@@ -60,16 +60,16 @@ public:
 
 	/**
 	 * evaluate() - Evaluate both the function and the gradient at the
-	 *              current point
+	 *		current point
 	 *
 	 * @instance: user data
-	 * @x       : current value of optimized variable
-	 * @g       : gradient vector
-	 * @n       : dimension of the space (unused since set to 1)
+	 * @x	    : current value of optimized variable
+	 * @g	    : gradient vector
+	 * @n	    : dimension of the space (unused since set to 1)
 	 * @step    : current step of line search (unused)
 	 *
 	 * Return: the value of the objective function as return value and the
-	 *         gradient in the passed parameter
+	 *	   gradient in the passed parameter
 	 */
 	static lbfgsfloatval_t
 	evaluate(void *instance,
@@ -114,97 +114,97 @@ public:
 	 *
 	 * Return: Textual description of the error
 	 */
-        static const char *
+	static const char *
 	getErrDescr(int errID)
-        {
-            switch(errID)
-            {
-	    case LBFGS_ALREADY_MINIMIZED:
-		    return "The initial variables already minimize the objective function.";
-	    case LBFGSERR_UNKNOWNERROR:
-		    return "Unknown error";
-	    case LBFGSERR_LOGICERROR:
-		    return "Logic error.";
-	    case LBFGSERR_OUTOFMEMORY:
-		    return "Insufficient memory.";
-	    case LBFGSERR_CANCELED:
-		    return "The minimization process has been canceled.";
-	    case LBFGSERR_INVALID_N:
-		    return "Invalid number of variables specified.";
-	    case LBFGSERR_INVALID_N_SSE:
-		    return "Invalid number of variables (for SSE) specified.";
-	    case LBFGSERR_INVALID_X_SSE:
-		    return "The array x must be aligned to 16 (for SSE).";
-	    case LBFGSERR_INVALID_EPSILON:
-		    return "Invalid parameter lbfgs_parameter_t::epsilon specified.";
-	    case LBFGSERR_INVALID_TESTPERIOD:
-		    return "Invalid parameter lbfgs_parameter_t::past specified.";
-	    case LBFGSERR_INVALID_DELTA:
-		    return "Invalid parameter lbfgs_parameter_t::delta specified.";
-	    case LBFGSERR_INVALID_LINESEARCH:
-		    return "Invalid parameter lbfgs_parameter_t::linesearch specified.";
-	    case LBFGSERR_INVALID_MINSTEP:
-		    return "Invalid parameter lbfgs_parameter_t::max_step specified.";
-	    case LBFGSERR_INVALID_MAXSTEP:
-		    return "Invalid parameter lbfgs_parameter_t::max_step specified.";
-	    case LBFGSERR_INVALID_FTOL:
-		    return "Invalid parameter lbfgs_parameter_t::ftol specified.";
-	    case LBFGSERR_INVALID_WOLFE:
-		    return "Invalid parameter lbfgs_parameter_t::wolfe specified.";
-	    case LBFGSERR_INVALID_GTOL:
-		    return "Invalid parameter lbfgs_parameter_t::gtol specified.";
-	    case LBFGSERR_INVALID_XTOL:
-		    return "Invalid parameter lbfgs_parameter_t::xtol specified.";
-	    case LBFGSERR_INVALID_MAXLINESEARCH:
-		    return "Invalid parameter lbfgs_parameter_t::max_linesearch specified.";
-	    case LBFGSERR_INVALID_ORTHANTWISE:
-		    return "Invalid parameter lbfgs_parameter_t::orthantwise_c specified.";
-	    case LBFGSERR_INVALID_ORTHANTWISE_START:
-		    return "Invalid parameter lbfgs_parameter_t::orthantwise_start specified.";
-	    case LBFGSERR_INVALID_ORTHANTWISE_END:
-		    return "Invalid parameter lbfgs_parameter_t::orthantwise_end specified.";
-	    case LBFGSERR_OUTOFINTERVAL:
-		    return "The line-search step went out of the interval of uncertainty.";
-	    case LBFGSERR_INCORRECT_TMINMAX:
-		    return "A logic error occurred; alternatively, the interval of uncertainty became too small.";
-	    case LBFGSERR_ROUNDING_ERROR:
-		    return "A rounding error occurred; alternatively, no line-search step satisfies the sufficient decrease and curvature conditions.";
-	    case LBFGSERR_MINIMUMSTEP:
-		    return "The line-search step became smaller than lbfgs_parameter_t::min_step.";
-	    case LBFGSERR_MAXIMUMSTEP:
-		    return "The line-search step became larger than lbfgs_parameter_t::max_step.";
-	    case LBFGSERR_MAXIMUMLINESEARCH:
-		    return "The line-search routine reaches the maximum number of evaluations.";
-	    case LBFGSERR_MAXIMUMITERATION:
-		    return "The algorithm routine reaches the maximum number of iterations.";
-	    case LBFGSERR_WIDTHTOOSMALL:
-		    return "Relative width of the interval of uncertainty is at most lbfgs_parameter_t::xtol.";
-	    case LBFGSERR_INVALIDPARAMETERS:
-		    return "A logic error (negative line-search step) occurred.";
-	    case LBFGSERR_INCREASEGRADIENT:
-		    return "The current search direction increases the objective function value.";
-	    default:
-		    return "UNKNOWN";
-            }
+	{
+		switch(errID)
+			{
+			case LBFGS_ALREADY_MINIMIZED:
+				return "The initial variables already minimize the objective function.";
+			case LBFGSERR_UNKNOWNERROR:
+				return "Unknown error";
+			case LBFGSERR_LOGICERROR:
+				return "Logic error.";
+			case LBFGSERR_OUTOFMEMORY:
+				return "Insufficient memory.";
+			case LBFGSERR_CANCELED:
+				return "The minimization process has been canceled.";
+			case LBFGSERR_INVALID_N:
+				return "Invalid number of variables specified.";
+			case LBFGSERR_INVALID_N_SSE:
+				return "Invalid number of variables (for SSE) specified.";
+			case LBFGSERR_INVALID_X_SSE:
+				return "The array x must be aligned to 16 (for SSE).";
+			case LBFGSERR_INVALID_EPSILON:
+				return "Invalid parameter lbfgs_parameter_t::epsilon specified.";
+			case LBFGSERR_INVALID_TESTPERIOD:
+				return "Invalid parameter lbfgs_parameter_t::past specified.";
+			case LBFGSERR_INVALID_DELTA:
+				return "Invalid parameter lbfgs_parameter_t::delta specified.";
+			case LBFGSERR_INVALID_LINESEARCH:
+				return "Invalid parameter lbfgs_parameter_t::linesearch specified.";
+			case LBFGSERR_INVALID_MINSTEP:
+				return "Invalid parameter lbfgs_parameter_t::max_step specified.";
+			case LBFGSERR_INVALID_MAXSTEP:
+				return "Invalid parameter lbfgs_parameter_t::max_step specified.";
+			case LBFGSERR_INVALID_FTOL:
+				return "Invalid parameter lbfgs_parameter_t::ftol specified.";
+			case LBFGSERR_INVALID_WOLFE:
+				return "Invalid parameter lbfgs_parameter_t::wolfe specified.";
+			case LBFGSERR_INVALID_GTOL:
+				return "Invalid parameter lbfgs_parameter_t::gtol specified.";
+			case LBFGSERR_INVALID_XTOL:
+				return "Invalid parameter lbfgs_parameter_t::xtol specified.";
+			case LBFGSERR_INVALID_MAXLINESEARCH:
+				return "Invalid parameter lbfgs_parameter_t::max_linesearch specified.";
+			case LBFGSERR_INVALID_ORTHANTWISE:
+				return "Invalid parameter lbfgs_parameter_t::orthantwise_c specified.";
+			case LBFGSERR_INVALID_ORTHANTWISE_START:
+				return "Invalid parameter lbfgs_parameter_t::orthantwise_start specified.";
+			case LBFGSERR_INVALID_ORTHANTWISE_END:
+				return "Invalid parameter lbfgs_parameter_t::orthantwise_end specified.";
+			case LBFGSERR_OUTOFINTERVAL:
+				return "The line-search step went out of the interval of uncertainty.";
+			case LBFGSERR_INCORRECT_TMINMAX:
+				return "A logic error occurred; alternatively, the interval of uncertainty became too small.";
+			case LBFGSERR_ROUNDING_ERROR:
+				return "A rounding error occurred; alternatively, no line-search step satisfies the sufficient decrease and curvature conditions.";
+			case LBFGSERR_MINIMUMSTEP:
+				return "The line-search step became smaller than lbfgs_parameter_t::min_step.";
+			case LBFGSERR_MAXIMUMSTEP:
+				return "The line-search step became larger than lbfgs_parameter_t::max_step.";
+			case LBFGSERR_MAXIMUMLINESEARCH:
+				return "The line-search routine reaches the maximum number of evaluations.";
+			case LBFGSERR_MAXIMUMITERATION:
+				return "The algorithm routine reaches the maximum number of iterations.";
+			case LBFGSERR_WIDTHTOOSMALL:
+				return "Relative width of the interval of uncertainty is at most lbfgs_parameter_t::xtol.";
+			case LBFGSERR_INVALIDPARAMETERS:
+				return "A logic error (negative line-search step) occurred.";
+			case LBFGSERR_INCREASEGRADIENT:
+				return "The current search direction increases the objective function value.";
+			default:
+				return "UNKNOWN";
+			}
 
-	    /* Should never get here... */
-            return "UNKNOWN";
-        }
+		/* Should never get here... */
+		return "UNKNOWN";
+	}
 
 	/**
 	 * progress() - Display the state of the current iteration of the L-BFGS
-	 *              algorithm
+	 *		algorithm
 	 *
 	 * @instance: user data
-	 * @x       : current value
-	 * @g       : gradient value
-	 * @fx      : value of the objective function
+	 * @x	    : current value
+	 * @g	    : gradient value
+	 * @fx	    : value of the objective function
 	 * @xnorm   : Euclidean norm of the variable
 	 * @gnorm   : Euclidean norm of the gradient
 	 * @step    : line-search step used for this iteration
-	 * @n       : Dimensionality of the optimized variable
-	 * @k       : Iteration count
-	 * @ls      : Number of evaluations called for this iteration
+	 * @n	    : Dimensionality of the optimized variable
+	 * @k	    : Iteration count
+	 * @ls	    : Number of evaluations called for this iteration
 	 *
 	 * Return: 0 (a non-zero value would cancel the optimization process!)
 	 */
@@ -221,8 +221,8 @@ public:
 		 int /* ls */)
 	{
 		// log_info("Iteration %d - step = %f:\n\tfx = %f\tx = %f\n"
-		// 	  "\tx_norm = %f\tg_norm = %f",
-		// 	  k, step, fx, x[0], xnorm, gnorm);
+		//	  "\tx_norm = %f\tg_norm = %f",
+		//	  k, step, fx, x[0], xnorm, gnorm);
 		return 0;
 	}
 

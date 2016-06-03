@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef FILTER_BANK_HPP_
 #define FILTER_BANK_HPP_
@@ -54,14 +54,14 @@ public:
 #ifdef MOVABLE_TRAIN
 	/**
 	 * FilterBank() - Build a filter bank by learning the filters from the
-	 *                given samples according to the parameters
+	 *		  given samples according to the parameters
 	 *
-	 * @params         : simulation's parameters
-	 * @SM             : pre-computed smoothing matrices
-	 * @dataset        : simulation's dataset
-	 * @chNo           : considered channel number
+	 * @params	   : simulation's parameters
+	 * @SM		   : pre-computed smoothing matrices
+	 * @dataset	   : simulation's dataset
+	 * @chNo	   : considered channel number
 	 * @samplePositions: position of the sampling points
-	 * @weights        : weight of each individual sampling point
+	 * @weights	   : weight of each individual sampling point
 	 */
 	FilterBank(const Parameters &params,
 		   const SmoothingMatrices &SM,
@@ -71,14 +71,14 @@ public:
 		   const EVec &weights);
 	/**
 	 * FilterBank() - Create a new filter bank from a set of filter banks
-	 *                and a list of retained features
+	 *		  and a list of retained features
 	 *
 	 * @filterBanks: set of filter banks from which filters have to be
-	 *               chosen
+	 *		 chosen
 	 * @featsIdxs  : list of retained features
 	 *
 	 * WARNING: the order of the filter banks has to be consistent with the
-	 *          ordering of the features!
+	 *	    ordering of the features!
 	 */
 	FilterBank(const std::vector< FilterBank > &filterBanks,
 		   const std::vector< unsigned int > &featsIdxs);
@@ -86,10 +86,10 @@ public:
 
 	/**
 	 * FilterBank() - Build a filter bank starting from its JSON description
-	 *                (de-serialization)
+	 *		  (de-serialization)
 	 *
 	 * @descr_json: string containing the JSON's description of the filter
-	 *              bank
+	 *		bank
 	 */
 	FilterBank(std::string &descr_json);
 
@@ -149,11 +149,11 @@ public:
 	/**
 	 * evaluateFilters() - Evaluate the filters over a set of samples
 	 *
-	 * @dataset        : input dataset
+	 * @dataset	   : input dataset
 	 * @samplePositions: vector containing the list of sample positions
-	 *                   where filters have to be evaluated
+	 *		     where filters have to be evaluated
 	 *
-	 * @features       : resulting features computed using the filters
+	 * @features	   : resulting features computed using the filters
 	 */
 
 	void evaluateFilters(const Dataset &dataset,
@@ -175,7 +175,7 @@ public:
 #endif /* MOVABLE_TRAIN */
 	/**
 	 * evaluateFiltersOnImage() - Evaluate the filters over the channels of
-	 *                            a specific image
+	 *			      a specific image
 	 *
 	 * @imgVec    : vector containing the channels associated with the image
 	 * @borderSize: size of the border added to the image before convolution
@@ -202,7 +202,7 @@ private:
 	 * @col	   : start column of the filter inside the patch
 	 * @size   : filter size
 	 * @X	   : filter shaped as a column vector
-	 * @Xsq    : filter shaped as a square in cv::Mat format
+	 * @Xsq	   : filter shaped as a square in cv::Mat format
 	 */
 	typedef struct filter {
 		unsigned int chNo;
@@ -219,7 +219,7 @@ private:
 		 * @flt2: second filter in the comparison
 		 *
 		 * Return: true if the two filters are identical, false
-		 *         otherwise
+		 *	   otherwise
 		 */
 		friend bool
 		operator==(const filter &flt1, const filter &flt2)
@@ -242,7 +242,7 @@ private:
 		 * @flt2: second filter in the comparison
 		 *
 		 * Return: true if the two filter banks are different, false
-		 *         otherwise
+		 *	   otherwise
 		 */
 		friend bool
 		operator!=(const filter &flt1, const filter &flt2)

@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef PARAMETERS_HPP_
 #define PARAMETERS_HPP_
@@ -43,43 +43,43 @@ const std::string defaultConfigFName = "train_config.json";
 /**
  * class Parameters - Set of parameters for the application
  *
- * @simName        : codename of the simulation
- * @resultsDir     : base path of the results directory
+ * @simName	   : codename of the simulation
+ * @resultsDir	   : base path of the results directory
  * @classifierPath : final classifier's path
- * @datasetPath    : dataset's path
- * @datasetName    : dataset's name
+ * @datasetPath	   : dataset's path
+ * @datasetName	   : dataset's name
  * @imgPathFName   : name of the file containing image paths
  * @maskPathFName  : name of the file containing mask paths
- * @gtPathFName    : name of the file containing gt paths
- * @regMinVal      : minimum value for the regularization parameter
- * @regMaxVal      : maximum value for the regularization parameter
- * @regValStep     : step between regularization parameter's values
+ * @gtPathFName	   : name of the file containing gt paths
+ * @regMinVal	   : minimum value for the regularization parameter
+ * @regMaxVal	   : maximum value for the regularization parameter
+ * @regValStep	   : step between regularization parameter's values
  * @shrinkageFactor: shrinkage factor for the boosting algorithm
- * @gtValues       : list of considered gt values
+ * @gtValues	   : list of considered gt values
  * @useColorImages : enable the use of color images in the dataset
  * @datasetBalance : balance the number of positives and negatives in
- *                   the dataset
+ *		     the dataset
  * @posSamplesNo   : number of positive samples
  * @negSamplesNo   : number of negative samples
  * @randSamplesNo  : number of samples randomly taken for each
- *                   filter learning round
+ *		     filter learning round
  * @finalSamplesNo : number of samples for each class used in the training of
- *                   the final classifier
- * @sampleSize     : lateral size (in pixels) of each sample (for
- *                   instance, if this is 51, this means sampling
- *                   51x51 squared around the sample point)
+ *		     the final classifier
+ * @sampleSize	   : lateral size (in pixels) of each sample (for
+ *		     instance, if this is 51, this means sampling
+ *		     51x51 squared around the sample point)
  * @filtersPerChNo : number of filters to learn for each channel
  * @minFilterSize  : minimum filter size
  * @maxFilterSize  : maximum filter size
- * @wlNo           : number of weak-learners to learn
- * @treeDepth      : maximum depth of the regression trees
+ * @wlNo	   : number of weak-learners to learn
+ * @treeDepth	   : maximum depth of the regression trees
  * @finalTreeDepth : depth of the final tree
  * @smoothingValues: list of smoothing values
  * @intermedResDir : directories where the intermediate results will be
- *                   stored
- * @finalResDir    : directory where final results will be stored
- * @channelList    : list of channels requested by user
- * @configFName    : path of the configuration file
+ *		     stored
+ * @finalResDir	   : directory where final results will be stored
+ * @channelList	   : list of channels requested by user
+ * @configFName	   : path of the configuration file
  */
 class Parameters {
 public:
@@ -130,7 +130,7 @@ public:
 
 	/**
 	 * Parameters() - Load a set of parameters from the JSON configuration
-	 *                file and the command line
+	 *		  file and the command line
 	 *
 	 * @argc: command line's argument count
 	 * @argv: command line's argument list

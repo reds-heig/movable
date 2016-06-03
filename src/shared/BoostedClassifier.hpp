@@ -1,21 +1,21 @@
 /*******************************************************************************
-** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
-**                                                                            **
-** This file is part of MOVABLE.                                              **
-**                                                                            **
-**  MOVABLE is free software: you can redistribute it and/or modify           **
-**  it under the terms of the GNU General Public License as published by      **
-**  the Free Software Foundation, either version 3 of the License, or         **
-**  (at your option) any later version.                                       **
-**                                                                            **
-**  MOVABLE is distributed in the hope that it will be useful,                **
-**  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
-**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
-**  GNU General Public License for more details.                              **
-**                                                                            **
-**  You should have received a copy of the GNU General Public License         **
-**  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
-*******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #ifndef BOOSTED_CLASSIFIER_HPP_
 #define BOOSTED_CLASSIFIER_HPP_
@@ -34,10 +34,10 @@
 
 /**
  * class BoostedClassifier - Boosted Classifier main class, grouping all weak
- *                           learners
+ *			     learners
  *
  * @weakLearners: weak learners
- * @gtPair      : ground truth pair considered by the classifier
+ * @gtPair	: ground truth pair considered by the classifier
  */
 class BoostedClassifier : public JSONSerializable {
 public:
@@ -46,7 +46,7 @@ public:
 	 * BoostedClassifier() - Create a boosted classifier
 	 *
 	 * @params : simulation's parameters
-	 * @SM     : pre-computed smoothing matrices
+	 * @SM	   : pre-computed smoothing matrices
 	 * @dataset: simulation's dataset
 	 * @gtPair : considered ground truth pair
 	 */
@@ -58,16 +58,16 @@ public:
 
 	/**
 	 * BoostedClassifier() - Build a boosted classifier starting from its
-	 *                       JSON description(de-serialization)
+	 *			 JSON description(de-serialization)
 	 *
 	 * @descr_json: string containing the JSON's description of the boosted
-	 *              classifier
+	 *		classifier
 	 */
 	BoostedClassifier(std::string &descr_json);
 
 	/**
 	 * BoostedClassifier() - Create a boosted classifier starting from a
-	 *                       JSON node
+	 *			 JSON node
 	 *
 	 * @root: JSON's representation root
 	 */
@@ -77,8 +77,8 @@ public:
 	}
 
 	/**
-	 * ~BoostedClassifier() - Deallocate the weak learners
-	 */
+	* ~BoostedClassifier() - Deallocate the weak learners
+	*/
 	virtual ~BoostedClassifier()
 	{
 		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
@@ -144,7 +144,7 @@ public:
 	 * @wl2: second boosted classifier in the comparison
 	 *
 	 * Return: true if the two boosted classifiers are identical, false
-	 *         otherwise
+	 *	   otherwise
 	 */
 	friend bool
 	operator==(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
@@ -168,7 +168,7 @@ public:
 	 * @wl2: second boosted classifier in the comparison
 	 *
 	 * Return: true if the two boosted classifiers are different, false
-	 *         otherwise
+	 *	   otherwise
 	 */
 	friend bool
 	operator!=(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
@@ -220,7 +220,7 @@ public:
 	 *
 	 * @imgVec    : vector containing the channels associated with the image
 	 * @borderSize: size of the border that has to be excluded from the
-	 *              result
+	 *		result
 	 *
 	 * @prediction: computed result image
 	 */

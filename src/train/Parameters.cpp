@@ -1,21 +1,21 @@
 /*******************************************************************************
- ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
- **                                                                            **
- ** This file is part of MOVABLE.                                              **
- **                                                                            **
- **  MOVABLE is free software: you can redistribute it and/or modify           **
- **  it under the terms of the GNU General Public License as published by      **
- **  the Free Software Foundation, either version 3 of the License, or         **
- **  (at your option) any later version.                                       **
- **                                                                            **
- **  MOVABLE is distributed in the hope that it will be useful,                **
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
- **  GNU General Public License for more details.                              **
- **                                                                            **
- **  You should have received a copy of the GNU General Public License         **
- **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
- *******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **									      **
+ ** This file is part of MOVABLE.					      **
+ **									      **
+ **  MOVABLE is free software: you can redistribute it and/or modify	      **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or	      **
+ **  (at your option) any later version.				      **
+ **									      **
+ **  MOVABLE is distributed in the hope that it will be useful,		      **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of	      **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	      **
+ **  GNU General Public License for more details.			      **
+ **									      **
+ **  You should have received a copy of the GNU General Public License	      **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.	      **
+ ******************************************************************************/
 
 #include <iostream>
 
@@ -23,7 +23,7 @@
 
 /**
  * Parameters() - Load a set of parameters from the JSON configuration
- *                file
+ *		  file
  *
  * @argc: command line's argument count
  * @argv: command line's argument list
@@ -71,7 +71,7 @@ Parameters::Parameters(int argc, char **argv)
 	if (help->count > 0) {
 		log_err("Usage: %s", argv[0]);
 		arg_print_syntax(stderr, argtable, "\n");
-		arg_print_glossary(stderr, argtable, "  %-45s %s\n");
+		arg_print_glossary(stderr, argtable, "	%-45s %s\n");
 	} else {
 		if (errors_no > 0) {
 			arg_print_errors(stderr, end, argv[0]);

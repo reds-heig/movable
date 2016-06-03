@@ -1,21 +1,21 @@
 /*******************************************************************************
- ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016   **
- **                                                                            **
- ** This file is part of MOVABLE.                                              **
- **                                                                            **
- **  MOVABLE is free software: you can redistribute it and/or modify           **
- **  it under the terms of the GNU General Public License as published by      **
- **  the Free Software Foundation, either version 3 of the License, or         **
- **  (at your option) any later version.                                       **
- **                                                                            **
- **  MOVABLE is distributed in the hope that it will be useful,                **
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of            **
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             **
- **  GNU General Public License for more details.                              **
- **                                                                            **
- **  You should have received a copy of the GNU General Public License         **
- **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.          **
- *******************************************************************************/
+ ** MOVABLE project - REDS Institute, HEIG-VD, Yverdon-les-Bains (CH) - 2016  **
+ **                                                                           **
+ ** This file is part of MOVABLE.                                             **
+ **                                                                           **
+ **  MOVABLE is free software: you can redistribute it and/or modify          **
+ **  it under the terms of the GNU General Public License as published by     **
+ **  the Free Software Foundation, either version 3 of the License, or        **
+ **  (at your option) any later version.                                      **
+ **                                                                           **
+ **  MOVABLE is distributed in the hope that it will be useful,               **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of           **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            **
+ **  GNU General Public License for more details.                             **
+ **                                                                           **
+ **  You should have received a copy of the GNU General Public License        **
+ **  along with MOVABLE.  If not, see <http://www.gnu.org/licenses/>.         **
+ ******************************************************************************/
 
 #include <iostream>
 
@@ -23,13 +23,6 @@
 #include "FilterBank.hpp"
 #include "utils.hpp"
 
-/**
- * Parameters() - Load a set of parameters from the JSON configuration
- *                file
- *
- * @argc: command line's argument count
- * @argv: command line's argument list
- */
 Parameters::Parameters(int argc, char **argv)
 {
 	/* Command line arguments */
@@ -135,9 +128,34 @@ Parameters::Parameters(int argc, char **argv)
 		CHECK_FILE_EXISTS((datasetPath + std::string("/")
 				   + maskPathsFName).c_str());
 
-		GET_INT_PARAM(sampleSize);
-		GET_STRING_ARRAY(channelList);
-
 		GET_FLOAT_PARAM(threshold);
+
+		/* Loading sample size and channel list from the classifier */
+		std::ifstream file(classifierPath);
+		if (!file.is_open()) {
+			log_err("Unable to open classifier file %s",
+				classifierPath.c_str());
+			throw std::runtime_error("invalidClassifierFile");
+		}
+
+		std::stringstream KBClassifier_json;
+		KBClassifier_json << file.rdbuf();
+		file.close();
+		std::string KBC_json = KBClassifier_json.str();
+
+		Json::Value KB_root;
+
+		if (!reader.parse(KBC_json, KB_root)) {
+			throw std::runtime_error("invalidJSONDescription");
+		}
+
+		sampleSize =
+			KB_root["KernelBoost"].get("sampleSize", 51).asInt();
+
+		for (Json::Value::iterator it =
+			     KB_root["KernelBoost"]["Channels"].begin();
+		     it != KB_root["KernelBoost"]["Channels"].end(); ++it) {
+			channelList.push_back((*it).asString());
+		}
 	}
 }
