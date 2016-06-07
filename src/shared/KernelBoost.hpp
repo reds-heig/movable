@@ -220,7 +220,7 @@ public:
 	 * @warning: superseded by the function taking param as an argument, as
 	 *	     it allows to set some values for the test routine
 	 */
-	virtual void Serialize(Json::Value &root)
+	virtual void Serialize(Json::Value &)
 	{
 		throw std::runtime_error("deprecatedSerialization");
 	}

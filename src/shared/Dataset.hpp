@@ -306,7 +306,7 @@ public:
 	bool isFeedbackImage(const int imageNo) const
 	{
 		assert(imageNo >= 0);
-		assert(imageNo < imagesNo);
+		assert(imageNo < (int)imagesNo);
 
 		return feedbackImagesFlag[imageNo];
 	}

@@ -1065,6 +1065,7 @@ Dataset::addMask(cv::Mat &src)
 			   borderSize, borderSize, borderSize, borderSize,
 			   cv::BORDER_CONSTANT, MASK_EXCLUDED);
 
+#ifdef MOVABLE_TRAIN
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
 						    cv::Size(2*sampleSize + 1,
 							     2*sampleSize + 1),
@@ -1072,6 +1073,9 @@ Dataset::addMask(cv::Mat &src)
 							      sampleSize));
 	cv::Mat dst;
 	cv::erode(src, dst, element);
+#else
+	cv::Mat dst = src;
+#endif /* MOVABLE_TRAIN */
 
 #ifdef VISUALIZE_IMG_DATA
 	cv::namedWindow("InMask", cv::WINDOW_NORMAL);
