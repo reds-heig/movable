@@ -117,7 +117,7 @@ void ImageItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void ImageItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->modifiers() & Qt::ShiftModifier) {
+    if (/*event->modifiers()*/parasite_pen_selected || eraser_selected) {
         stuff << event->pos();
         update();
         return;

@@ -152,7 +152,7 @@ ImageViewer::ImageViewer(const QString &name, QWidget *parent)
     /* Draw parasites panel */
     QHBoxLayout *layout_parasites = new QHBoxLayout;
     layout_parasites->addWidget(pen_parasite_item);
-    layout_parasites->addWidget(pen_undefined_item);
+    //layout_parasites->addWidget(pen_undefined_item);
     layout_parasites->addWidget(eraser);
 //    layout_parasites->addWidget(new QLabel(tr("|")));
 //    layout_parasites->addWidget(take_big_cursor);
@@ -306,7 +306,7 @@ void ImageViewer::setPointerMode()
             p->setVisible(false);
 
         drawing_area->setEraserPen(eraser->isChecked());
-        drawing_area->setParasitePen(pen_parasite_item->isChecked());
+        drawing_area->setParasitePen(pen_parasite_item->isChecked() || pen_undefined_item->isChecked());
     }
     else {
         // Edition Mode
