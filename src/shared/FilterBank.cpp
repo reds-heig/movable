@@ -233,8 +233,8 @@ FilterBank::evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
 
 	const unsigned int nRows = imgVec[0].rows-2*borderSize;
 	const unsigned int nCols = imgVec[0].cols-2*borderSize;
-
-	features.resize(nRows*nCols, filters.size());
+	EMat featTmp;
+	featTmp.resize(filters.size(), nRows*nCols);
 
 #pragma omp parallel for schedule(dynamic)
 	for (unsigned int iF = 0; iF < filters.size(); ++iF) {
@@ -249,11 +249,12 @@ FilterBank::evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
 		   (non-contiguous in memory) */
 		for (unsigned int r = 0; r < nRows; ++r) {
 			for (unsigned int c = 0; c < nCols; ++c) {
-				features(r*nCols+c, iF) =
+				featTmp(iF, r*nCols+c) =
 					tmp.at< float >(r+startRow, c+startCol);
 			}
 		}
 	}
+	features = featTmp.transpose();
 }
 
 void
