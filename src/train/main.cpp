@@ -67,7 +67,7 @@ main(int argc, char **argv)
 
 	std::string KBClassifier_json;
 	Json::Value root;
-	kb.Serialize(root, params);
+	kb.serialize(root, params);
 	Json::StyledWriter writer;
 	KBClassifier_json = writer.write(root);
 	file << KBClassifier_json;

@@ -60,6 +60,15 @@ Dataset::Dataset(const Parameters &params)
 	if (checkChannelPresent("IMAGE_VALUE_CH", params.channelList)) {
 		imageOps.push_back(&Dataset::imageValueCh);
 	}
+	if (checkChannelPresent("IMAGE_L_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageLCh);
+	}
+	if (checkChannelPresent("IMAGE_A_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageACh);
+	}
+	if (checkChannelPresent("IMAGE_B_CH", params.channelList)) {
+		imageOps.push_back(&Dataset::imageBCh);
+	}
 	if (checkChannelPresent("MEDIAN_FILTERING", params.channelList)) {
 		imageOps.push_back(&Dataset::medianFiltering);
 	}
@@ -761,6 +770,135 @@ Dataset::imageHueCh(const cv::Mat &src, EMat &dst, const void *opaque)
 		hueCh.setTo(cv::Scalar(0));
 	}
 	cv::imshow("HUE", hueCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageLCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> lab_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat lab_image;
+	cv::cvtColor(src, lab_image, cv::COLOR_BGR2Lab);
+	cv::split(lab_image, lab_channels);
+
+	cv::Mat LCh = lab_channels[0];
+
+	cv::Mat imgCenter = LCh(cv::Range(borderSize,
+					  LCh.rows-borderSize+1),
+				cv::Range(borderSize,
+					  LCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	LCh -= mean[0];
+	LCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(LCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("L", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(LCh, &min, &max);
+	if (max-min > 1e-4) {
+		LCh = (LCh-min)/(max-min);
+	} else {
+		LCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("L", LCh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageACh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> lab_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat lab_image;
+	cv::cvtColor(src, lab_image, cv::COLOR_BGR2Lab);
+	cv::split(lab_image, lab_channels);
+
+	cv::Mat ACh = lab_channels[0];
+
+	cv::Mat imgCenter = ACh(cv::Range(borderSize,
+					  ACh.rows-borderSize+1),
+				cv::Range(borderSize,
+					  ACh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	ACh -= mean[0];
+	ACh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(ACh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("A", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(ACh, &min, &max);
+	if (max-min > 1e-4) {
+		ACh = (ACh-min)/(max-min);
+	} else {
+		ACh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("A", ACh);
+	cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+	return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageBCh(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+	std::vector< cv::Mat> lab_channels(3);
+	const unsigned int borderSize = *((unsigned int *)opaque);
+
+	cv::Mat lab_image;
+	cv::cvtColor(src, lab_image, cv::COLOR_BGR2Lab);
+	cv::split(lab_image, lab_channels);
+
+	cv::Mat BCh = lab_channels[0];
+
+	cv::Mat imgCenter = BCh(cv::Range(borderSize,
+					  BCh.rows-borderSize+1),
+				cv::Range(borderSize,
+					  BCh.cols-borderSize+1));
+	cv::Scalar mean;
+	cv::Scalar std_dev;
+	cv::meanStdDev(imgCenter, mean, std_dev);
+	BCh -= mean[0];
+	BCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+	dst.resize(src.rows, src.cols);
+	cv::cv2eigen(BCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+	cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+	cv::imshow("ImgColor", src);
+	cv::namedWindow("B", cv::WINDOW_NORMAL);
+	double min, max;
+	cv::minMaxLoc(BCh, &min, &max);
+	if (max-min > 1e-4) {
+		BCh = (BCh-min)/(max-min);
+	} else {
+		BCh.setTo(cv::Scalar(0));
+	}
+	cv::imshow("B", BCh);
 	cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 

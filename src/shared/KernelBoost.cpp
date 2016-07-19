@@ -292,7 +292,7 @@ KernelBoost::KernelBoost(std::string &descr_json,
 #endif /* MOVABLE_TRAIN */
 
 void
-KernelBoost::Serialize(Json::Value &root, const Parameters &params)
+KernelBoost::serialize(Json::Value &root, const Parameters &params)
 {
 	Json::Value kb_json(Json::objectValue);
 	Json::Value boostedClassifiers_json(Json::arrayValue);

@@ -231,7 +231,7 @@ public:
 	 * @root  : root of the JSON's KernelBoost classifier description
 	 * @params: simulation's parameters
 	 */
-	virtual void Serialize(Json::Value &root, const Parameters &params);
+	void serialize(Json::Value &root, const Parameters &params);
 
 private:
 	std::vector< BoostedClassifier * > boostedClassifiers;

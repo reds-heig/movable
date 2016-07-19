@@ -707,6 +707,48 @@ private:
 				const void *opaque);
 
 	/**
+	 * imageLCh() - Process an image, taking the CIE L channel only and
+	 *		pushing it into the corresponding channel of the
+	 *		dataset
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageLCh(const cv::Mat &src, EMat &dst,
+			    const void *opaque);
+
+	/**
+	 * imageACh() - Process an image, taking the CIE A channel only and
+	 *		pushing it into the corresponding channel of the
+	 *		dataset
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageACh(const cv::Mat &src, EMat &dst,
+			    const void *opaque);
+
+	/**
+	 * imageBCh() - Process an image, taking the CIE B channel only and
+	 *		pushing it into the corresponding channel of the
+	 *		dataset
+	 *
+	 * @src	  : input image
+	 * @dst	  : converted image
+	 * @opaque: opaque pointer to useful data (here: border size)
+	 *
+	 * Return: EXIT_SUCCESS
+	 */
+	static int imageBCh(const cv::Mat &src, EMat &dst,
+			    const void *opaque);
+
+	/**
 	 * gaussianFiltering() - Process an image, taking its green channel and
 	 *			 passing it through a Gaussian filter with sigma
 	 *			 1
