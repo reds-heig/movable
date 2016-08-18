@@ -339,6 +339,7 @@ saveThresholdedImage(const cv::Mat &classResult,
 		     const float threshold,
 		     const std::string &dirPath,
 		     const std::string &imgName,
+		     const std::pair< int, int >& originalSize,
 		     const unsigned int borderSize)
 {
 	cv::Mat tmp;
@@ -386,6 +387,10 @@ saveThresholdedImage(const cv::Mat &classResult,
 	cv::bitwise_not(im_floodfill, im_floodfill_inv);
 	finalBinary = (finalBinary | im_floodfill_inv);
 
+	/* Rescale image to the initial size */
+	cv::resize(finalBinary, finalBinary,
+		   cv::Size(originalSize.second, originalSize.first), 0, 0,
+		   cv::INTER_NEAREST);
 	/* Save resulting image */
 	std::string dstPath = dirPath + "/" + imgName + "_thresh.png";
 	cv::imwrite(dstPath.c_str(), finalBinary);

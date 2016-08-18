@@ -31,7 +31,7 @@ int
 main(int argc, char **argv)
 {
 	/* Initialize RNG */
-	srand(12345);
+	srand(time(0));
 
 	log_info("Loading parameters...");
 	Parameters params(argc, argv);

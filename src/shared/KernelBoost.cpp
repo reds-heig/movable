@@ -146,6 +146,7 @@ KernelBoost::KernelBoost(Parameters &params,
 				     binaryThreshold,
 				     params.finalResDir,
 				     dataset_final.getImageName(i),
+				     dataset_final.getOriginalImgSize(i),
 				     dataset_final.getBorderSize());
 	}
 
@@ -280,6 +281,7 @@ KernelBoost::KernelBoost(std::string &descr_json,
 				     params.threshold,
 				     params.baseResDir,
 				     dataset_final.getImageName(i),
+				     dataset_final.getOriginalImgSize(i),
 				     dataset_final.getBorderSize());
 
 		end = std::chrono::system_clock::now();
@@ -310,6 +312,7 @@ KernelBoost::serialize(Json::Value &root, const Parameters &params)
 	kb_json["binaryThreshold"] = binaryThreshold;
 
 	kb_json["sampleSize"] = params.sampleSize;
+	kb_json["imgRescaleFactor"] = params.imgRescaleFactor;
 	for (unsigned int i = 0; i < params.channelList.size(); ++i) {
 		kb_json["Channels"].append(params.channelList[i]);
 	}

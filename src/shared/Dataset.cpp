@@ -88,6 +88,12 @@ Dataset::Dataset(const Parameters &params)
 
 	data.resize(dataChNo);
 
+	imgRescaleFactor = params.imgRescaleFactor;
+	if (imgRescaleFactor == 0) {
+		throw std::runtime_error("Invalid rescale factor: " +
+					 std::to_string(imgRescaleFactor));
+	}
+
 #ifdef MOVABLE_TRAIN
 	gtValues = params.gtValues;
 	createGtPairs(params.gtValues);
@@ -174,6 +180,7 @@ Dataset::Dataset(const Dataset &srcDataset,
 	this->sampleSize = srcDataset.sampleSize;
 	this->borderSize = srcDataset.borderSize;
 	this->masks = srcDataset.masks;
+	this->originalSizes = srcDataset.originalSizes;
 #ifdef MOVABLE_TRAIN
 	this->gts = srcDataset.gts;
 	this->originalGts = srcDataset.originalGts;
@@ -339,9 +346,9 @@ Dataset::addImage(const std::string &imgPath,
 		  const std::string &maskPath,
 		  const std::string &gtPath)
 #else
-	int
-	Dataset::addImage(const std::string &imgPath,
-			  const std::string &maskPath)
+int
+Dataset::addImage(const std::string &imgPath,
+		  const std::string &maskPath)
 #endif /* MOVABLE_TRAIN */
 {
 	CHECK_FILE_EXISTS(imgPath.c_str());
@@ -353,6 +360,15 @@ Dataset::addImage(const std::string &imgPath,
 	/* Groundtruth and mask are assumed to be grayscale */
 	cv::Mat mask = cv::imread(maskPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
 
+	/* Rescale mask. Its size will be used to alter the size of the input
+	   image and the gt */
+	originalSizes.push_back(std::make_pair(mask.rows, mask.cols));
+
+	cv::resize(mask, mask, cv::Size(0, 0),
+		   1.0/(double)imgRescaleFactor,
+		   1.0/(double)imgRescaleFactor,
+		   cv::INTER_NEAREST);
+
 	cv::Mat tmp;
 	mask.convertTo(tmp, CV_32FC1);
 	addMask(tmp);
@@ -361,6 +377,8 @@ Dataset::addImage(const std::string &imgPath,
 	   that will grab the different component and eventually keep the
 	   grayscale one only */
 	cv::Mat img = cv::imread(imgPath.c_str(), CV_LOAD_IMAGE_COLOR);
+	cv::resize(img, img, cv::Size(mask.cols, mask.rows), 0, 0,
+		   cv::INTER_LANCZOS4);
 	img.convertTo(tmp, CV_32FC3);
 	img = tmp / 255;
 
@@ -379,6 +397,7 @@ Dataset::addImage(const std::string &imgPath,
 	/* Check that all sizes are consistent */
 	const unsigned int rowsNo = masks[imagesNo].rows();
 	const unsigned int colsNo = masks[imagesNo].cols();
+
 	for (unsigned int i = 0; i < imageOps.size(); ++i) {
 		if (data[i][imagesNo].rows() != rowsNo ||
 		    data[i][imagesNo].cols() != colsNo) {
@@ -391,6 +410,8 @@ Dataset::addImage(const std::string &imgPath,
 #ifdef MOVABLE_TRAIN
 	cv::Mat gt = cv::imread(gtPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
 	gt.convertTo(tmp, CV_32FC1);
+	cv::resize(tmp, tmp, cv::Size(mask.cols, mask.rows), 0, 0,
+		   cv::INTER_NEAREST);
 	addGt(tmp);
 	for (unsigned int i = 0; i < gtPairsNo; ++i) {
 		if (gts[i][imagesNo].rows() != rowsNo ||
@@ -429,7 +450,8 @@ Dataset::collectAllSamplePositions(const gtVector &gt,
 		   just to do a single if-comparison, possibly cheaper to do
 		   perform the two individual comparisons */
 		for (unsigned int r = 0; r < (unsigned int)gtImg.rows(); ++r) {
-			for (unsigned int c = 0; c < (unsigned int)gtImg.cols(); ++c) {
+			for (unsigned int c = 0;
+			     c < (unsigned int)gtImg.cols(); ++c) {
 				if (maskImg(r, c) == MASK_INCLUDED &&
 				    gtImg(r, c) == sampleClass) {
 					samples.push_back(samplePos(i, r, c,
@@ -521,10 +543,10 @@ Dataset::loadPaths(const Parameters &params,
 		   std::vector< std::string > &mask_paths,
 		   std::vector< std::string > &gt_paths)
 #else
-	int
-	Dataset::loadPaths(const Parameters &params,
-			   std::vector< std::string > &img_paths,
-			   std::vector< std::string > &mask_paths)
+int
+Dataset::loadPaths(const Parameters &params,
+		   std::vector< std::string > &img_paths,
+		   std::vector< std::string > &mask_paths)
 #endif /* MOVABLE_TRAIN */
 {
 	if (loadPathFile(params.datasetPath, params.imgPathsFName,
@@ -1203,17 +1225,17 @@ Dataset::addMask(cv::Mat &src)
 			   borderSize, borderSize, borderSize, borderSize,
 			   cv::BORDER_CONSTANT, MASK_EXCLUDED);
 
-#ifdef MOVABLE_TRAIN
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
-						    cv::Size(2*sampleSize + 1,
-							     2*sampleSize + 1),
-						    cv::Point(sampleSize,
-							      sampleSize));
-	cv::Mat dst;
-	cv::erode(src, dst, element);
-#else
+// #ifdef MOVABLE_TRAIN
+// 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
+// 						    cv::Size(2*sampleSize + 1,
+// 							     2*sampleSize + 1),
+// 						    cv::Point(sampleSize,
+// 							      sampleSize));
+// 	cv::Mat dst;
+// 	cv::erode(src, dst, element);
+// #else
 	cv::Mat dst = src;
-#endif /* MOVABLE_TRAIN */
+// #endif /* MOVABLE_TRAIN */
 
 #ifdef VISUALIZE_IMG_DATA
 	cv::namedWindow("InMask", cv::WINDOW_NORMAL);

@@ -58,21 +58,27 @@ class BoostedClassifier;
 /**
  * class Dataset - Represent a dataset with all associated images and paths
  *
- * @data	  : set of data vectors (one vector per channel)
- * @dataChNo	  : number of data channels
- * @imageOps	  : set of operations performed on the loaded images (each
- *		    operation will lead to an additional channel)
- * @imagesNo	  : number of loaded images
- * @imageNames	  : names of the loaded images
- * @sampleSize	  : size of a sampled patch
- * @borderSize	  : size of the replicated border around the image
- * @masks	  : image masks
- * @gts		  : set of ground-truth vectors (one vector per gt pair)
- * @originalGts	  : original ground-truth images (used for final classification)
- * @gtValues	  : values available in gt
- * @gtPairValues  : gt pairs numeric values (each pair will require a boosted
- *		    classifier)
- * @gtPairsNo	  : number of ground-truth pairs
+ * @data	      : set of data vectors (one vector per channel)
+ * @dataChNo	      : number of data channels
+ * @imageOps	      : set of operations performed on the loaded images (each
+ *		        operation will lead to an additional channel)
+ * @imagesNo	      : number of loaded images
+ * @imageNames	      : names of the loaded images
+ * @feedbackImagesFlag: flag marking images that have been fixed by a human
+ *                      operator (and therefore deserve more weight)
+ * @imgRescaleFactor  : rescale input images by this factor (that is, divide
+ *                      each image coordinate by this value)
+ * @originalSizes     : sizes of the input images
+ * @sampleSize	      : size of a sampled patch
+ * @borderSize	      : size of the replicated border around the image
+ * @masks	      : image masks
+ * @gts		      : set of ground-truth vectors (one vector per gt pair)
+ * @originalGts	      : original ground-truth images (used for final
+ *                      classification)
+ * @gtValues	      : values available in gt
+ * @gtPairValues      : gt pairs numeric values (each pair will require a
+ *		        boosted classifier)
+ * @gtPairsNo	      : number of ground-truth pairs
  */
 class Dataset {
 public:
@@ -457,6 +463,31 @@ public:
 	}
 
 	/**
+	 * getOriginalImgSize() - Get the size of the input image before
+	 *                        resizing
+	 *
+	 * @imgNo: image to consider
+	 *
+	 * @Return: Size of the considered samples (rows, cols)
+	 */
+	std::pair< int, int > getOriginalImgSize(const unsigned int imgNo) const
+	{
+		if (imgNo >= imagesNo) {
+			log_err("The requested image %u does not exist "
+				"(limit: image = %u)",
+				imgNo, imagesNo-1);
+			throw std::runtime_error("invalidRequest");
+		}
+		if (imgNo >= originalSizes.size()) {
+			log_err("Not enough image sizes were pushed (%lu, "
+				"request is for %u",
+				originalSizes.size(), imgNo);
+			throw std::runtime_error("invalidRequest");
+		}
+		return originalSizes[imgNo];
+	}
+
+	/**
 	 * getSampleSize() - Get the size of a sample extracted from the dataset
 	 *
 	 * @Return: Size of the considered samples
@@ -477,6 +508,9 @@ private:
 	std::vector< std::string > imageNames;
 	std::vector< bool > feedbackImagesFlag;
 
+	std::vector< std::pair< int, int > > originalSizes;
+
+	unsigned int imgRescaleFactor;
 	unsigned int sampleSize;
 	unsigned int borderSize;
 

@@ -43,43 +43,44 @@ const std::string defaultConfigFName = "train_config.json";
 /**
  * class Parameters - Set of parameters for the application
  *
- * @simName	   : codename of the simulation
- * @resultsDir	   : base path of the results directory
- * @classifierPath : final classifier's path
- * @datasetPath	   : dataset's path
- * @datasetName	   : dataset's name
- * @imgPathFName   : name of the file containing image paths
- * @maskPathFName  : name of the file containing mask paths
- * @gtPathFName	   : name of the file containing gt paths
- * @regMinVal	   : minimum value for the regularization parameter
- * @regMaxVal	   : maximum value for the regularization parameter
- * @regValStep	   : step between regularization parameter's values
- * @shrinkageFactor: shrinkage factor for the boosting algorithm
- * @gtValues	   : list of considered gt values
- * @useColorImages : enable the use of color images in the dataset
- * @datasetBalance : balance the number of positives and negatives in
- *		     the dataset
- * @posSamplesNo   : number of positive samples
- * @negSamplesNo   : number of negative samples
- * @randSamplesNo  : number of samples randomly taken for each
- *		     filter learning round
- * @finalSamplesNo : number of samples for each class used in the training of
- *		     the final classifier
- * @sampleSize	   : lateral size (in pixels) of each sample (for
- *		     instance, if this is 51, this means sampling
- *		     51x51 squared around the sample point)
- * @filtersPerChNo : number of filters to learn for each channel
- * @minFilterSize  : minimum filter size
- * @maxFilterSize  : maximum filter size
- * @wlNo	   : number of weak-learners to learn
- * @treeDepth	   : maximum depth of the regression trees
- * @finalTreeDepth : depth of the final tree
- * @smoothingValues: list of smoothing values
- * @intermedResDir : directories where the intermediate results will be
- *		     stored
- * @finalResDir	   : directory where final results will be stored
- * @channelList	   : list of channels requested by user
- * @configFName	   : path of the configuration file
+ * @simName	    : codename of the simulation
+ * @resultsDir	    : base path of the results directory
+ * @classifierPath  : final classifier's path
+ * @datasetPath	    : dataset's path
+ * @datasetName	    : dataset's name
+ * @imgPathFName    : name of the file containing image paths
+ * @maskPathFName   : name of the file containing mask paths
+ * @gtPathFName	    : name of the file containing gt paths
+ * @regMinVal	    : minimum value for the regularization parameter
+ * @regMaxVal	    : maximum value for the regularization parameter
+ * @regValStep	    : step between regularization parameter's values
+ * @shrinkageFactor : shrinkage factor for the boosting algorithm
+ * @gtValues	    : list of considered gt values
+ * @datasetBalance  : balance the number of positives and negatives in
+ *		      the dataset
+ * @imgRescaleFactor: rescale input images by this factor (that is, divide each
+ *                    image coordinate by this value)
+ * @posSamplesNo    : number of positive samples
+ * @negSamplesNo    : number of negative samples
+ * @randSamplesNo   : number of samples randomly taken for each
+ *		      filter learning round
+ * @finalSamplesNo  : number of samples for each class used in the training of
+ *		      the final classifier
+ * @sampleSize	    : lateral size (in pixels) of each sample (for
+ *		      instance, if this is 51, this means sampling
+ *		      51x51 squared around the sample point)
+ * @filtersPerChNo  : number of filters to learn for each channel
+ * @minFilterSize   : minimum filter size
+ * @maxFilterSize   : maximum filter size
+ * @wlNo	    : number of weak-learners to learn
+ * @treeDepth	    : maximum depth of the regression trees
+ * @finalTreeDepth  : depth of the final tree
+ * @smoothingValues : list of smoothing values
+ * @intermedResDir  : directories where the intermediate results will be
+ *		      stored
+ * @finalResDir	    : directory where final results will be stored
+ * @channelList	    : list of channels requested by user
+ * @configFName	    : path of the configuration file
  */
 class Parameters {
 public:
@@ -100,8 +101,8 @@ public:
 
 	std::vector< int > gtValues;
 
-	bool useColorImages;
 	bool datasetBalance;
+	unsigned int imgRescaleFactor;
 
 	unsigned int posSamplesNo;
 	unsigned int negSamplesNo;

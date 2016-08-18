@@ -152,6 +152,9 @@ Parameters::Parameters(int argc, char **argv)
 		sampleSize =
 			KB_root["KernelBoost"].get("sampleSize", 51).asInt();
 
+		imgRescaleFactor =
+			KB_root["KernelBoost"].get("imgRescaleFactor", 51).asInt();
+
 		for (Json::Value::iterator it =
 			     KB_root["KernelBoost"]["Channels"].begin();
 		     it != KB_root["KernelBoost"]["Channels"].end(); ++it) {

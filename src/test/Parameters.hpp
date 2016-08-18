@@ -42,19 +42,21 @@ const std::string defaultConfigFName = "test_config.json";
 /**
  * class Parameters - Set of parameters for the application
  *
- * @simName	   : codename of the simulation
- * @resultsDir	   : base path of the results directory
- * @datasetPath	   : dataset's path
- * @datasetName	   : dataset's name
- * @imgPathFName   : name of the file containing image paths
- * @maskPathFName  : name of the file containing mask paths
- * @sampleSize	   : lateral size (in pixels) of each sample (for
- *		     instance, if this is 51, this means sampling
- *		     51x51 squared around the sample point)
- * @threshold	   : fixed threshold applied when binarizing the image
- * @baseResDir	   : base directory path for output results
- * @channelList	   : list of channels requested by user
- * @configFName	   : path of the configuration file
+ * @simName	    : codename of the simulation
+ * @resultsDir	    : base path of the results directory
+ * @datasetPath	    : dataset's path
+ * @datasetName	    : dataset's name
+ * @imgPathFName    : name of the file containing image paths
+ * @maskPathFName   : name of the file containing mask paths
+ * @sampleSize	    : lateral size (in pixels) of each sample (for
+ *		      instance, if this is 51, this means sampling
+ *		      51x51 squared around the sample point)
+ * @imgRescaleFactor: rescale input images by this factor (that is, divide each
+ *                    image coordinate by this value)
+ * @threshold	    : fixed threshold applied when binarizing the image
+ * @baseResDir	    : base directory path for output results
+ * @channelList	    : list of channels requested by user
+ * @configFName	    : path of the configuration file
  */
 class Parameters {
 public:
@@ -67,6 +69,7 @@ public:
 	std::string maskPathsFName;
 
 	unsigned int sampleSize;
+	unsigned int imgRescaleFactor;
 
 	float threshold;
 

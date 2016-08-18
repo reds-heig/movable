@@ -218,13 +218,14 @@ void saveClassifiedImage(const EMat &classResult,
 /**
  * saveThresholdedImage() - Save the thresholded result to disk
  *
- * @classResult: classification result to store
- * @mask       : mask to apply
- * @threshold  : threshold to apply
- * @dirPath    : path of the destination directory
- * @imgName    : name of the destination image (it is the same as the original
- *		 image name)
- * @borderSize : size of the border to drop
+ * @classResult : classification result to store
+ * @mask        : mask to apply
+ * @threshold   : threshold to apply
+ * @dirPath     : path of the destination directory
+ * @imgName     : name of the destination image (it is the same as the original
+ *	  	 image name)
+ * @originalSize: original image dimensions
+ * @borderSize  : size of the border to drop
  */
 void
 saveThresholdedImage(const cv::Mat &classResult,
@@ -232,6 +233,7 @@ saveThresholdedImage(const cv::Mat &classResult,
 		     const float threshold,
 		     const std::string &dirPath,
 		     const std::string &imgName,
+		     const std::pair< int, int >& originalSize,
 		     const unsigned int borderSize);
 
 #ifdef MOVABLE_TRAIN

@@ -140,8 +140,8 @@ Parameters::Parameters(int argc, char **argv)
 
 		GET_INT_ARRAY(gtValues);
 
-		GET_BOOL_PARAM(useColorImages);
 		GET_BOOL_PARAM(datasetBalance);
+		GET_INT_PARAM(imgRescaleFactor);
 
 		GET_INT_PARAM(posSamplesNo);
 		GET_INT_PARAM(negSamplesNo);
