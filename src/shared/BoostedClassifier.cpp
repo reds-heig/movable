@@ -24,9 +24,10 @@
 #include "BoostedClassifier.hpp"
 #include "utils.hpp"
 
-#ifdef MOVABLE_TRAIN
 #include <chrono>
 #include <ctime>
+
+#ifdef MOVABLE_TRAIN
 
 BoostedClassifier::BoostedClassifier(const Parameters &params,
 				     const SmoothingMatrices &SM,
@@ -183,8 +184,80 @@ BoostedClassifier::BoostedClassifier(const Parameters &params,
 	file.close();
 #endif /* TESTS */
 }
-
 #endif /* MOVABLE_TRAIN */
+
+BoostedClassifier::BoostedClassifier(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+BoostedClassifier::~BoostedClassifier()
+{
+	for (unsigned int i = 0; i < weakLearners.size(); ++i) {
+		delete weakLearners[i];
+	}
+}
+
+BoostedClassifier::BoostedClassifier(const BoostedClassifier &obj)
+{
+	/* Deallocate previous weak learners */
+	for (unsigned int i = 0; i < weakLearners.size(); ++i) {
+		delete weakLearners[i];
+	}
+	/* Resize the weak learners vector */
+	this->weakLearners.resize(obj.weakLearners.size());
+	/* Create the new set of weak learners from the elements of the
+	   copied one */
+	for (unsigned int i = 0; i < weakLearners.size(); ++i) {
+		weakLearners[i] = new WeakLearner(*(obj.weakLearners[i]));
+	}
+	gtPair = obj.gtPair;
+}
+
+BoostedClassifier &
+BoostedClassifier::operator=(const BoostedClassifier &rhs)
+{
+	if (this != &rhs) {
+		/* Deallocate previous weak learners */
+		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
+			delete weakLearners[i];
+		}
+
+		/* Resize the weak learners vector */
+		this->weakLearners.resize(rhs.weakLearners.size());
+		/* Create the new set of weak learners from the elements
+		   of the copied one */
+		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
+			weakLearners[i] =
+				new WeakLearner(*(rhs.weakLearners[i]));
+		}
+		gtPair = rhs.gtPair;
+	}
+
+	return *this;
+}
+
+bool
+operator==(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
+{
+	if (bc1.weakLearners.size() != bc2.weakLearners.size() ||
+	    bc1.gtPair != bc2.gtPair)
+		return false;
+
+	for (unsigned int i = 0; i < bc1.weakLearners.size(); ++i) {
+		if (*(bc1.weakLearners[i]) != *(bc2.weakLearners[i]))
+			return false;
+	}
+
+	return true;
+}
+
+bool
+operator!=(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
+{
+	return !(bc1 == bc2);
+}
+
 
 BoostedClassifier::BoostedClassifier(std::string &descr_json)
 {
@@ -196,6 +269,90 @@ BoostedClassifier::BoostedClassifier(std::string &descr_json)
 	}
 
 	Deserialize(root);
+}
+
+/**
+ * classify() - Classify a set of samples using the learned classifier
+ *
+ * @dataset    : simulation's dataset
+ * @samplingPos: considered sampling positions
+ *
+ * @predictions: computed predictions
+ */
+void
+BoostedClassifier::classify(const Dataset &dataset,
+			    const sampleSet &samplePositions,
+			    EVec &predictions) const
+{
+	predictions.resize(samplePositions.size());
+	predictions.setZero();
+
+	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
+		EVec currentResponse;
+		weakLearners[w]->evaluate(dataset,
+					  samplePositions,
+					  currentResponse);
+		predictions += currentResponse;
+	}
+}
+
+/**
+ * getChCount() - Get the fraction of filters for each specific channel
+ *
+ * @count: output filter count
+ */
+void
+BoostedClassifier::getChCount(std::vector< int > &count)
+{
+	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
+		weakLearners[w]->getChCount(count);
+	}
+}
+
+void
+BoostedClassifier::classifyImage(const Dataset &DS,
+				 const sampleSet& ePoints,
+				 EMat &prediction) const
+{
+	EMat tmp = DS.getData(0, ePoints[0].imageNo);
+
+	prediction.resize(tmp.rows(),
+			  tmp.cols());
+	prediction.setZero();
+	EVec partialResults(ePoints.size());
+	partialResults.setZero();
+
+	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
+		EVec currentResponse;
+		/* Call the same function used in training */
+		weakLearners[w]->evaluate(DS,
+					  ePoints,
+					  currentResponse);
+		partialResults += currentResponse;
+	}
+
+	for (unsigned int i = 0; i < ePoints.size(); ++i) {
+		prediction(ePoints[i].row,
+			   ePoints[i].col) = partialResults(i);
+	}
+}
+
+void
+BoostedClassifier::classifyFullImage(const std::vector< cv::Mat > &imgVec,
+				     const unsigned int borderSize,
+				     EMat &prediction) const
+{
+	prediction.resize(imgVec[0].rows-2*borderSize,
+			  imgVec[0].cols-2*borderSize);
+	prediction.setZero();
+
+	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
+		EMat currentResponse;
+		weakLearners[w]->evaluateOnImage(imgVec,
+						 borderSize,
+						 currentResponse);
+		prediction += currentResponse;
+	}
 }
 
 void

@@ -72,10 +72,17 @@ const std::string defaultConfigFName = "train_config.json";
  * @filtersPerChNo  : number of filters to learn for each channel
  * @minFilterSize   : minimum filter size
  * @maxFilterSize   : maximum filter size
+ * @houghMinDist    : minimum distance between RBCs for the Hough method
+ * @houghHThresh    : higher threshold on Canny's output in the Hough method
+ * @houghLThresh    : lower threshold on Canny's output in the Hough method
+ * @houghMinRad     : minimum radius for the retained RBCs in the Hough method
+ * @houghMaxRad     : maximum radius for the retained RBCs in the Hough method
  * @wlNo	    : number of weak-learners to learn
  * @treeDepth	    : maximum depth of the regression trees
  * @finalTreeDepth  : depth of the final tree
  * @smoothingValues : list of smoothing values
+ * @fastClassifier  : enable fast classification (only candidate points are
+ *                    tested)
  * @intermedResDir  : directories where the intermediate results will be
  *		      stored
  * @finalResDir	    : directory where final results will be stored
@@ -112,6 +119,15 @@ public:
 	unsigned int filtersPerChNo;
 	unsigned int minFilterSize;
 	unsigned int maxFilterSize;
+
+	double houghMinDist;
+	double houghHThresh;
+	double houghLThresh;
+	int houghMinRad;
+	int houghMaxRad;
+
+	bool fastClassifier;
+
 	unsigned int wlNo;
 	unsigned int treeDepth;
 	unsigned int finalTreeDepth;

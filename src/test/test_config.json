@@ -4,5 +4,5 @@
     "datasetName": "PUT_A_NICE_NAME_FOR_YOUR_DATASET_HERE",
     "imgPathsFName": "test_imgs.txt",
     "maskPathsFName": "test_masks.txt",
-    "threshold": 2.0
+    "threshold": 0.0
 }

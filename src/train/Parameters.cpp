@@ -139,6 +139,7 @@ Parameters::Parameters(int argc, char **argv)
 		}
 
 		GET_INT_ARRAY(gtValues);
+		GET_BOOL_PARAM(fastClassifier);
 
 		GET_BOOL_PARAM(datasetBalance);
 		GET_INT_PARAM(imgRescaleFactor);
@@ -151,6 +152,13 @@ Parameters::Parameters(int argc, char **argv)
 		GET_INT_PARAM(filtersPerChNo);
 		GET_INT_PARAM(minFilterSize);
 		GET_INT_PARAM(maxFilterSize);
+
+		GET_FLOAT_PARAM(houghMinDist);
+		GET_FLOAT_PARAM(houghHThresh);
+		GET_FLOAT_PARAM(houghLThresh);
+		GET_INT_PARAM(houghMinRad);
+		GET_INT_PARAM(houghMaxRad);
+
 		GET_INT_PARAM(wlNo);
 		GET_INT_PARAM(treeDepth);
 		GET_INT_PARAM(finalTreeDepth);

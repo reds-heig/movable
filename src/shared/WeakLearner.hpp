@@ -92,37 +92,19 @@ public:
 	 *
 	 * @root: JSON's representation root
 	 */
-	WeakLearner(Json::Value &root)
-	{
-		Deserialize(root);
-	}
+	WeakLearner(Json::Value &root);
 
 	/**
 	 * WeakLearner() - Copy constructor
 	 *
 	 * @obj: source object of the copy
 	 */
-	WeakLearner(const WeakLearner &obj)
-	{
-		/* Delete previous filter bank and regression tree, then
-		   instantiate the new ones from the copied object */
-		delete fb;
-		delete rt;
-		this->fb = new FilterBank(*(obj.fb));
-		this->rt = new RegTree(*(obj.rt));
-		this->alpha = obj.alpha;
-		this->MR = obj.MR;
-		this->loss = obj.loss;
-	}
+	WeakLearner(const WeakLearner &obj);
 
 	/**
 	 * ~WeakLearner() - Deallocate the filter bank and the regression tree
 	 */
-	virtual ~WeakLearner()
-	{
-		delete fb;
-		delete rt;
-	}
+	virtual ~WeakLearner();
 
 	/**
 	 * operator=() - Assignment operator
@@ -132,21 +114,7 @@ public:
 	 * Return: Reference to the resulting weak learner
 	 */
 	WeakLearner &
-	operator=(const WeakLearner &rhs)
-	{
-		if (this != &rhs) {
-			delete fb;
-			delete rt;
-
-			fb = new FilterBank(*(rhs.fb));
-			rt = new RegTree(*(rhs.rt));
-			alpha = rhs.alpha;
-			MR = rhs.MR;
-			loss = rhs.loss;
-		}
-
-		return *this;
-	}
+	operator=(const WeakLearner &rhs);
 
 	/**
 	 * operator==() - Compare two weak learners for equality
@@ -157,14 +125,7 @@ public:
 	 * Return: true if the two weak learners are identical, false otherwise
 	 */
 	friend bool
-	operator==(const WeakLearner &wl1, const WeakLearner &wl2)
-	{
-		return ((fabs(wl1.MR-wl2.MR) < 1e-6) &&
-			(fabs(wl1.loss-wl2.loss) < 1e-6) &&
-			(fabs(wl1.alpha-wl2.alpha) < 1e-9) &&
-			(*(wl1.fb) == *(wl2.fb)) &&
-			(*(wl1.rt) == *(wl2.rt)));
-	}
+	operator==(const WeakLearner &wl1, const WeakLearner &wl2);
 
 	/**
 	 * operator!=() - Compare two weak learners for difference
@@ -175,12 +136,7 @@ public:
 	 * Return: true if the two weak learners are different, false otherwise
 	 */
 	friend bool
-	operator!=(const WeakLearner &wl1, const WeakLearner &wl2)
-	{
-		return !(wl1 == wl2);
-	}
-
-#ifdef MOVABLE_TRAIN
+	operator!=(const WeakLearner &wl1, const WeakLearner &wl2);
 
 	/**
 	 * evaluate() - Evaluate a weak learner on a given set of samples
@@ -193,56 +149,25 @@ public:
 	 */
 	void evaluate(const Dataset &dataset,
 		      const sampleSet &samplePositions,
-		      EVec &predictions) const
-	{
-		EMat features;
-		fb->evaluateFilters(dataset, samplePositions, features);
-		rt->predict(features, predictions);
-		predictions *= alpha;
-	}
+		      EVec &predictions) const;
 
 	/**
 	 * getChCount() - Get the fraction of filters for each specific channel
 	 *
 	 * @count: output filter count
 	 */
-	void getChCount(std::vector< int > &count)
-	{
-		fb->getChCount(count);
-	}
+	void getChCount(std::vector< int > &count);
 
-#endif /* MOVABLE_TRAIN */
-
-	/**
-	 * evaluateOnImage() - Evaluate a weak learner on a given image
-	 *
-	 * @imgVec    : vector containing the channels associated with the image
-	 * @borderSize: size of the border that has to be excluded from the
-	 *		result
-	 *
-	 * @wlResponse: response produced by the weak learner, already weighted
-	 *		by the weak learner's importance
-	 */
 	void evaluateOnImage(const std::vector< cv::Mat > &imgVec,
 			     const unsigned int borderSize,
-			     EMat &wlResponse) const
-	{
-		EMat features;
-		fb->evaluateFiltersOnImage(imgVec, borderSize, features);
-		EVec treeResponse;
-		rt->predict(features, treeResponse);
-		wlResponse = Eigen::Map< EMat >(treeResponse.data(),
-						imgVec[0].rows-2*borderSize,
-						imgVec[0].cols-2*borderSize);
-		wlResponse *= alpha;
-	}
+			     EMat &wlResponse) const;
 
 	/**
 	 * getLoss() - Return the weak learner's loss on train data
 	 *
 	 * Return: Weak learner's loss on the samples used for training it
 	 */
-	float getLoss() const { return loss; };
+	float getLoss() const;
 
 	/**
 	 * getMR() - Return the weak learner's misclassification rate on train
@@ -251,7 +176,7 @@ public:
 	 * Return: Weak learner's misclassification rate on the samples used for
 	 *	   training it
 	 */
-	float getMR() const { return MR; };
+	float getMR() const;
 
 	/**
 	 * Serialize() - Serialize a weak learner in JSON format

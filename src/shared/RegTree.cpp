@@ -188,6 +188,31 @@ RegTree::RegTree(std::string &descr_json)
 	Deserialize(root);
 }
 
+RegTree::RegTree(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+RegTree::RegTree(const RegTree &other)
+{
+	this->nodes = other.nodes;
+}
+
+bool
+operator==(const RegTree &rt1, const RegTree &rt2)
+{
+	if (rt1.nodes == rt2.nodes) {
+		return true;
+	}
+	return false;
+}
+
+bool
+operator!=(const RegTree &rt1, const RegTree &rt2)
+{
+	return !(rt1 == rt2);
+}
+
 void
 RegTree::predict(const EMat &X_, EVec &results) const
 {

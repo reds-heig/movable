@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <algorithm>
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -42,14 +43,23 @@ extern "C" {
 #include "utils.hpp"
 #include "Parameters.hpp"
 
-#ifdef MOVABLE_TRAIN
 const int POS_GT_CLASS = 1;
 const int NEG_GT_CLASS = -1;
 const int IGN_GT_CLASS = 0;
-#endif /* MOVABLE_TRAIN */
 
 const int MASK_EXCLUDED = 0;
 const int MASK_INCLUDED = 255;
+
+/* Threshold for the initial point of the L histogram to be detected */
+const double L_THRESHOLD_INIT = 0.02;
+/* Threshold that has to be surpassed by the point three positions after to
+   validate the initial L histogram point */
+const double L_THRESHOLD_NEXT = 0.05;
+/* Threshold for the initial point of the B histogram to be detected */
+const double B_THRESHOLD = 0.02;
+
+// const int ERODE_SIZE = 3;
+// const int M_BLUR_SIZE = 5;
 
 const int FEEDBACK_SAMPLE_WEIGHT = 10;
 
@@ -71,6 +81,15 @@ class BoostedClassifier;
  * @originalSizes     : sizes of the input images
  * @sampleSize	      : size of a sampled patch
  * @borderSize	      : size of the replicated border around the image
+ * ePoints            : mask marking the spots where the classifier has to be
+ *                      evaluated
+ * @fastClassifier    : enable fast classification (only candidate points are
+ *                      tested)
+ * @houghMinDist      : minimum distance between RBCs for the Hough method
+ * @houghHThresh      : higher threshold on Canny's output in the Hough method
+ * @houghLThresh      : lower threshold on Canny's output in the Hough method
+ * @houghMinRad       : minimum radius for the retained RBCs in the Hough method
+ * @houghMaxRad       : maximum radius for the retained RBCs in the Hough method
  * @masks	      : image masks
  * @gts		      : set of ground-truth vectors (one vector per gt pair)
  * @originalGts	      : original ground-truth images (used for final
@@ -114,124 +133,6 @@ public:
 		const std::vector< BoostedClassifier * > &boostedClassifiers);
 #endif /* TESTS */
 
-#ifdef MOVABLE_TRAIN
-	/**
-	 * getGt() - Get a reference to a specific ground-truth for the
-	 *	     specified gt pair
-	 *
-	 * @pairNo : image pair to which the ground-truth belongs to
-	 * @imageNo: number of the image for which to return the ground-truth
-	 *
-	 * Return: reference to the specified gt if available, reference to an
-	 *	   empty EMat otherwise
-	 */
-	const EMat& getGt(const int pairNo,
-			  const unsigned int imageNo) const
-	{
-		if (pairNo < 0 || pairNo >= (int)gtPairsNo ||
-		    imageNo >= imagesNo) {
-			log_err("The requested gt %d does not exist in "
-				"pair %d (limits: image = %d, pair = %d)",
-				imageNo, pairNo, imagesNo-1, gtPairsNo-1);
-			/* Return an empty EMat */
-			static EMat nullresult;
-			return nullresult;
-		}
-		return gts[pairNo][imageNo];
-	}
-
-	/**
-	 * getGtNegativePairValue() - Get the value of the negative class for a
-	 *			      given gt pair
-	 *
-	 * @gtPair: considered gt pair
-	 *
-	 * Return: Numerical value of the negative class for the given gt pair
-	 */
-	int getGtNegativePairValue(const unsigned int gtPair) const
-	{
-		if (gtPair >= gtPairsNo) {
-			log_err("The desired gt pair (%d) does not exist",
-				gtPair);
-			return -1;
-		}
-		return gtPairValues[gtPair].first;
-	}
-
-	/**
-	 * getGtPositivePairValue() - Get the value of the positive class for a
-	 *			      given gt pair
-	 *
-	 * @gtPair: considered gt pair
-	 *
-	 * Return: Numerical value of the positive class for the given gt pair
-	 */
-	int getGtPositivePairValue(const unsigned int gtPair) const
-	{
-		if (gtPair >= gtPairsNo) {
-			log_err("The desired gt pair (%d) does not exist",
-				gtPair);
-			return -1;
-		}
-		return gtPairValues[gtPair].second;
-	}
-
-	/**
-	 * getGtPairsNo() - Return the number of ground-truth pairs available
-	 *
-	 * Return: number of available gt pairs
-	 */
-	unsigned int getGtPairsNo() const { return gtPairsNo; };
-
-	/**
-	 * getGtValuesNo() - Return the number of ground-truth values considered
-	 *
-	 * Return: number of considered gt values
-	 */
-	unsigned int getGtValuesNo() const { return gtValues.size(); };
-
-	/**
-	 * getGtVector() - Get a reference to a the specified gt pair vector
-	 *
-	 *
-	 * @pairNo: number of the desired gt pair
-	 *
-	 * Return: reference to the specified gt vector if set, reference to an
-	 *	   empty one otherwise
-	 */
-	const gtVector& getGtVector(const int pairNo) const
-	{
-		if (pairNo >= (int)gtPairsNo || pairNo < 0) {
-			log_err("The requested gt vector does not exist (pair "
-				"= %d, max value = %d)", pairNo, gtPairsNo-1);
-			/* Return an empty vector */
-			static gtVector nullresult;
-			return nullresult;
-		}
-		return gts[pairNo];
-	}
-
-	/**
-	 * getOriginalGt() - Get a reference to a specific original ground-truth
-	 *		     image
-	 *
-	 * @imageNo: number of the image for which to return the ground-truth
-	 *
-	 * Return: reference to the specified gt if available, reference to an
-	 *	   empty EMat otherwise
-	 */
-	const EMat& getOriginalGt(const unsigned int imageNo) const
-	{
-		if (imageNo >= imagesNo) {
-			log_err("The requested original gt (%d) does not exist",
-				imageNo);
-			/* Return an empty EMat */
-			static EMat nullresult;
-			return nullresult;
-		}
-		return originalGts[imageNo];
-	}
-
 	/**
 	 * getSampleMatrix() - Fill a matrix with a specified set of samples
 	 *
@@ -253,23 +154,90 @@ public:
 			     const unsigned int rowOffset,
 			     const unsigned int colOffset,
 			     const unsigned int size,
-			     EMat &samples) const
-	{
-		assert (chNo < dataChNo);
+			     EMat &samples) const;
 
-		const unsigned int samplesNo = samplesIdx.size();
-		const unsigned int sampleArea = size*size;
+#ifdef MOVABLE_TRAIN
+	/**
+	 * getGt() - Get a reference to a specific ground-truth for the
+	 *	     specified gt pair
+	 *
+	 * @pairNo : image pair to which the ground-truth belongs to
+	 * @imageNo: number of the image for which to return the ground-truth
+	 *
+	 * Return: reference to the specified gt if available, reference to an
+	 *	   empty EMat otherwise
+	 */
+	const EMat& getGt(const int pairNo,
+			  const unsigned int imageNo) const;
 
-		samples.resize(samplesNo, sampleArea);
-		for (unsigned int iX = 0; iX < samplesNo; ++iX) {
-			const samplePos &s = samplePositions[samplesIdx[iX]];
-			EMat tmp = data[chNo][s.imageNo].block(s.row+rowOffset,
-							       s.col+colOffset,
-							       size, size);
-			samples.row(iX) = Eigen::Map< EMat >(tmp.data(), 1,
-							     sampleArea);
-		}
-	}
+	/**
+	 * getGtNegativePairValue() - Get the value of the negative class for a
+	 *			      given gt pair
+	 *
+	 * @gtPair: considered gt pair
+	 *
+	 * Return: Numerical value of the negative class for the given gt pair
+	 */
+	int getGtNegativePairValue(const unsigned int gtPair) const;
+
+	/**
+	 * getGtPositivePairValue() - Get the value of the positive class for a
+	 *			      given gt pair
+	 *
+	 * @gtPair: considered gt pair
+	 *
+	 * Return: Numerical value of the positive class for the given gt pair
+	 */
+	int getGtPositivePairValue(const unsigned int gtPair) const;
+
+	/**
+	 * getGtPairsNo() - Return the number of ground-truth pairs available
+	 *
+	 * Return: number of available gt pairs
+	 */
+	unsigned int getGtPairsNo() const;
+
+	/**
+	 * getGtValuesNo() - Return the number of ground-truth values considered
+	 *
+	 * Return: number of considered gt values
+	 */
+	unsigned int getGtValuesNo() const;
+
+	/**
+	 * getGtVector() - Get a reference to a the specified gt pair vector
+	 *
+	 *
+	 * @pairNo: number of the desired gt pair
+	 *
+	 * Return: reference to the specified gt vector if set, reference to an
+	 *	   empty one otherwise
+	 */
+	const gtVector& getGtVector(const int pairNo) const;
+
+	/**
+	 * getOriginalGt() - Get a reference to a specific original ground-truth
+	 *		     image
+	 *
+	 * @imageNo: number of the image for which to return the ground-truth
+	 *
+	 * Return: reference to the specified gt if available, reference to an
+	 *	   empty EMat otherwise
+	 */
+	const EMat& getOriginalGt(const unsigned int imageNo) const;
+
+	/**
+	 * isFeedbackImage() - Returns whether an image given as a parameter has
+	 *		       been returned by a technician as feedback or not
+	 *		       (this increases the weight of its samples)
+	 *
+	 * @imageNo: number of the image to check
+	 *
+	 * Return: true if the image is a feedback one, false otherwise
+	 */
+	bool isFeedbackImage(const int imageNo) const;
+
+#endif
 
 	/**
 	 * getSamplePositions() - Get a set of sampling positions from the
@@ -288,34 +256,7 @@ public:
 	int getSamplePositions(const int sampleClass,
 			       const unsigned int gtPair,
 			       const unsigned int samplesNo,
-			       sampleSet &samplePositions) const
-	{
-		if (sampleClass != POS_GT_CLASS && sampleClass != NEG_GT_CLASS) {
-			return -EXIT_FAILURE;
-		}
-
-		return getAvailableSamples(gts[(unsigned int)gtPair],
-					   sampleClass,
-					   samplesNo,
-					   samplePositions);
-	}
-
-	/**
-	 * isFeedbackImage() - Returns whether an image given as a parameter has
-	 *		       been returned by a technician as feedback or not
-	 *		       (this increases the weight of its samples)
-	 *
-	 * @imageNo: number of the image to check
-	 *
-	 * Return: true if the image is a feedback one, false otherwise
-	 */
-	bool isFeedbackImage(const int imageNo) const
-	{
-		assert(imageNo >= 0);
-		assert(imageNo < (int)imagesNo);
-
-		return feedbackImagesFlag[imageNo];
-	}
+			       sampleSet &samplePositions) const;
 
 	/**
 	 * shrinkSamplePositions() - Drop samples from a sample set until the
@@ -325,31 +266,14 @@ public:
 	 * @desiredSize	   : desired size of the sampling set
 	 */
 	static void shrinkSamplePositions(sampleSet &samplePositions,
-					  const unsigned int desiredSize)
-	{
-		assert(desiredSize > 0);
-		assert(desiredSize <= samplePositions.size());
+					  const unsigned int desiredSize);
 
-		std::vector< unsigned int > newSamplesPos =
-			randomSamplingWithoutReplacement(desiredSize,
-							 samplePositions.size());
-
-		sampleSet newSamples(desiredSize);
-
-		for (unsigned int i = 0; i < desiredSize; ++i) {
-			newSamples[i] = samplePositions[newSamplesPos[i]];
-		}
-
-		samplePositions = newSamples;
-	}
-
-#endif
 	/**
 	 * getBorderSize() - Return the size of the border
 	 *
 	 * Return: size of the border
 	 */
-	unsigned int getBorderSize() const { return borderSize; };
+	unsigned int getBorderSize() const;
 
 	/**
 	 * getChsForImage() - Get the channels corresponding to a specified
@@ -373,25 +297,14 @@ public:
 	 *	   empty EMat otherwise
 	 */
 	const EMat& getData(const unsigned int channelNo,
-			    const unsigned int imageNo) const
-	{
-		if (channelNo >= dataChNo || imageNo >= imagesNo) {
-			log_err("The requested image %d does not exist in "
-				"channel %d (limits: image = %d, channel = %d)",
-				imageNo, channelNo, imagesNo-1, dataChNo-1);
-			/* Return an empty EMat */
-			static EMat nullresult;
-			return nullresult;
-		}
-		return data[channelNo][imageNo];
-	}
+			    const unsigned int imageNo) const;
 
 	/**
 	 * getDataChNo() - Return the number of data channels available
 	 *
 	 * Return: number of available data channels
 	 */
-	unsigned int getDataChNo() const { return dataChNo; };
+	unsigned int getDataChNo() const;
 
 	/**
 	 * getDataVector() - Get a reference to the specific data channel
@@ -402,19 +315,17 @@ public:
 	 * Return: reference to the desired channel if available, reference to
 	 *	   an empty one otherwise
 	 */
-	const dataVector& getDataVector(const unsigned int channelNo) const
-	{
-		if (channelNo >= dataChNo) {
-			log_err("The requested data vector does not exist "
-				"channel = %d, max value = %d)",
-				channelNo, dataChNo-1);
-			/* Return an empty vector if the wrong channel number is
-			   requested */
-			static dataVector nullresult;
-			return nullresult;
-		}
-		return data[channelNo];
-	}
+	const dataVector& getDataVector(const unsigned int channelNo) const;
+
+	/**
+	 * getEPoints() - Return the desired set of candidate points
+	 *
+	 * @imageNo: number of the image whose set of candidates is requested
+	 *
+	 * Return: reference to the desired set if available, reference to
+	 *	   an empty set otherwise
+	 */
+	const sampleSet& getEPoints(const unsigned int imageNo) const;
 
 	/**
 	 * getImageName() - Return the filename of an input image
@@ -424,22 +335,24 @@ public:
 	 * Return: filename of the desired image if found, an empty string
 	 *	   otherwise
 	 */
-	std::string getImageName(const unsigned int imageNo) const
-	{
-		if (imageNo >= imagesNo) {
-			log_err("The requested image %d does not exist",
-				imageNo);
-			return std::string();
-		}
-		return imageNames[imageNo];
-	}
+	std::string getImageName(const unsigned int imageNo) const;
+
+	/**
+	 * getImagePath() - Return the path of an input image
+	 *
+	 * @imageNo  : number of the desired image
+	 *
+	 * Return: path of the desired image if found, an empty string
+	 *	   otherwise
+	 */
+	std::string getImagePath(const unsigned int imageNo) const;
 
 	/**
 	 * getImagesNo() - Return the number of images currently loaded
 	 *
 	 * Return: number of images loaded in the dataset
 	 */
-	unsigned int getImagesNo() const { return imagesNo; };
+	unsigned int getImagesNo() const;
 
 	/**
 	 * getMask() - Return the desired image mask
@@ -449,18 +362,7 @@ public:
 	 * Return: reference to the desired mask if available, reference to
 	 *	   an empty EMat otherwise
 	 */
-	const EMat& getMask(const unsigned int imageNo) const
-	{
-		if (imageNo >= imagesNo) {
-			log_err("The requested image %d does not exist "
-				"(limit: image = %d)",
-				imageNo, imagesNo-1);
-			/* Return an empty EMat */
-			static EMat nullresult;
-			return nullresult;
-		}
-		return masks[imageNo];
-	}
+	const EMat& getMask(const unsigned int imageNo) const;
 
 	/**
 	 * getOriginalImgSize() - Get the size of the input image before
@@ -470,32 +372,31 @@ public:
 	 *
 	 * @Return: Size of the considered samples (rows, cols)
 	 */
-	std::pair< int, int > getOriginalImgSize(const unsigned int imgNo) const
-	{
-		if (imgNo >= imagesNo) {
-			log_err("The requested image %u does not exist "
-				"(limit: image = %u)",
-				imgNo, imagesNo-1);
-			throw std::runtime_error("invalidRequest");
-		}
-		if (imgNo >= originalSizes.size()) {
-			log_err("Not enough image sizes were pushed (%lu, "
-				"request is for %u",
-				originalSizes.size(), imgNo);
-			throw std::runtime_error("invalidRequest");
-		}
-		return originalSizes[imgNo];
-	}
+	std::pair< int, int >
+	getOriginalImgSize(const unsigned int imgNo) const;
 
 	/**
 	 * getSampleSize() - Get the size of a sample extracted from the dataset
 	 *
 	 * @Return: Size of the considered samples
 	 */
-	unsigned int getSampleSize() const
-	{
-		return sampleSize;
-	}
+	unsigned int getSampleSize() const;
+
+	/**
+	 * computeCandidatePointsMask() - Compute the mask containing the
+	 *                                points where parasites are likely to be
+	 *
+	 * @imageID : image ID (corresponding to its position)
+	 * @colorImg: RGB version of the input image
+	 * @mask    : mask that has to be applied on the image
+	 *
+	 * @note: the system computes the mask and pushes it in the ePoints data
+	 *        vector at the location corresponding to that of the image that
+	 *        originated it
+	 */
+	void computeCandidatePointsMask(const unsigned int imageID,
+					const cv::Mat& colorImg,
+					const cv::Mat& mask);
 
 private:
 	typedef int (*ImageOps)(const cv::Mat &src, EMat &dst,
@@ -506,7 +407,16 @@ private:
 	std::vector< ImageOps > imageOps;
 	unsigned int imagesNo;
 	std::vector< std::string > imageNames;
+	std::vector< std::string > imagePaths;
 	std::vector< bool > feedbackImagesFlag;
+
+	bool fastClassifier;
+	std::vector< sampleSet > ePoints;
+	double houghMinDist;
+	double houghHThresh;
+	double houghLThresh;
+	int houghMinRad;
+	int houghMaxRad;
 
 	std::vector< std::pair< int, int > > originalSizes;
 
@@ -528,16 +438,18 @@ private:
 	 *	     then push it into the dataset, exploding it on the
 	 *	     different gt pairs
 	 *
+	 * @imageID: image ID (corresponding to its position)
 	 * @src: input ground-truth image
 	 *
 	 * Return: EXIT_SUCCESS
 	 */
-	int addGt(const cv::Mat &src);
+	int addGt(const unsigned int imageID, const cv::Mat &src);
 
 	/**
 	 * addImage() - Add an image along with its ground-truth and mask,
 	 *		computing the additional channels from the image itself
 	 *
+	 * @imageID   : image ID (corresponding to its position)
 	 * @imgPath : path of the input image
 	 * @maskPath: path of the input mask
 	 * @gtPath  : path of the input ground-truth
@@ -546,7 +458,8 @@ private:
 	 *	   or an image has invalid size, EXIT_SUCCESS otherwise
 	 */
 
-	int addImage(const std::string &imgPath,
+	int addImage(const unsigned int imageID,
+		     const std::string &imgPath,
 		     const std::string &maskPath,
 		     const std::string &gtPath);
 
@@ -617,6 +530,7 @@ private:
 	 * addImage() - Add an image along with its mask, computing the
 	 *		additional channels from the image itself
 	 *
+	 * @imageID : image ID (corresponding to its position)
 	 * @imgPath : path of the input image
 	 * @maskPath: path of the input mask
 	 *
@@ -624,7 +538,8 @@ private:
 	 *	   or an image has invalid size, EXIT_SUCCESS otherwise
 	 */
 
-	int addImage(const std::string &imgPath,
+	int addImage(const unsigned int imageID,
+		     const std::string &imgPath,
 		     const std::string &maskPath);
 
 	/**
@@ -856,11 +771,12 @@ private:
 	 * addMask() - Preprocess the mask passed as parameter, and then push it
 	 *	       into the dataset
 	 *
-	 * @src: input image mask
+	 * @imageID: image ID (corresponding to its position)
+	 * @src    : input image mask
 	 *
 	 * Return: EXIT_SUCCESS
 	 */
-	int addMask(cv::Mat &src);
+	int addMask(const unsigned int imageID, cv::Mat &src);
 
 	/**
 	 * loadPathFile() - Load a list of paths from a file
@@ -875,7 +791,6 @@ private:
 	int loadPathFile(const std::string &dataset_path,
 			 const std::string &fname,
 			 std::vector< std::string > &loaded_paths);
-
 };
 
 #endif /* DATASET_HPP_ */

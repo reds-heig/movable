@@ -60,21 +60,8 @@ public:
 	 * Return: Reference to the desired smoothing matrix
 	 */
 	const EMat& getSmoothingMatrix(const unsigned int filterSize,
-				       const float lambda) const
-	{
-		const int XPos_size = getPosSize(filterSize);
-		const int XPos_lambda = getPosLambda(lambda);
+				       const float lambda) const;
 
-		if (XPos_size < 0 || XPos_lambda < 0) {
-			log_err("The requested smoothing matrix does not exist "
-				"(filter size = %d, lambda = %f)",
-				filterSize, lambda);
-			/* Return an empty EMat */
-			static EMat nullresult;
-			return nullresult;
-		}
-		return M[XPos_size][XPos_lambda];
-	}
 private:
 	/**
 	 * struct PixLoc - Single pixel location in the image
@@ -151,16 +138,7 @@ private:
 	 * Return: The desired position if the lambda value is present in the
 	 *	   smoothing values vector, -1 otherwise
 	 */
-	int
-	getPosLambda(const float lambda) const {
-		std::vector< float >::const_iterator it;
-		if ((it = std::find(smoothingValues.begin(),
-				    smoothingValues.end(),
-				    lambda)) != smoothingValues.end()) {
-			return std::distance(smoothingValues.begin(), it);
-		}
-		return -1;
-	}
+	int getPosLambda(const float lambda) const;
 
 	/**
 	 * getPosSize() - Get the position of the considered matrix according to
@@ -171,15 +149,8 @@ private:
 	 * Return: The desired position if the size is present in the size
 	 *	   vector, -1 otherwise
 	 */
-	int
-	getPosSize(const unsigned int size) const {
-		std::vector< unsigned int >::const_iterator it;
-		if ((it = std::find(sizes.begin(), sizes.end(),
-				    size)) != sizes.end()) {
-			return std::distance(sizes.begin(), it);
-		}
-		return -1;
-	}
+	int getPosSize(const unsigned int size) const;
+
 };
 
 #endif /* SMOOTHING_MATRICES_HPP_ */

@@ -98,45 +98,19 @@ public:
 	 *
 	 * @root: JSON's representation root
 	 */
-	KernelBoost(Json::Value &root)
-	{
-		Deserialize(root);
-	}
+	KernelBoost(Json::Value &root);
 
 	/**
 	 * ~KernelBoost() - Deallocate the boosted classifiers
 	 */
-	virtual ~KernelBoost()
-	{
-		for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
-			delete boostedClassifiers[i];
-		}
-		delete finalClassifier;
-	}
+	virtual ~KernelBoost();
 
 	/**
 	 * KernelBoost() - Copy constructor
 	 *
 	 * @obj: source object of the copy
 	 */
-	KernelBoost(const KernelBoost &obj)
-	{
-		/* Deallocate previous boosted classifiers */
-		for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
-			delete boostedClassifiers[i];
-		}
-		delete finalClassifier;
-		/* Resize the boosted classifiers vector */
-		this->boostedClassifiers.resize(obj.boostedClassifiers.size());
-		/* Create the new set of boosted classifiers from the elements
-		   of the copied one */
-		for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
-			boostedClassifiers[i] =
-				new BoostedClassifier(*(obj.boostedClassifiers[i]));
-		}
-		finalClassifier = new BoostedClassifier(*(obj.finalClassifier));
-		binaryThreshold = obj.binaryThreshold;
-	}
+	KernelBoost(const KernelBoost &obj);
 
 	/**
 	 * operator=() - Assignment operator
@@ -146,31 +120,7 @@ public:
 	 * Return: Reference to the resulting KernelBoost classifier
 	 */
 	KernelBoost &
-	operator=(const KernelBoost &rhs)
-	{
-		if (this != &rhs) {
-			/* Deallocate previous boosted classifiers */
-			for (unsigned int i = 0; i < boostedClassifiers.size();
-			     ++i) {
-				delete boostedClassifiers[i];
-			}
-			delete finalClassifier;
-
-			/* Resize the weak learners vector */
-			this->boostedClassifiers.resize(rhs.boostedClassifiers.size());
-			/* Create the new set of weak learners from the elements
-			   of the copied one */
-			for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
-				boostedClassifiers[i] =
-					new BoostedClassifier(*(rhs.boostedClassifiers[i]));
-			}
-			finalClassifier =
-				new BoostedClassifier(*(rhs.finalClassifier));
-			binaryThreshold = rhs.binaryThreshold;
-		}
-
-		return *this;
-	}
+	operator=(const KernelBoost &rhs);
 
 	/**
 	 * operator==() - Compare two KernelBoost classifiers for equality
@@ -182,20 +132,7 @@ public:
 	 *	   otherwise
 	 */
 	friend bool
-	operator==(const KernelBoost &kb1, const KernelBoost &kb2)
-	{
-		if (kb1.boostedClassifiers.size() != kb2.boostedClassifiers.size())
-			return false;
-
-		for (unsigned int i = 0; i < kb1.boostedClassifiers.size(); ++i) {
-			if (*(kb1.boostedClassifiers[i]) != *(kb2.boostedClassifiers[i]) ||
-			    *(kb1.finalClassifier) != *(kb2.finalClassifier) ||
-			    kb1.binaryThreshold != kb2.binaryThreshold)
-				return false;
-		}
-
-		return true;
-	}
+	operator==(const KernelBoost &kb1, const KernelBoost &kb2);
 
 	/**
 	 * operator!=() - Compare two KernelBoost classifiers for difference
@@ -207,10 +144,7 @@ public:
 	 *	   otherwise
 	 */
 	friend bool
-	operator!=(const KernelBoost &kb1, const KernelBoost &kb2)
-	{
-		return !(kb1 == kb2);
-	}
+	operator!=(const KernelBoost &kb1, const KernelBoost &kb2);
 
 	/**
 	 * Serialize() - Serialize a KernelBoost classifier in JSON format
@@ -220,10 +154,7 @@ public:
 	 * @warning: superseded by the function taking param as an argument, as
 	 *	     it allows to set some values for the test routine
 	 */
-	virtual void Serialize(Json::Value &)
-	{
-		throw std::runtime_error("deprecatedSerialization");
-	}
+	virtual void Serialize(Json::Value &);
 
 	/**
 	 * Serialize() - Serialize a KernelBoost classifier in JSON format

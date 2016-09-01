@@ -63,19 +63,14 @@ public:
 	 *
 	 * @root: JSON's representation root
 	 */
-	RegTree(Json::Value &root)
-	{
-		Deserialize(root);
-	}
+	RegTree(Json::Value &root);
 
 	/**
 	 * RegTree() - Copy constructor, useful for testing purposes
 	 *
 	 * @other: source regression tree from which to copy
 	 */
-	RegTree(const RegTree &other) {
-		this->nodes = other.nodes;
-	}
+	RegTree(const RegTree &other);
 
 	/**
 	 * operator==() - Compare two regression trees for equality
@@ -86,13 +81,7 @@ public:
 	 * Return: true if the two trees are identical, false otherwise
 	 */
 	friend bool
-	operator==(const RegTree &rt1, const RegTree &rt2)
-	{
-		if (rt1.nodes == rt2.nodes) {
-			return true;
-		}
-		return false;
-	}
+	operator==(const RegTree &rt1, const RegTree &rt2);
 
 	/**
 	 * operator!=() - Compare two regression trees for difference
@@ -103,10 +92,7 @@ public:
 	 * Return: true if the two trees are different, false otherwise
 	 */
 	friend bool
-	operator!=(const RegTree &rt1, const RegTree &rt2)
-	{
-		return !(rt1 == rt2);
-	}
+	operator!=(const RegTree &rt1, const RegTree &rt2);
 
 	/**
 	 * predict() - Given the learnt regression tree, perform prediction on

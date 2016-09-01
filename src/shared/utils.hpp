@@ -42,8 +42,6 @@
 #include "Parameters.hpp"
 #include "DataTypes.hpp"
 
-#ifdef MOVABLE_TRAIN
-
 /**
  * computeF1Score() - Compute the F1 score for an image-threshold pair,
  *		      where the thresholded image undergoes morphological
@@ -153,8 +151,6 @@ int splitSampleSet(const sampleSet &samples,
 		   EVec &W_fl,
 		   EVec &W_tree);
 
-#endif
-
 /**
  * checkChannelPresent() - Check if a given channel is requested by the
  *			   user (that is, if the corresponding string
@@ -223,7 +219,7 @@ void saveClassifiedImage(const EMat &classResult,
  * @threshold   : threshold to apply
  * @dirPath     : path of the destination directory
  * @imgName     : name of the destination image (it is the same as the original
- *	  	 image name)
+ *	   	  image name)
  * @originalSize: original image dimensions
  * @borderSize  : size of the border to drop
  */
@@ -236,8 +232,21 @@ saveThresholdedImage(const cv::Mat &classResult,
 		     const std::pair< int, int >& originalSize,
 		     const unsigned int borderSize);
 
-#ifdef MOVABLE_TRAIN
+/**
+ * saveOverlayedImage() - Save the thresholded result, overlayed to the input
+ *                        image, to disk
+ *
+ * @imageFName      : input image path
+ * @dirPath         : path of the destination directory
+ * @imgName         : name of the destination image (it is the same as the
+ *	   	      original image name)
+ */
+void
+saveOverlayedImage(const std::string &imageFName,
+		   const std::string &dirPath,
+		   const std::string &imgName);
 
+#ifdef MOVABLE_TRAIN
 /**
  * createDirectories() - Create the set of directories needed by the simulation
  *

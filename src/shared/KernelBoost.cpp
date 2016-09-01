@@ -59,15 +59,21 @@ KernelBoost::KernelBoost(Parameters &params,
 		std::chrono::time_point< std::chrono::system_clock > end;
 		start = std::chrono::system_clock::now();
 
-		/* Prepare a vector containing the set of OpenCV matrices
-		   corresponding to the available channels */
-		std::vector< cv::Mat > chs;
-		dataset_final.getChsForImage(i, chs);
-
 		EMat result;
-		finalClassifier->classifyImage(chs,
-					       dataset_final.getBorderSize(),
-					       result);
+		if (params.fastClassifier) {
+			const sampleSet& ePoints = dataset_final.getEPoints(i);
+			finalClassifier->classifyImage(dataset_final,
+						       ePoints,
+						       result);
+		} else {
+			/* Prepare a vector containing the set of OpenCV
+			   matrices corresponding to the available channels */
+			std::vector< cv::Mat > chs;
+			dataset_final.getChsForImage(i, chs);
+			finalClassifier->classifyFullImage(chs,
+							   dataset_final.getBorderSize(),
+							   result);
+		}
 		normalizeImage(result, dataset_final.getBorderSize(),
 			       scoreImages[i]);
 #ifndef TESTS
@@ -85,58 +91,8 @@ KernelBoost::KernelBoost(Parameters &params,
 #endif /* TESTS */
 	}
 
-#if 0
-	/* Now computing a threshold, for the binary thresholding of the
-	   classified images, that maximizes the F1-score */
-	std::vector< float > thresholds(dataset_final.getImagesNo());
-	log_info("Computing the best thresholding value...");
-	/* ONLY images with some positive values in it are considered (otherwise
-	   the business gets shady...) */
-	// #pragma omp parallel for schedule(dynamic)
-	for (unsigned int i = 0; i < dataset_final.getImagesNo(); ++i) {
-		EMat egt = dataset_final.getGt(0, i);
-		if (egt.maxCoeff() > NEG_GT_CLASS) {
-			cv::Mat gt(egt.rows(), egt.cols(), CV_32FC1);
-			cv::eigen2cv(egt, gt);
-			float F1Score = 0;
-			float f;
-			for (float thr = -1+1.0/200; thr < 1; thr += 1.0/200) {
-				f = computeF1Score(scoreImages[i], gt, thr);
-				if (f > F1Score) {
-					F1Score = f;
-					thresholds[i] = thr;
-				}
-			}
-			log_info("\t\tImage %d/%d, threshold %.3f gives "
-				 "F1-score %.3f",
-				 i+1, dataset_final.getImagesNo(),
-				 thresholds[i], F1Score);
-		} else {
-			/* Set the threshold to -10 to rule this image out */
-			thresholds[i] = -10;
-		}
-	}
-
-	/* Get the final threshold as an average of the thresholds of the
-	   considered images */
-	binaryThreshold = 0;
-	int cnt = 0;
-	for (unsigned int i = 0; i < dataset_final.getImagesNo(); ++i) {
-		if (thresholds[i] > -10) {
-			binaryThreshold += thresholds[i];
-			++cnt;
-		}
-	}
-	if (cnt == 0) {
-		log_info("WEIRD, no images actually contributed to threshold "
-			 "determination... :(");
-	} else {
-		binaryThreshold /= cnt;
-	}
-#endif /* 0 */
-
 	/* For the moment, use a fixed threshold */
-	binaryThreshold = 0.6;
+	binaryThreshold = 0;
 
 #ifndef TESTS
 	/* Dumping the thresholded images for reference */
@@ -206,9 +162,7 @@ KernelBoost::KernelBoost(Parameters &params,
 	}
 #endif /* TESTS */
 }
-#endif /* MOVABLE_TRAIN */
 
-#ifdef MOVABLE_TRAIN
 KernelBoost::KernelBoost(std::string &descr_json)
 {
 	Json::Value root;
@@ -220,9 +174,12 @@ KernelBoost::KernelBoost(std::string &descr_json)
 
 	Deserialize(root);
 }
+
 #else
+
 KernelBoost::KernelBoost(std::string &descr_json,
-			 const Parameters &params, const Dataset &dataset)
+			 const Parameters &params,
+			 const Dataset &dataset)
 {
 	Json::Value root;
 	Json::Reader reader;
@@ -246,15 +203,21 @@ KernelBoost::KernelBoost(std::string &descr_json,
 		start = std::chrono::system_clock::now();
 #endif /* TESTS */
 
-		/* Prepare a vector containing the set of OpenCV matrices
-		   corresponding to the available channels */
-		std::vector< cv::Mat > chs;
-		dataset_final.getChsForImage(i, chs);
-
 		EMat result;
-		finalClassifier->classifyImage(chs,
-					       dataset_final.getBorderSize(),
-					       result);
+		if (params.fastClassifier) {
+			const sampleSet& ePoints = dataset_final.getEPoints(i);
+			finalClassifier->classifyImage(dataset_final,
+						       ePoints,
+						       result);
+		} else {
+			/* Prepare a vector containing the set of OpenCV matrices
+			   corresponding to the available channels */
+			std::vector< cv::Mat > chs;
+			dataset_final.getChsForImage(i, chs);
+			finalClassifier->classifyFullImage(chs,
+							   dataset_final.getBorderSize(),
+							   result);
+		}
 #ifndef TESTS
 		saveClassifiedImage(result,
 				    params.baseResDir,
@@ -284,6 +247,10 @@ KernelBoost::KernelBoost(std::string &descr_json,
 				     dataset_final.getOriginalImgSize(i),
 				     dataset_final.getBorderSize());
 
+		saveOverlayedImage(dataset_final.getImagePath(i),
+				   params.baseResDir,
+				   dataset_final.getImageName(i));
+
 		end = std::chrono::system_clock::now();
 		std::chrono::duration< double > elapsed_s = end-start;
 		log_info("\t\tImage %d/%d DONE! (took %.3fs)",
@@ -292,6 +259,94 @@ KernelBoost::KernelBoost(std::string &descr_json,
 	}
 }
 #endif /* MOVABLE_TRAIN */
+
+
+KernelBoost::KernelBoost(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+KernelBoost::~KernelBoost()
+{
+	for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
+		delete boostedClassifiers[i];
+	}
+	delete finalClassifier;
+}
+
+KernelBoost::KernelBoost(const KernelBoost &obj)
+{
+	/* Deallocate previous boosted classifiers */
+	for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
+		delete boostedClassifiers[i];
+	}
+	delete finalClassifier;
+	/* Resize the boosted classifiers vector */
+	this->boostedClassifiers.resize(obj.boostedClassifiers.size());
+	/* Create the new set of boosted classifiers from the elements
+	   of the copied one */
+	for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
+		boostedClassifiers[i] =
+			new BoostedClassifier(*(obj.boostedClassifiers[i]));
+	}
+	finalClassifier = new BoostedClassifier(*(obj.finalClassifier));
+	binaryThreshold = obj.binaryThreshold;
+}
+
+KernelBoost &
+KernelBoost::operator=(const KernelBoost &rhs)
+{
+	if (this != &rhs) {
+		/* Deallocate previous boosted classifiers */
+		for (unsigned int i = 0; i < boostedClassifiers.size();
+		     ++i) {
+			delete boostedClassifiers[i];
+		}
+		delete finalClassifier;
+
+		/* Resize the weak learners vector */
+		this->boostedClassifiers.resize(rhs.boostedClassifiers.size());
+		/* Create the new set of weak learners from the elements
+		   of the copied one */
+		for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
+			boostedClassifiers[i] =
+				new BoostedClassifier(*(rhs.boostedClassifiers[i]));
+		}
+		finalClassifier =
+			new BoostedClassifier(*(rhs.finalClassifier));
+		binaryThreshold = rhs.binaryThreshold;
+	}
+
+	return *this;
+}
+
+bool
+operator==(const KernelBoost &kb1, const KernelBoost &kb2)
+{
+	if (kb1.boostedClassifiers.size() != kb2.boostedClassifiers.size())
+		return false;
+
+	for (unsigned int i = 0; i < kb1.boostedClassifiers.size(); ++i) {
+		if (*(kb1.boostedClassifiers[i]) != *(kb2.boostedClassifiers[i]) ||
+		    *(kb1.finalClassifier) != *(kb2.finalClassifier) ||
+		    kb1.binaryThreshold != kb2.binaryThreshold)
+			return false;
+	}
+
+	return true;
+}
+
+bool
+operator!=(const KernelBoost &kb1, const KernelBoost &kb2)
+{
+	return !(kb1 == kb2);
+}
+
+void
+KernelBoost::Serialize(Json::Value &)
+{
+	throw std::runtime_error("deprecatedSerialization");
+}
 
 void
 KernelBoost::serialize(Json::Value &root, const Parameters &params)
@@ -310,9 +365,17 @@ KernelBoost::serialize(Json::Value &root, const Parameters &params)
 	finalClassifier->Serialize(final_bc_json);
 	kb_json["FinalClassifier"] = final_bc_json;
 	kb_json["binaryThreshold"] = binaryThreshold;
+	kb_json["fastClassifier"] = params.fastClassifier;
 
 	kb_json["sampleSize"] = params.sampleSize;
 	kb_json["imgRescaleFactor"] = params.imgRescaleFactor;
+
+	kb_json["houghMinDist"] = params.houghMinDist;
+	kb_json["houghHThresh"] = params.houghHThresh;
+	kb_json["houghLThresh"] = params.houghLThresh;
+	kb_json["houghMinRad"] = params.houghMinRad;
+	kb_json["houghMaxRad"] = params.houghMaxRad;
+
 	for (unsigned int i = 0; i < params.channelList.size(); ++i) {
 		kb_json["Channels"].append(params.channelList[i]);
 	}

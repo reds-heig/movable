@@ -32,8 +32,6 @@
 #include "logging.hpp"
 #include "utils.hpp"
 
-#ifdef MOVABLE_TRAIN
-
 float
 computeF1Score(const cv::Mat &scoreImage,
 	       const cv::Mat &gt,
@@ -221,10 +219,9 @@ splitSampleSet(const sampleSet &samples,
 	return EXIT_SUCCESS;
 }
 
-#endif /* MOVABLE_TRAIN */
-
-bool checkChannelPresent(const std::string &sought,
-			 const std::vector< std::string > &chList)
+bool
+checkChannelPresent(const std::string &sought,
+		    const std::vector< std::string > &chList)
 {
 	return std::find(chList.begin(), chList.end(),
 			 sought) != chList.end();
@@ -334,6 +331,36 @@ saveClassifiedImage(const EMat &classResult,
 }
 
 void
+saveOverlayedImage(const std::string &imageFName,
+		   const std::string &dirPath,
+		   const std::string &imgName)
+{
+	const std::string thresholdedFName(dirPath + "/" +
+					   imgName + "_thresh.png");
+	cv::Mat img = cv::imread(imageFName.c_str(),
+				 CV_LOAD_IMAGE_COLOR);
+	// cv::Mat overlayedDet[3];
+	cv::Mat detections = cv::imread(thresholdedFName.c_str(),
+					CV_LOAD_IMAGE_COLOR);
+	/* Invert image */
+	// cv::threshold(detections, detections, 127,
+	// 	      255, cv::THRESH_BINARY_INV);
+	// cv::Mat tmp(img.rows, img.cols, CV_8UC1);
+	// tmp = cv::Scalar(0);
+	// overlayedDet[0] = tmp;
+	// overlayedDet[1] = img;
+	// overlayedDet[2] = detections;
+
+	// cv::cvtColor(detections, detections, CV_GRAY2BGR);
+
+	cv::Mat dst;
+	cv::addWeighted(img, 0.3, detections, 0.7, 0.0, dst);
+	// cv::merge(overlayedDet, 3, dst);
+	std::string dstPath = dirPath + "/" + imgName + "_overlayed.png";
+	cv::imwrite(dstPath.c_str(), dst);
+}
+
+void
 saveThresholdedImage(const cv::Mat &classResult,
 		     const EMat &mask,
 		     const float threshold,
@@ -400,8 +427,8 @@ saveThresholdedImage(const cv::Mat &classResult,
 int
 createDirectories(Parameters &params, const Dataset &dataset)
 #else
-	int
-	createDirectories(Parameters &params)
+int
+createDirectories(Parameters &params)
 #endif /* MOVABLE_TRAIN */
 {
 	std::string base_path;

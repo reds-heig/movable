@@ -37,7 +37,6 @@ typedef std::vector< EMat > dataVector;
 typedef std::vector< dataVector > dataChannels;
 typedef std::vector< EMat > maskVector;
 
-#ifdef MOVABLE_TRAIN
 typedef std::vector< EMat > gtVector;
 typedef std::vector< gtVector > gtPairs;
 
@@ -119,7 +118,5 @@ typedef struct samplePos {
 } samplePos;
 
 typedef std::vector< samplePos > sampleSet;
-
-#endif /* MOVABLE_TRAIN */
 
 #endif /* DATATYPES_HPP_ */

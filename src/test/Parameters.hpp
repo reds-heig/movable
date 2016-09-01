@@ -54,6 +54,13 @@ const std::string defaultConfigFName = "test_config.json";
  * @imgRescaleFactor: rescale input images by this factor (that is, divide each
  *                    image coordinate by this value)
  * @threshold	    : fixed threshold applied when binarizing the image
+ * @houghMinDist    : minimum distance between RBCs for the Hough method
+ * @houghHThresh    : higher threshold on Canny's output in the Hough method
+ * @houghLThresh    : lower threshold on Canny's output in the Hough method
+ * @houghMinRad     : minimum radius for the retained RBCs in the Hough method
+ * @houghMaxRad     : maximum radius for the retained RBCs in the Hough method
+ * @fastClassifier  : enable fast classification (only candidate points are
+ *                    tested)
  * @baseResDir	    : base directory path for output results
  * @channelList	    : list of channels requested by user
  * @configFName	    : path of the configuration file
@@ -68,10 +75,17 @@ public:
 	std::string imgPathsFName;
 	std::string maskPathsFName;
 
+	double houghMinDist;
+	double houghHThresh;
+	double houghLThresh;
+	int houghMinRad;
+	int houghMaxRad;
+
 	unsigned int sampleSize;
 	unsigned int imgRescaleFactor;
 
 	float threshold;
+	bool fastClassifier;
 
 	std::string baseResDir;
 	std::vector< std::string > channelList;

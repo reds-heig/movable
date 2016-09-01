@@ -71,41 +71,19 @@ public:
 	 *
 	 * @root: JSON's representation root
 	 */
-	BoostedClassifier(Json::Value &root)
-	{
-		Deserialize(root);
-	}
+	BoostedClassifier(Json::Value &root);
 
 	/**
-	* ~BoostedClassifier() - Deallocate the weak learners
-	*/
-	virtual ~BoostedClassifier()
-	{
-		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
-			delete weakLearners[i];
-		}
-	}
+	 * ~BoostedClassifier() - Deallocate the weak learners
+	 */
+	virtual ~BoostedClassifier();
 
 	/**
 	 * BoostedClassifier() - Copy constructor
 	 *
 	 * @obj: source object of the copy
 	 */
-	BoostedClassifier(const BoostedClassifier &obj)
-	{
-		/* Deallocate previous weak learners */
-		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
-			delete weakLearners[i];
-		}
-		/* Resize the weak learners vector */
-		this->weakLearners.resize(obj.weakLearners.size());
-		/* Create the new set of weak learners from the elements of the
-		   copied one */
-		for (unsigned int i = 0; i < weakLearners.size(); ++i) {
-			weakLearners[i] = new WeakLearner(*(obj.weakLearners[i]));
-		}
-		gtPair = obj.gtPair;
-	}
+	BoostedClassifier(const BoostedClassifier &obj);
 
 	/**
 	 * operator=() - Assignment operator
@@ -115,27 +93,7 @@ public:
 	 * Return: Reference to the resulting boosted classifier
 	 */
 	BoostedClassifier &
-	operator=(const BoostedClassifier &rhs)
-	{
-		if (this != &rhs) {
-			/* Deallocate previous weak learners */
-			for (unsigned int i = 0; i < weakLearners.size(); ++i) {
-				delete weakLearners[i];
-			}
-
-			/* Resize the weak learners vector */
-			this->weakLearners.resize(rhs.weakLearners.size());
-			/* Create the new set of weak learners from the elements
-			   of the copied one */
-			for (unsigned int i = 0; i < weakLearners.size(); ++i) {
-				weakLearners[i] =
-					new WeakLearner(*(rhs.weakLearners[i]));
-			}
-			gtPair = rhs.gtPair;
-		}
-
-		return *this;
-	}
+	operator=(const BoostedClassifier &rhs);
 
 	/**
 	 * operator==() - Compare two boosted classifiers for equality
@@ -147,19 +105,7 @@ public:
 	 *	   otherwise
 	 */
 	friend bool
-	operator==(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
-	{
-		if (bc1.weakLearners.size() != bc2.weakLearners.size() ||
-		    bc1.gtPair != bc2.gtPair)
-			return false;
-
-		for (unsigned int i = 0; i < bc1.weakLearners.size(); ++i) {
-			if (*(bc1.weakLearners[i]) != *(bc2.weakLearners[i]))
-				return false;
-		}
-
-		return true;
-	}
+	operator==(const BoostedClassifier &bc1, const BoostedClassifier &bc2);
 
 	/**
 	 * operator!=() - Compare two boosted classifiers for difference
@@ -171,12 +117,8 @@ public:
 	 *	   otherwise
 	 */
 	friend bool
-	operator!=(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
-	{
-		return !(bc1 == bc2);
-	}
+	operator!=(const BoostedClassifier &bc1, const BoostedClassifier &bc2);
 
-#ifdef MOVABLE_TRAIN
 	/**
 	 * classify() - Classify a set of samples using the learned classifier
 	 *
@@ -187,36 +129,31 @@ public:
 	 */
 	void classify(const Dataset &dataset,
 		      const sampleSet &samplePositions,
-		      EVec &predictions) const
-	{
-		predictions.resize(samplePositions.size());
-		predictions.setZero();
-
-		for (unsigned int w = 0; w < weakLearners.size(); ++w) {
-			EVec currentResponse;
-			weakLearners[w]->evaluate(dataset,
-						  samplePositions,
-						  currentResponse);
-			predictions += currentResponse;
-		}
-	}
+		      EVec &predictions) const;
 
 	/**
 	 * getChCount() - Get the fraction of filters for each specific channel
 	 *
 	 * @count: output filter count
 	 */
-	void getChCount(std::vector< int > &count)
-	{
-		for (unsigned int w = 0; w < weakLearners.size(); ++w) {
-			weakLearners[w]->getChCount(count);
-		}
-	}
-
-#endif /* MOVABLE_TRAIN */
+	void getChCount(std::vector< int > &count);
 
 	/**
-	 * classifyImage() - Classify an image using the learned classifier
+	 * classifyImage() - Classify an image using the learned classifier on
+	 *                   the set of detected candidate points
+	 *
+	 * @DS        : dataset where the points have to be extracted
+	 * @ePoints   : set of candidate points
+	 *
+	 * @prediction: computed result image
+	 */
+	void classifyImage(const Dataset &DS,
+			   const sampleSet& ePoints,
+			   EMat &prediction) const;
+
+	/**
+	 * classifyFullImage() - Classify all the points in a given image using
+	 *                       the learned classifier
 	 *
 	 * @imgVec    : vector containing the channels associated with the image
 	 * @borderSize: size of the border that has to be excluded from the
@@ -224,22 +161,9 @@ public:
 	 *
 	 * @prediction: computed result image
 	 */
-	void classifyImage(const std::vector< cv::Mat > &imgVec,
-			   const unsigned int borderSize,
-			   EMat &prediction) const
-	{
-		prediction.resize(imgVec[0].rows-2*borderSize,
-				  imgVec[0].cols-2*borderSize);
-		prediction.setZero();
-
-		for (unsigned int w = 0; w < weakLearners.size(); ++w) {
-			EMat currentResponse;
-			weakLearners[w]->evaluateOnImage(imgVec,
-							 borderSize,
-							 currentResponse);
-			prediction += currentResponse;
-		}
-	}
+	void classifyFullImage(const std::vector< cv::Mat > &imgVec,
+			       const unsigned int borderSize,
+			       EMat &prediction) const;
 
 	/**
 	 * Serialize() - Serialize a boosted classifier in JSON format

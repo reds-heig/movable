@@ -25,6 +25,31 @@
 #include "FilterBank.hpp"
 #include "utils.hpp"
 
+FilterBank::FilterBank(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+FilterBank::FilterBank(const FilterBank &obj)
+{
+	this->filters = obj.filters;
+}
+bool
+operator==(const FilterBank &fb1, const FilterBank &fb2)
+{
+	if (fb1.filters == fb2.filters) {
+		return true;
+	}
+	return false;
+}
+
+bool
+operator!=(const FilterBank &fb1, const FilterBank &fb2)
+{
+	return !(fb1 == fb2);
+}
+
+
 #ifdef MOVABLE_TRAIN
 FilterBank::FilterBank(const Parameters &params,
 		       const SmoothingMatrices &SM,
@@ -196,6 +221,7 @@ FilterBank::FilterBank(std::string &descr_json)
 	}
 	Deserialize(root);
 }
+#endif /* MOVABLE_TRAIN */
 
 void
 FilterBank::evaluateFilters(const Dataset &dataset,
@@ -222,7 +248,6 @@ FilterBank::evaluateFilters(const Dataset &dataset,
 		features.col(iF) = samples * filters[iF].X;
 	}
 }
-#endif /* MOVABLE_TRAIN */
 
 void
 FilterBank::evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
@@ -255,6 +280,14 @@ FilterBank::evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
 		}
 	}
 	features = featTmp.transpose();
+}
+
+void
+FilterBank::getChCount(std::vector< int > &count)
+{
+	for (unsigned int iF = 0; iF < filters.size(); ++iF) {
+		count[filters[iF].chNo]++;
+	}
 }
 
 void

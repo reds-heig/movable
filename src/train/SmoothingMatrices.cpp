@@ -132,3 +132,42 @@ SmoothingMatrices::createSmoothingMatrixOnes(const unsigned int size) const
 
 	return X;
 }
+
+const EMat&
+SmoothingMatrices::getSmoothingMatrix(const unsigned int filterSize,
+				      const float lambda) const
+{
+	const int XPos_size = getPosSize(filterSize);
+	const int XPos_lambda = getPosLambda(lambda);
+
+	if (XPos_size < 0 || XPos_lambda < 0) {
+		log_err("The requested smoothing matrix does not exist "
+			"(filter size = %d, lambda = %f)",
+			filterSize, lambda);
+		/* Return an empty EMat */
+		static EMat nullresult;
+		return nullresult;
+	}
+	return M[XPos_size][XPos_lambda];
+}
+
+int
+SmoothingMatrices::getPosLambda(const float lambda) const {
+	std::vector< float >::const_iterator it;
+	if ((it = std::find(smoothingValues.begin(),
+			    smoothingValues.end(),
+			    lambda)) != smoothingValues.end()) {
+		return std::distance(smoothingValues.begin(), it);
+	}
+	return -1;
+}
+
+int
+SmoothingMatrices::getPosSize(const unsigned int size) const {
+	std::vector< unsigned int >::const_iterator it;
+	if ((it = std::find(sizes.begin(), sizes.end(),
+			    size)) != sizes.end()) {
+		return std::distance(sizes.begin(), it);
+	}
+	return -1;
+}

@@ -94,6 +94,13 @@ Dataset::Dataset(const Parameters &params)
 					 std::to_string(imgRescaleFactor));
 	}
 
+	houghMinDist = params.houghMinDist;
+	houghHThresh = params.houghHThresh;
+	houghLThresh = params.houghLThresh;
+	houghMinRad = params.houghMinRad;
+	houghMaxRad = params.houghMaxRad;
+	fastClassifier = params.fastClassifier;
+
 #ifdef MOVABLE_TRAIN
 	gtValues = params.gtValues;
 	createGtPairs(params.gtValues);
@@ -118,11 +125,26 @@ Dataset::Dataset(const Parameters &params)
 			(int)gt_paths.size());
 		throw std::runtime_error("inconsistentPathList");
 	}
+
+	/* Pre-allocate structures */
+	imagesNo = img_paths.size();
+	originalSizes.resize(imagesNo);
+	masks.resize(imagesNo);
+	originalGts.resize(imagesNo);
+	imagePaths.resize(imagesNo);
+	ePoints.resize(imagesNo);
+	for (unsigned int i = 0; i < imageOps.size(); ++i) {
+		data[i].resize(imagesNo);
+	}
+	for (unsigned int i = 0; i < gtPairsNo; ++i) {
+		gts[i].resize(imagesNo);
+	}
 	/* Load images */
+#pragma omp parallel for schedule(dynamic)
 	for (unsigned int i = 0; i < img_paths.size(); ++i) {
 		log_info("\t\tAdding image %d/%d...",
 			 (int)i+1, (int)img_paths.size());
-		if (addImage(img_paths[i], mask_paths[i],
+		if (addImage(i, img_paths[i], mask_paths[i],
 			     gt_paths[i]) != EXIT_SUCCESS) {
 			log_err("Error encountered while loading image %d/%d",
 				(int)i+1, (int)img_paths.size());
@@ -139,11 +161,22 @@ Dataset::Dataset(const Parameters &params)
 			(int)img_paths.size(), (int)mask_paths.size());
 		throw std::runtime_error("inconsistentPathList");
 	}
+
+	/* Pre-allocate structures */
+	imagesNo = img_paths.size();
+	originalSizes.resize(imagesNo);
+	masks.resize(imagesNo);
+	imagePaths.resize(imagesNo);
+	ePoints.resize(imagesNo);
+	for (unsigned int i = 0; i < imageOps.size(); ++i) {
+		data[i].resize(imagesNo);
+	}
 	/* Load images */
+#pragma omp parallel for schedule(dynamic)
 	for (unsigned int i = 0; i < img_paths.size(); ++i) {
 		log_info("\t\tAdding image %d/%d...",
 			 (int)i+1, (int)img_paths.size());
-		if (addImage(img_paths[i], mask_paths[i]) != EXIT_SUCCESS) {
+		if (addImage(i, img_paths[i], mask_paths[i]) != EXIT_SUCCESS) {
 			log_err("Error encountered while loading image %d/%d",
 				(int)i+1, (int)img_paths.size());
 			throw std::runtime_error("imageLoading");
@@ -153,8 +186,155 @@ Dataset::Dataset(const Parameters &params)
 
 }
 
-#ifndef TESTS
+void Dataset::getSampleMatrix(const sampleSet &samplePositions,
+			      const std::vector< unsigned int > &samplesIdx,
+			      const unsigned int chNo,
+			      const unsigned int rowOffset,
+			      const unsigned int colOffset,
+			      const unsigned int size,
+			      EMat &samples) const
+{
+	assert (chNo < dataChNo);
 
+	const unsigned int samplesNo = samplesIdx.size();
+	const unsigned int sampleArea = size*size;
+
+	samples.resize(samplesNo, sampleArea);
+	for (unsigned int iX = 0; iX < samplesNo; ++iX) {
+		const samplePos &s = samplePositions[samplesIdx[iX]];
+		EMat tmp = data[chNo][s.imageNo].block(s.row+rowOffset,
+						       s.col+colOffset,
+						       size, size);
+		samples.row(iX) = Eigen::Map< EMat >(tmp.data(), 1,
+						     sampleArea);
+	}
+}
+
+#ifdef MOVABLE_TRAIN
+const EMat&
+Dataset::getGt(const int pairNo,
+	       const unsigned int imageNo) const
+{
+	if (pairNo < 0 || pairNo >= (int)gtPairsNo ||
+	    imageNo >= imagesNo) {
+		log_err("The requested gt %d does not exist in "
+			"pair %d (limits: image = %d, pair = %d)",
+			imageNo, pairNo, imagesNo-1, gtPairsNo-1);
+		/* Return an empty EMat */
+		static EMat nullresult;
+		return nullresult;
+	}
+	return gts[pairNo][imageNo];
+}
+
+int
+Dataset::getGtNegativePairValue(const unsigned int gtPair) const
+{
+	if (gtPair >= gtPairsNo) {
+		log_err("The desired gt pair (%d) does not exist",
+			gtPair);
+		return -1;
+	}
+	return gtPairValues[gtPair].first;
+}
+
+int
+Dataset::getGtPositivePairValue(const unsigned int gtPair) const
+{
+	if (gtPair >= gtPairsNo) {
+		log_err("The desired gt pair (%d) does not exist",
+			gtPair);
+		return -1;
+	}
+	return gtPairValues[gtPair].second;
+}
+
+const gtVector&
+Dataset::getGtVector(const int pairNo) const
+{
+	if (pairNo >= (int)gtPairsNo || pairNo < 0) {
+		log_err("The requested gt vector does not exist (pair "
+			"= %d, max value = %d)", pairNo, gtPairsNo-1);
+		/* Return an empty vector */
+		static gtVector nullresult;
+		return nullresult;
+	}
+	return gts[pairNo];
+}
+
+const EMat&
+Dataset::getOriginalGt(const unsigned int imageNo) const
+{
+	if (imageNo >= imagesNo) {
+		log_err("The requested original gt (%d) does not exist",
+			imageNo);
+		/* Return an empty EMat */
+		static EMat nullresult;
+		return nullresult;
+	}
+	return originalGts[imageNo];
+}
+
+int
+Dataset::getSamplePositions(const int sampleClass,
+			    const unsigned int gtPair,
+			    const unsigned int samplesNo,
+			    sampleSet &samplePositions) const
+{
+	if (sampleClass != POS_GT_CLASS && sampleClass != NEG_GT_CLASS) {
+		return -EXIT_FAILURE;
+	}
+
+	return getAvailableSamples(gts[(unsigned int)gtPair],
+				   sampleClass,
+				   samplesNo,
+				   samplePositions);
+}
+
+bool
+Dataset::isFeedbackImage(const int imageNo) const
+{
+	assert(imageNo >= 0);
+	assert(imageNo < (int)imagesNo);
+
+	return feedbackImagesFlag[imageNo];
+}
+
+unsigned int
+Dataset::getGtPairsNo() const
+{
+	return gtPairsNo;
+}
+
+unsigned int
+Dataset::getGtValuesNo() const
+{
+	return gtValues.size();
+}
+
+#endif /* MOVABLE_TRAIN */
+
+void
+Dataset::shrinkSamplePositions(sampleSet &samplePositions,
+			       const unsigned int desiredSize)
+{
+	assert(desiredSize > 0);
+	assert(desiredSize <= samplePositions.size());
+
+	std::vector< unsigned int > newSamplesPos =
+		randomSamplingWithoutReplacement(desiredSize,
+						 samplePositions.size());
+
+	sampleSet newSamples(desiredSize);
+
+	for (unsigned int i = 0; i < desiredSize; ++i) {
+		newSamples[i] = samplePositions[newSamplesPos[i]];
+	}
+
+	samplePositions = newSamples;
+}
+
+#ifndef TESTS
 #ifdef MOVABLE_TRAIN
 Dataset::Dataset(const Parameters &params,
 		 const Dataset &srcDataset,
@@ -163,12 +343,9 @@ Dataset::Dataset(const Parameters &params,
 Dataset::Dataset(const Dataset &srcDataset,
 		 const std::vector< BoostedClassifier * > &boostedClassifiers)
 #endif /* MOVABLE_TRAIN */
-
 #else
-
 Dataset::Dataset(const Dataset &srcDataset,
 		 const std::vector< BoostedClassifier * > &boostedClassifiers)
-
 #endif /* TESTS */
 {
 	/* Copy values from the source dataset */
@@ -177,10 +354,18 @@ Dataset::Dataset(const Dataset &srcDataset,
 	this->imageOps = srcDataset.imageOps;
 	this->imagesNo = srcDataset.imagesNo;
 	this->imageNames = srcDataset.imageNames;
+	this->imagePaths = srcDataset.imagePaths;
 	this->sampleSize = srcDataset.sampleSize;
 	this->borderSize = srcDataset.borderSize;
 	this->masks = srcDataset.masks;
+	this->ePoints = srcDataset.ePoints;
 	this->originalSizes = srcDataset.originalSizes;
+	this->houghMinDist = srcDataset.houghMinDist;
+	this->houghHThresh = srcDataset.houghHThresh;
+	this->houghLThresh = srcDataset.houghLThresh;
+	this->houghMinRad = srcDataset.houghMinRad;
+	this->houghMaxRad = srcDataset.houghMaxRad;
+
 #ifdef MOVABLE_TRAIN
 	this->gts = srcDataset.gts;
 	this->originalGts = srcDataset.originalGts;
@@ -205,24 +390,38 @@ Dataset::Dataset(const Dataset &srcDataset,
 		start = std::chrono::system_clock::now();
 #endif /* TESTS */
 
-		/* Prepare a vector containing the set of OpenCV matrices
-		   corresponding to the available channels */
-		std::vector< cv::Mat > chs;
-		getChsForImage(i, chs);
-		for (unsigned int bc = 0; bc < boostedClassifiers.size(); ++bc) {
-			boostedClassifiers[bc]->classifyImage(chs,
-							      borderSize,
-							      data[dataChNo+bc][i]);
-
+		if (fastClassifier) {
+			for (unsigned int bc = 0;
+			     bc < boostedClassifiers.size(); ++bc) {
+				boostedClassifiers[bc]->classifyImage(*this,
+								      ePoints[i],
+								      data[dataChNo+bc][i]);
 #ifndef TESTS
 #ifdef MOVABLE_TRAIN
-			saveClassifiedImage(data[dataChNo+bc][i],
-					    params.intermedResDir[bc],
-					    imageNames[i],
-					    borderSize);
+				saveClassifiedImage(data[dataChNo+bc][i],
+						    params.intermedResDir[bc],
+						    imageNames[i],
+						    borderSize);
+#endif /* MOVABLE_TRAIN */
+#endif /* TESTS */
+			}
+		} else {
+			std::vector< cv::Mat > chs;
+			getChsForImage(i, chs);
+			for (unsigned int bc = 0; bc < boostedClassifiers.size(); ++bc) {
+				boostedClassifiers[bc]->classifyFullImage(chs,
+									  borderSize,
+									  data[dataChNo+bc][i]);
+#ifndef TESTS
+#ifdef MOVABLE_TRAIN
+				saveClassifiedImage(data[dataChNo+bc][i],
+						    params.intermedResDir[bc],
+						    imageNames[i],
+						    borderSize);
 #endif /* MOVABLE_TRAIN */
 #endif /* TESTS */
 
+			}
 		}
 
 #ifndef TESTS
@@ -269,6 +468,12 @@ Dataset::Dataset(const Dataset &srcDataset,
 #endif /* MOVABLE_TRAIN */
 }
 
+unsigned int
+Dataset::getBorderSize() const
+{
+	return borderSize;
+}
+
 void
 Dataset::getChsForImage(const unsigned int n, std::vector< cv::Mat > &chs) const
 {
@@ -286,10 +491,127 @@ Dataset::getChsForImage(const unsigned int n, std::vector< cv::Mat > &chs) const
 	}
 }
 
+const EMat&
+Dataset::getData(const unsigned int channelNo,
+		 const unsigned int imageNo) const
+{
+	if (channelNo >= dataChNo || imageNo >= imagesNo) {
+		log_err("The requested image %d does not exist in "
+			"channel %d (limits: image = %d, channel = %d)",
+			imageNo, channelNo, imagesNo-1, dataChNo-1);
+		/* Return an empty EMat */
+		static EMat nullresult;
+		return nullresult;
+	}
+	return data[channelNo][imageNo];
+}
+
+unsigned int
+Dataset::getDataChNo() const
+{
+	return dataChNo;
+}
+
+const dataVector&
+Dataset::getDataVector(const unsigned int channelNo) const
+{
+	if (channelNo >= dataChNo) {
+		log_err("The requested data vector does not exist "
+			"channel = %d, max value = %d)",
+			channelNo, dataChNo-1);
+		/* Return an empty vector if the wrong channel number is
+		   requested */
+		static dataVector nullresult;
+		return nullresult;
+	}
+	return data[channelNo];
+}
+
+const sampleSet&
+Dataset::getEPoints(const unsigned int imageNo) const
+{
+	if (imageNo >= imagesNo) {
+		log_err("The requested image %d does not exist "
+			"(limit: image = %d)",
+			imageNo, imagesNo-1);
+		/* Return an empty sampleSet */
+		static sampleSet nullresult;
+		return nullresult;
+	}
+	return ePoints[imageNo];
+}
+
+std::string
+Dataset::getImageName(const unsigned int imageNo) const
+{
+	if (imageNo >= imagesNo) {
+		log_err("The requested image %d does not exist",
+			imageNo);
+		return std::string();
+	}
+	return imageNames[imageNo];
+}
+
+std::string
+Dataset::getImagePath(const unsigned int imageNo) const
+{
+	if (imageNo >= imagesNo) {
+		log_err("The requested image %d does not exist",
+			imageNo);
+		return std::string();
+	}
+	return imagePaths[imageNo];
+}
+
+unsigned int
+Dataset::getImagesNo() const
+{
+	return imagesNo;
+}
+
+const EMat&
+Dataset::getMask(const unsigned int imageNo) const
+{
+	if (imageNo >= imagesNo) {
+		log_err("The requested image %d does not exist "
+			"(limit: image = %d)",
+			imageNo, imagesNo-1);
+		/* Return an empty EMat */
+		static EMat nullresult;
+		return nullresult;
+	}
+	return masks[imageNo];
+}
+
+std::pair< int, int >
+Dataset::getOriginalImgSize(const unsigned int imgNo) const
+{
+	if (imgNo >= imagesNo) {
+		log_err("The requested image %u does not exist "
+			"(limit: image = %u)",
+			imgNo, imagesNo-1);
+		throw std::runtime_error("invalidRequest");
+	}
+	if (imgNo >= originalSizes.size()) {
+		log_err("Not enough image sizes were pushed (%lu, "
+			"request is for %u",
+			originalSizes.size(), imgNo);
+		throw std::runtime_error("invalidRequest");
+	}
+	return originalSizes[imgNo];
+}
+
+unsigned int
+Dataset::getSampleSize() const
+{
+	return sampleSize;
+}
+
+
 #ifdef MOVABLE_TRAIN
 
 int
-Dataset::addGt(const cv::Mat &src)
+Dataset::addGt(const unsigned int imageID, const cv::Mat &src)
 {
 	/* Enlarge the original GT image and store it */
 	cv::Mat oSrc;
@@ -298,7 +620,7 @@ Dataset::addGt(const cv::Mat &src)
 			   cv::BORDER_CONSTANT, IGN_GT_CLASS);
 	EMat oTmp(oSrc.rows, oSrc.cols);
 	cv::cv2eigen(oSrc, oTmp);
-	originalGts.push_back(oTmp);
+	originalGts[imageID] = oTmp;
 
 	for (unsigned int i = 0; i < gtPairsNo; ++i) {
 		cv::Mat tmp(src.rows, src.cols, CV_32FC1);
@@ -323,7 +645,7 @@ Dataset::addGt(const cv::Mat &src)
 
 		EMat eTmp(tmp.rows, tmp.cols);
 		cv::cv2eigen(tmp, eTmp);
-		gts[i].push_back(eTmp);
+		gts[i][imageID] = eTmp;
 
 #ifdef VISUALIZE_IMG_DATA
 		cv::namedWindow("InGt", cv::WINDOW_NORMAL);
@@ -342,12 +664,14 @@ Dataset::addGt(const cv::Mat &src)
 
 #ifdef MOVABLE_TRAIN
 int
-Dataset::addImage(const std::string &imgPath,
+Dataset::addImage(const unsigned int imageID,
+		  const std::string &imgPath,
 		  const std::string &maskPath,
 		  const std::string &gtPath)
 #else
 int
-Dataset::addImage(const std::string &imgPath,
+Dataset::addImage(const unsigned int imageID,
+		  const std::string &imgPath,
 		  const std::string &maskPath)
 #endif /* MOVABLE_TRAIN */
 {
@@ -362,7 +686,7 @@ Dataset::addImage(const std::string &imgPath,
 
 	/* Rescale mask. Its size will be used to alter the size of the input
 	   image and the gt */
-	originalSizes.push_back(std::make_pair(mask.rows, mask.cols));
+	originalSizes[imageID] = std::make_pair(mask.rows, mask.cols);
 
 	cv::resize(mask, mask, cv::Size(0, 0),
 		   1.0/(double)imgRescaleFactor,
@@ -371,38 +695,49 @@ Dataset::addImage(const std::string &imgPath,
 
 	cv::Mat tmp;
 	mask.convertTo(tmp, CV_32FC1);
-	addMask(tmp);
+	addMask(imageID, tmp);
 
+	imagePaths[imageID] = imgPath;
 	/* Always read a color image, it will be the loop over the operations
 	   that will grab the different component and eventually keep the
 	   grayscale one only */
 	cv::Mat img = cv::imread(imgPath.c_str(), CV_LOAD_IMAGE_COLOR);
+	/* Use the image as a source to the algorithm that finds the candidate
+	   points for classification and stores them in a mask that
+	   will be later used for the actual classification */
+	if (fastClassifier) {
+		computeCandidatePointsMask(imageID, img, mask);
+	}
+
 	cv::resize(img, img, cv::Size(mask.cols, mask.rows), 0, 0,
 		   cv::INTER_LANCZOS4);
-	img.convertTo(tmp, CV_32FC3);
-	img = tmp / 255;
 
 	/* Replicate image borders */
 	cv::copyMakeBorder(img, img,
 			   borderSize, borderSize, borderSize, borderSize,
 			   cv::BORDER_REPLICATE);
+
+	/* Convert image to float and rescale it in [0, 1] */
+	img.convertTo(img, CV_32FC3);
+	img = img/255;
+
 	/* Now alter the image according to user specifications, creating the
 	   corresponding channels */
 	for (unsigned int i = 0; i < imageOps.size(); ++i) {
 		EMat tmp;
 		imageOps[i](img, tmp, (void *)&borderSize);
-		data[i].push_back(tmp);
+		data[i][imageID] = tmp;
 	}
 
 	/* Check that all sizes are consistent */
-	const unsigned int rowsNo = masks[imagesNo].rows();
-	const unsigned int colsNo = masks[imagesNo].cols();
+	const unsigned int rowsNo = masks[imageID].rows();
+	const unsigned int colsNo = masks[imageID].cols();
 
 	for (unsigned int i = 0; i < imageOps.size(); ++i) {
-		if (data[i][imagesNo].rows() != rowsNo ||
-		    data[i][imagesNo].cols() != colsNo) {
+		if (data[i][imageID].rows() != rowsNo ||
+		    data[i][imageID].cols() != colsNo) {
 			log_err("Invalid image size -- image %d, channel %d",
-				imagesNo+1, i);
+				imageID+1, i);
 			return -EXIT_FAILURE;
 		}
 	}
@@ -412,18 +747,16 @@ Dataset::addImage(const std::string &imgPath,
 	gt.convertTo(tmp, CV_32FC1);
 	cv::resize(tmp, tmp, cv::Size(mask.cols, mask.rows), 0, 0,
 		   cv::INTER_NEAREST);
-	addGt(tmp);
+	addGt(imageID, tmp);
 	for (unsigned int i = 0; i < gtPairsNo; ++i) {
-		if (gts[i][imagesNo].rows() != rowsNo ||
-		    gts[i][imagesNo].cols() != colsNo) {
+		if (gts[i][imageID].rows() != rowsNo ||
+		    gts[i][imageID].cols() != colsNo) {
 			log_err("Invalid GT size -- image %d, gt pair %d",
-				imagesNo+1, i);
+				imageID+1, i);
 			return -EXIT_FAILURE;
 		}
 	}
 #endif /* MOVABLE_TRAIN */
-
-	imagesNo++;
 
 	return EXIT_SUCCESS;
 }
@@ -543,10 +876,10 @@ Dataset::loadPaths(const Parameters &params,
 		   std::vector< std::string > &mask_paths,
 		   std::vector< std::string > &gt_paths)
 #else
-int
-Dataset::loadPaths(const Parameters &params,
-		   std::vector< std::string > &img_paths,
-		   std::vector< std::string > &mask_paths)
+	int
+	Dataset::loadPaths(const Parameters &params,
+			   std::vector< std::string > &img_paths,
+			   std::vector< std::string > &mask_paths)
 #endif /* MOVABLE_TRAIN */
 {
 	if (loadPathFile(params.datasetPath, params.imgPathsFName,
@@ -1219,23 +1552,24 @@ Dataset::sobelDrvY(const cv::Mat &src, EMat &dst, const void *opaque)
 }
 
 int
-Dataset::addMask(cv::Mat &src)
+Dataset::addMask(const unsigned int imageID,
+		 cv::Mat &src)
 {
 	cv::copyMakeBorder(src, src,
 			   borderSize, borderSize, borderSize, borderSize,
 			   cv::BORDER_CONSTANT, MASK_EXCLUDED);
 
-// #ifdef MOVABLE_TRAIN
-// 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
-// 						    cv::Size(2*sampleSize + 1,
-// 							     2*sampleSize + 1),
-// 						    cv::Point(sampleSize,
-// 							      sampleSize));
-// 	cv::Mat dst;
-// 	cv::erode(src, dst, element);
-// #else
+	// #ifdef MOVABLE_TRAIN
+	// 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
+	// 						    cv::Size(2*sampleSize + 1,
+	// 							     2*sampleSize + 1),
+	// 						    cv::Point(sampleSize,
+	// 							      sampleSize));
+	// 	cv::Mat dst;
+	// 	cv::erode(src, dst, element);
+	// #else
 	cv::Mat dst = src;
-// #endif /* MOVABLE_TRAIN */
+	// #endif /* MOVABLE_TRAIN */
 
 #ifdef VISUALIZE_IMG_DATA
 	cv::namedWindow("InMask", cv::WINDOW_NORMAL);
@@ -1247,9 +1581,251 @@ Dataset::addMask(cv::Mat &src)
 
 	EMat eDst(dst.rows, dst.cols);
 	cv::cv2eigen(dst, eDst);
-	masks.push_back(eDst);
+	masks[imageID] = eDst;
 
 	return EXIT_SUCCESS;
+}
+
+void
+Dataset::computeCandidatePointsMask(const unsigned int imageID,
+				    const cv::Mat& colorImg,
+				    const cv::Mat& mask)
+{
+	cv::Mat grayImg;
+	cv::cvtColor(colorImg, grayImg, CV_BGR2GRAY);
+
+	cv::Mat labImg;
+	cv::cvtColor(colorImg, labImg, cv::COLOR_BGR2Lab);
+
+	std::vector< cv::Mat > VLAB(3);
+	cv::split(labImg, VLAB);
+
+	int histSize = 256;
+	float range[ ] = { 0, 256 } ;
+	const float *histRange = { range };
+	bool uniform = true;
+	bool accumulate = false;
+
+	cv::Mat l_hist, b_hist;
+	cv::calcHist(&VLAB[0], 1, 0, cv::Mat(), l_hist, 1,
+		     &histSize, &histRange, uniform, accumulate);
+	cv::calcHist(&VLAB[2], 1, 0, cv::Mat(), b_hist, 1,
+		     &histSize, &histRange, uniform, accumulate);
+
+	double minTmp;
+	double maxL;
+	double maxB;
+	cv::Point pminB;
+	cv::Point pmaxB;
+	minMaxLoc(l_hist, &minTmp, &maxL);
+	minMaxLoc(b_hist, &minTmp, &maxB, &pminB, &pmaxB);
+
+	/* Get the two threshold points on the histograms */
+	int th_L=-1;
+	int th_b=-1;
+
+	for (int i = 0; i < histSize-1; ++i) {
+		// fprintf(stderr, "%d: L=%f (%f), b=%f (%f)\n", i,
+	    	//     l_hist.at<float>(0, i), l_hist.at<float>(0, i)/maxL,
+	    	//     b_hist.at<float>(0, i), b_hist.at<float>(0, i)/maxB);
+		if (th_L < 0 &&
+		    l_hist.at<float>(0, i)/maxL >= L_THRESHOLD_INIT &&
+		    (i < histSize-3 &&
+		     l_hist.at< float >(0, i) < l_hist.at< float >(0, i+1) &&
+		     l_hist.at< float >(0, i) < l_hist.at< float >(0, i+2) &&
+		     l_hist.at< float >(0, i+2)/maxL > L_THRESHOLD_NEXT)) {
+			th_L = i;
+		}
+	}
+
+	unsigned int j = pmaxB.y;
+	while (b_hist.at< float >(0, j)/maxB > B_THRESHOLD) {
+		j--;
+	}
+	th_b = j+1;
+
+	// fprintf(stderr, "L: %d, b: %d\n", th_L, th_b);
+
+	if (th_L < 0)
+		th_L = 255;
+	if (th_b < 0)
+		th_b = 255;
+
+	cv::threshold(VLAB[0], VLAB[0], th_L, 255, cv::THRESH_BINARY_INV);
+	cv::threshold(VLAB[2], VLAB[2], th_b, 255, cv::THRESH_BINARY_INV);
+
+	cv::Mat thresholdedBinImage(colorImg.size(), CV_8UC1);
+	thresholdedBinImage = cv::Scalar(0);
+
+	for (int r = 0; r < colorImg.rows; ++r) {
+		for (int c = 0; c < colorImg.cols; ++c) {
+			if (VLAB[0].at< uchar >(r,c) > 0 ||
+			    VLAB[2].at< uchar >(r,c) > 0) {
+				thresholdedBinImage.at< uchar >(r,c) = 255;
+			}
+		}
+	}
+
+	cv::Mat eroded;
+	// cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+	// 					    cv::Size(ERODE_SIZE,
+	// 						     ERODE_SIZE));
+	// cv::erode(thresholdedBinImage, eroded, element);
+
+	eroded = thresholdedBinImage.clone();
+
+	std::vector< std::vector< cv::Point > > contoursH;
+	std::vector< cv::Vec4i > hierarchyH;
+	cv::findContours(eroded, contoursH, hierarchyH,
+			 cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE,
+			 cv::Point(0, 0));
+	std::vector< std::vector< cv::Point > > hull(contoursH.size());
+	for (unsigned int i = 0; i < contoursH.size(); ++i) {
+		cv::convexHull(cv::Mat(contoursH[i]), hull[i], false);
+	}
+	cv::Mat removedWBC = cv::Mat::zeros(eroded.size(), CV_8UC1);
+	cv::drawContours(removedWBC, hull, -1, cv::Scalar(255), -1);
+
+	// cv::Mat removedWBC = eroded.clone();
+	cv::Mat dst(removedWBC.size(), CV_8UC1);
+	dst = cv::Scalar(0);
+
+	cv::Mat im_floodfill = removedWBC.clone();
+	cv::Mat im_floodfill_inv;
+	cv::floodFill(im_floodfill, cv::Point(0,0), cv::Scalar(255));
+	cv::bitwise_not(im_floodfill, im_floodfill_inv);
+
+	removedWBC = (removedWBC | im_floodfill_inv);
+
+	std::vector< std::vector< cv::Point > > contours;
+	std::vector< cv::Vec4i > hierarchy;
+	cv::Mat ctrSearchImg = removedWBC.clone();
+	cv::findContours(ctrSearchImg, contours, hierarchy,
+			 cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
+	double maxArea = houghMaxRad*houghMaxRad*3.14;
+
+	int idx = 0;
+	for ( ; idx >= 0; idx = hierarchy[idx][0]) {
+		const std::vector< cv::Point >& c = contours[idx];
+		double area = fabs(cv::contourArea(cv::Mat(c)));
+		if (area < maxArea) {
+			cv::drawContours(dst,
+					 contours,
+					 idx,
+					 cv::Scalar(255),
+					 cv::FILLED,
+					 cv::LINE_8,
+					 hierarchy);
+		}
+	}
+
+	// cv::namedWindow("mau", CV_WINDOW_NORMAL);
+	// cv::imshow("mau", dst);
+	// cv::waitKey();
+
+	// /* Detect RBCs on smoothed grayscale image */
+	// cv::medianBlur(grayImg, grayImg, M_BLUR_SIZE);
+	// std::vector< cv::Vec3f > RBCs;
+	// cv::HoughCircles(grayImg, RBCs, cv::HOUGH_GRADIENT, 1,
+	// 		 houghMinDist,
+	// 		 houghHThresh, houghLThresh,
+	// 		 houghMinRad, houghMaxRad);
+
+	// cv::Mat dst(eroded.rows, eroded.cols, CV_8U);
+	// dst = cv::Scalar(0);
+
+	// for (size_t i = 0; i < RBCs.size(); ++i) {
+	// 	cv::Vec3i c = RBCs[i];
+	// 	cv::Mat tmp(eroded.rows, eroded.cols, CV_8U);
+	// 	tmp = cv::Scalar(0);
+	// 	cv::circle(tmp, cv::Point(c[0], c[1]), c[2], cv::Scalar(255),
+	// 		   -1, cv::LINE_8);
+
+	// 	cv::Mat roi_rbc = tmp(cv::Range(std::max(c[1]-c[2],
+	// 						 0),
+	// 					std::min(c[1]+c[2],
+	// 						 eroded.rows-1)),
+	// 			      cv::Range(std::max(c[0]-c[2],
+	// 						 0),
+	// 					std::min(c[0]+c[2],
+	// 						 eroded.cols-1)));
+	// 	cv::Mat roi_detection = eroded(cv::Range(std::max(c[1]-c[2],
+	// 							  0),
+	// 						 std::min(c[1]+c[2],
+	// 							  eroded.rows-1)),
+	// 				       cv::Range(std::max(c[0]-c[2],
+	// 							  0),
+	// 						 std::min(c[0]+c[2],
+	// 							  eroded.cols-1)));
+	// 	cv::Mat roi_region;
+	// 	cv::bitwise_and(roi_rbc, roi_detection, roi_region);
+	// 	if (cv::countNonZero(roi_region) > 0) {
+	// 		cv::circle(dst,
+	// 			   cv::Point(c[0], c[1]),
+	// 			   c[2]+(houghMaxRad/10),
+	// 			   cv::Scalar(255),
+	// 			   -1,
+	// 			   cv::LINE_8);
+	// 	}
+	// }
+	//
+	// cv::namedWindow("inColor", CV_WINDOW_NORMAL);
+	// cv::imshow("inColor", colorImg);
+	// // cv::namedWindow("grayColor", CV_WINDOW_NORMAL);
+	// // cv::imshow("grayColor", grayImg);
+	// cv::namedWindow("thresholdedBinImage", CV_WINDOW_NORMAL);
+	// cv::imshow("thresholdedBinImage", thresholdedBinImage);
+	// cv::namedWindow("er", CV_WINDOW_NORMAL);
+	// cv::imshow("er", eroded);
+	// /* Mask out incomplete RBCs on the border */
+	// /* Mask out replicated border*/
+
+	cv::resize(dst, dst, cv::Size(mask.cols, mask.rows), 0, 0,
+		   cv::INTER_NEAREST);
+	cv::bitwise_and(dst, mask, dst);
+	cv::copyMakeBorder(dst, dst,
+			   borderSize, borderSize, borderSize, borderSize,
+			   cv::BORDER_CONSTANT, cv::Scalar(0));
+
+	// cv::Mat replicated;
+	// cv::cvtColor(dst, replicated, CV_GRAY2BGR);
+	// cv::Mat overlayed;
+	// cv::Mat enlargedColorImg;
+	// cv::resize(colorImg, enlargedColorImg,
+	// 	   cv::Size(mask.cols, mask.rows), 0, 0,
+	// 	   cv::INTER_NEAREST);
+	// cv::copyMakeBorder(enlargedColorImg, enlargedColorImg,
+	// 		   borderSize, borderSize, borderSize, borderSize,
+	// 		   cv::BORDER_REPLICATE);
+
+	// cv::copyMakeBorder(enlargedColorImg, enlargedColorImg,
+	// 		   borderSize, borderSize, borderSize, borderSize,
+	// 		   cv::BORDER_REPLICATE);
+	// cv::addWeighted(enlargedColorImg, 0.4, replicated, 0.6, 0.0, overlayed);
+	// cv::namedWindow("overlayed", CV_WINDOW_NORMAL);
+	// cv::imshow("overlayed", overlayed);
+	// int cnt = 0;
+	// for (int r = 0; r < dst.rows; ++r) {
+	// 	for (int c = 0; c < dst.cols; ++c) {
+	// 		if (dst.at<uchar>(r,c) > 0) {
+	// 			++cnt;
+	// 		}
+	// 	}
+	// }
+	// fprintf(stderr, "Have %d whites instead of %d\n",
+	// 	cnt, dst.rows*dst.cols);
+	// cv::waitKey();
+
+	sampleSet eDst;
+	for (int r = 0; r < dst.rows; ++r) {
+		for (int c = 0; c < dst.cols; ++c) {
+			if (dst.at< uchar >(r, c) > 0) {
+				eDst.push_back(samplePos(imageID, r, c, 0));
+			}
+		}
+	}
+
+	ePoints[imageID] = eDst;
 }
 
 int

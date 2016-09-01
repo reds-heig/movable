@@ -98,20 +98,14 @@ public:
 	 *
 	 * @root: JSON's representation root
 	 */
-	FilterBank(Json::Value &root)
-	{
-		Deserialize(root);
-	}
+	FilterBank(Json::Value &root);
 
 	/**
 	 * FilterBank() - Copy constructor
 	 *
 	 * @obj: source object of the copy
 	 */
-	FilterBank(const FilterBank &obj)
-	{
-		this->filters = obj.filters;
-	}
+	FilterBank(const FilterBank &obj);
 
 	/**
 	 * operator==() - Compare two filter banks for equality
@@ -122,13 +116,7 @@ public:
 	 * Return: true if the two filter banks are identical, false otherwise
 	 */
 	friend bool
-	operator==(const FilterBank &fb1, const FilterBank &fb2)
-	{
-		if (fb1.filters == fb2.filters) {
-			return true;
-		}
-		return false;
-	}
+	operator==(const FilterBank &fb1, const FilterBank &fb2);
 
 	/**
 	 * operator!=() - Compare two filter banks for difference
@@ -139,12 +127,7 @@ public:
 	 * Return: true if the two filter banks are different, false otherwise
 	 */
 	friend bool
-	operator!=(const FilterBank &fb1, const FilterBank &fb2)
-	{
-		return !(fb1 == fb2);
-	}
-
-#ifdef MOVABLE_TRAIN
+	operator!=(const FilterBank &fb1, const FilterBank &fb2);
 
 	/**
 	 * evaluateFilters() - Evaluate the filters over a set of samples
@@ -165,14 +148,8 @@ public:
 	 *
 	 * @count: output filter count
 	 */
-	void getChCount(std::vector< int > &count)
-	{
-		for (unsigned int iF = 0; iF < filters.size(); ++iF) {
-			count[filters[iF].chNo]++;
-		}
-	}
+	void getChCount(std::vector< int > &count);
 
-#endif /* MOVABLE_TRAIN */
 	/**
 	 * evaluateFiltersOnImage() - Evaluate the filters over the channels of
 	 *			      a specific image

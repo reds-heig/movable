@@ -25,7 +25,6 @@
 #include "utils.hpp"
 
 #ifdef MOVABLE_TRAIN
-
 WeakLearner::WeakLearner(const Parameters &params,
 			 const SmoothingMatrices &SM,
 			 const Dataset &dataset,
@@ -135,6 +134,73 @@ WeakLearner::WeakLearner(const Parameters &params,
 }
 #endif /* MOVABLE_TRAIN */
 
+
+WeakLearner::WeakLearner(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+WeakLearner::WeakLearner(const WeakLearner &obj)
+{
+	/* Delete previous filter bank and regression tree, then
+	   instantiate the new ones from the copied object */
+	delete fb;
+	delete rt;
+	this->fb = new FilterBank(*(obj.fb));
+	this->rt = new RegTree(*(obj.rt));
+	this->alpha = obj.alpha;
+	this->MR = obj.MR;
+	this->loss = obj.loss;
+}
+
+WeakLearner::~WeakLearner()
+{
+	delete fb;
+	delete rt;
+}
+
+WeakLearner &
+WeakLearner::operator=(const WeakLearner &rhs)
+{
+	if (this != &rhs) {
+		delete fb;
+		delete rt;
+
+		fb = new FilterBank(*(rhs.fb));
+		rt = new RegTree(*(rhs.rt));
+		alpha = rhs.alpha;
+		MR = rhs.MR;
+		loss = rhs.loss;
+	}
+
+	return *this;
+}
+
+bool
+operator==(const WeakLearner &wl1, const WeakLearner &wl2)
+{
+	return ((fabs(wl1.MR-wl2.MR) < 1e-6) &&
+		(fabs(wl1.loss-wl2.loss) < 1e-6) &&
+		(fabs(wl1.alpha-wl2.alpha) < 1e-9) &&
+		(*(wl1.fb) == *(wl2.fb)) &&
+		(*(wl1.rt) == *(wl2.rt)));
+}
+bool
+operator!=(const WeakLearner &wl1, const WeakLearner &wl2)
+{
+	return !(wl1 == wl2);
+}
+
+void WeakLearner::evaluate(const Dataset &dataset,
+			   const sampleSet &samplePositions,
+			   EVec &predictions) const
+{
+	EMat features;
+	fb->evaluateFilters(dataset, samplePositions, features);
+	rt->predict(features, predictions);
+	predictions *= alpha;
+}
+
 WeakLearner::WeakLearner(std::string &descr_json)
 {
 	Json::Value root;
@@ -145,6 +211,38 @@ WeakLearner::WeakLearner(std::string &descr_json)
 	}
 
 	Deserialize(root);
+}
+
+void
+WeakLearner::evaluateOnImage(const std::vector< cv::Mat > &imgVec,
+			     const unsigned int borderSize,
+			     EMat &wlResponse) const
+{
+	EMat features;
+	fb->evaluateFiltersOnImage(imgVec, borderSize, features);
+	EVec treeResponse;
+	rt->predict(features, treeResponse);
+	wlResponse = Eigen::Map< EMat >(treeResponse.data(),
+					imgVec[0].rows-2*borderSize,
+					imgVec[0].cols-2*borderSize);
+	wlResponse *= alpha;
+}
+
+void WeakLearner::getChCount(std::vector< int > &count)
+{
+	fb->getChCount(count);
+}
+
+float
+WeakLearner::getLoss() const
+{
+	return loss;
+}
+
+float
+WeakLearner::getMR() const
+{
+	return MR;
 }
 
 void
