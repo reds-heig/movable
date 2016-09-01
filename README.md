@@ -7,7 +7,7 @@ Also, if you find a bug or have an idea for an interesting feature, please open 
 
 For further information on the project, please refer to the [project's webpage](https://reds.heig-vd.ch/rad/projets/movable).
 
-The software is composed of two main parts:
+The software is composed by two parts:
 - the classifier, which learns how to detect parasites on a set of manually-classified images and then applies these criteria on unseen images;
 - the GUI, which takes as input an already-classified image and allows to visualize the parasites and fix misdetections.
 
