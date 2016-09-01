@@ -52,6 +52,7 @@ WeakLearner::WeakLearner(const Parameters &params,
 	EVec Y_tree;
 	EVec W_fl;
 	EVec W_tree;
+
 	splitSampleSet(samplePositions, labels, weights, subsetSize,
 		       samples_fl, samples_tree, Y_fl, Y_tree, W_fl, W_tree);
 
@@ -134,6 +135,17 @@ WeakLearner::WeakLearner(const Parameters &params,
 }
 #endif /* MOVABLE_TRAIN */
 
+WeakLearner::WeakLearner(std::string &descr_json)
+{
+	Json::Value root;
+	Json::Reader reader;
+
+	if (!reader.parse(descr_json, root)) {
+		throw std::runtime_error("invalidJSONDescription");
+	}
+
+	Deserialize(root);
+}
 
 WeakLearner::WeakLearner(Json::Value &root)
 {
@@ -199,18 +211,6 @@ void WeakLearner::evaluate(const Dataset &dataset,
 	fb->evaluateFilters(dataset, samplePositions, features);
 	rt->predict(features, predictions);
 	predictions *= alpha;
-}
-
-WeakLearner::WeakLearner(std::string &descr_json)
-{
-	Json::Value root;
-	Json::Reader reader;
-
-	if (!reader.parse(descr_json, root)) {
-		throw std::runtime_error("invalidJSONDescription");
-	}
-
-	Deserialize(root);
 }
 
 void

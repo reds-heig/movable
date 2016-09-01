@@ -43,6 +43,19 @@
 #include "DataTypes.hpp"
 
 /**
+ * checkChannelPresent() - Check if a given channel is requested by the
+ *			   user (that is, if the corresponding string
+ *			   has been specified in the list of channels)
+ *
+ * @sought: sought channel
+ * @chList: list of requested channels
+ *
+ * Return: true if the channel was used, false otherwise
+ */
+bool checkChannelPresent(const std::string &sought,
+			 const std::vector< std::string > &chList);
+
+/**
  * computeF1Score() - Compute the F1 score for an image-threshold pair,
  *		      where the thresholded image undergoes morphological
  *		      transformations before the score computation
@@ -71,6 +84,28 @@ float computeF1Score(const cv::Mat &scoreImage,
  * Return: misclassification rate in [0, 1]
  */
 float computeMR(const EMat &img, const EMat &gt, const unsigned int borderSize);
+
+/**
+ * cvMatEquals() - Compare two OpenCV matrices for equality
+ *
+ * @m1: first matrix in the comparison
+ * @m2: second matrix in the comparison
+ *
+ * Return: true if the two matrices have the same content, false otherwise
+ */
+bool cvMatEquals(const cv::Mat m1, const cv::Mat m2);
+
+/**
+ * normalizeImage() - Normalize an image in [-1, 1] after having converted it in
+ *		      OpenCV format
+ *
+ * @resultImage: image obtained from the classification algorithm
+ * @bordersize : size of the border to drop
+ * @scoreImage : output image, normalized in [-1, 1]
+ */
+void normalizeImage(const EMat &resultImage,
+		    const int borderSize,
+		    cv::Mat &scoreImage);
 
 /**
  * randomSamplingWithoutReplacement() - Sample a given number (M) of indexes
@@ -120,71 +155,6 @@ randomWeightedSamplingWithReplacement(const unsigned int M,
 
 	return randomSamples;
 }
-
-/**
- * splitSampleSet() - Split a set of samples in two distinct groups of the
- *		      desired size, one for learning of the filters and the
- *		      other for learning the tree
- *
- * @samples	   : original sample set
- * @Y		   : corresponding set of labels
- * @W		   : corresponding weights
- * @subsetSamplesNo: cardinality of the desired subsets
- *
- * @samples_fl	   : extracted subset for filter learning
- * @samples_tree   : extracted subset for tree learning
- * @Y_fl	   : labels of the filter learning subset
- * @Y_tree	   : labels of the tree learning subset
- * @W_fl	   : weights of the filter learning subset
- * @W_tree	   : weights of the tree learning subset
- *
- * Return: -EXIT_FAILURE in case of error, EXIT_SUCCESS otherwise
- */
-int splitSampleSet(const sampleSet &samples,
-		   const EVec &Y,
-		   const EVec &W,
-		   const unsigned int subsetSamplesNo,
-		   sampleSet &samples_fl,
-		   sampleSet &samples_tree,
-		   EVec &Y_fl,
-		   EVec &Y_tree,
-		   EVec &W_fl,
-		   EVec &W_tree);
-
-/**
- * checkChannelPresent() - Check if a given channel is requested by the
- *			   user (that is, if the corresponding string
- *			   has been specified in the list of channels)
- *
- * @sought: sought channel
- * @chList: list of requested channels
- *
- * Return: true if the channel was used, false otherwise
- */
-bool checkChannelPresent(const std::string &sought,
-			 const std::vector< std::string > &chList);
-
-/**
- * cvMatEquals() - Compare two OpenCV matrices for equality
- *
- * @m1: first matrix in the comparison
- * @m2: second matrix in the comparison
- *
- * Return: true if the two matrices have the same content, false otherwise
- */
-bool cvMatEquals(const cv::Mat m1, const cv::Mat m2);
-
-/**
- * normalizeImage() - Normalize an image in [-1, 1] after having converted it in
- *		      OpenCV format
- *
- * @resultImage: image obtained from the classification algorithm
- * @bordersize : size of the border to drop
- * @scoreImage : output image, normalized in [-1, 1]
- */
-void normalizeImage(const EMat &resultImage,
-		    const int borderSize,
-		    cv::Mat &scoreImage);
 
 /**
  * removeSmallBlobs() - Equivalent of Matlab's bwareaopen(), taken from
@@ -245,6 +215,36 @@ void
 saveOverlayedImage(const std::string &imageFName,
 		   const std::string &dirPath,
 		   const std::string &imgName);
+
+/**
+ * splitSampleSet() - Split a set of samples in two distinct groups of the
+ *		      desired size, one for learning of the filters and the
+ *		      other for learning the tree
+ *
+ * @samples	   : original sample set
+ * @Y		   : corresponding set of labels
+ * @W		   : corresponding weights
+ * @subsetSamplesNo: cardinality of the desired subsets
+ *
+ * @samples_fl	   : extracted subset for filter learning
+ * @samples_tree   : extracted subset for tree learning
+ * @Y_fl	   : labels of the filter learning subset
+ * @Y_tree	   : labels of the tree learning subset
+ * @W_fl	   : weights of the filter learning subset
+ * @W_tree	   : weights of the tree learning subset
+ *
+ * Return: -EXIT_FAILURE in case of error, EXIT_SUCCESS otherwise
+ */
+int splitSampleSet(const sampleSet &samples,
+		   const EVec &Y,
+		   const EVec &W,
+		   const unsigned int subsetSamplesNo,
+		   sampleSet &samples_fl,
+		   sampleSet &samples_tree,
+		   EVec &Y_fl,
+		   EVec &Y_tree,
+		   EVec &W_fl,
+		   EVec &W_tree);
 
 #ifdef MOVABLE_TRAIN
 /**

@@ -78,7 +78,7 @@ public:
 	 *		KernelBoost classifier
 	 */
 	KernelBoost(std::string &descr_json);
-#else
+#else /* !MOVABLE_TRAIN */
 	/**
 	 * KernelBoost() - Build a KernelBoost classifier starting from its JSON
 	 *		   description(de-serialization)
@@ -90,6 +90,7 @@ public:
 	 */
 	KernelBoost(std::string &descr_json,
 		    const Parameters &params, const Dataset &dataset);
+
 #endif /* MOVABLE_TRAIN */
 
 	/**

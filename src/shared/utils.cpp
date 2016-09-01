@@ -32,6 +32,14 @@
 #include "logging.hpp"
 #include "utils.hpp"
 
+bool
+checkChannelPresent(const std::string &sought,
+		    const std::vector< std::string > &chList)
+{
+	return std::find(chList.begin(), chList.end(),
+			 sought) != chList.end();
+}
+
 float
 computeF1Score(const cv::Mat &scoreImage,
 	       const cv::Mat &gt,
@@ -93,140 +101,6 @@ computeMR(const EMat &img, const EMat &gt, const unsigned int borderSize)
 	return err_count / ((img.rows()-2*borderSize)*(img.cols()-2*borderSize));
 }
 
-std::vector< unsigned int >
-randomSamplingWithoutReplacement(const unsigned int M,
-				 const unsigned int N)
-{
-	assert (M < N);
-	assert (M > 0);
-
-	/* Uniformly-distributed RNG */
-	std::random_device rd;
-	std::mt19937 randomGenerator(rd());
-
-	/* Index pool */
-	std::vector< unsigned int > idxs(N);
-	std::iota(idxs.begin(), idxs.end(), 0);
-
-	/* Returned indexes */
-	std::vector< unsigned int > vResult(M);
-
-	for (unsigned int i = 0, max = N - 1; i < M; ++i, --max) {
-		std::uniform_int_distribution<> uniformDistribution(0, (int)max);
-		int index = uniformDistribution(randomGenerator);
-		std::swap(idxs[(unsigned int)index], idxs[max]);
-		vResult[i] = idxs[max];
-	}
-
-	assert (vResult.size() == M);
-
-	return vResult;
-}
-
-int
-splitSampleSet(const sampleSet &samples,
-	       const EVec &Y,
-	       const EVec &W,
-	       const unsigned int subsetSamplesNo,
-	       sampleSet &samples_fl,
-	       sampleSet &samples_tree,
-	       EVec &Y_fl,
-	       EVec &Y_tree,
-	       EVec &W_fl,
-	       EVec &W_tree)
-{
-	assert(samples.size() > 2*subsetSamplesNo);
-
-	samples_fl.clear();
-	samples_fl.resize(subsetSamplesNo);
-	samples_tree.clear();
-	samples_tree.resize(subsetSamplesNo);
-	Y_fl.resize(subsetSamplesNo);
-	Y_tree.resize(subsetSamplesNo);
-	W_fl.resize(subsetSamplesNo);
-	W_tree.resize(subsetSamplesNo);
-
-	/* Shuffle vector and reserve the first third of the indexes to the tree
-	   learning, then sample another third from the remaining indexes
-	   according to the weight */
-	std::vector< unsigned int > idxs(samples.size());
-	std::iota(idxs.begin(), idxs.end(), 0);
-	std::random_shuffle(idxs.begin(), idxs.end());
-
-	for (unsigned int i = 0; i < subsetSamplesNo; ++i) {
-		samples_tree[i] = samples[idxs[i]];
-		Y_tree(i) = Y[idxs[i]];
-		W_tree(i) = W[idxs[i]];
-	}
-	W_tree /= W_tree.array().sum();
-
-	std::vector< unsigned int > posIdxs;
-	std::vector< unsigned int > negIdxs;
-	std::vector< float > posW;
-	std::vector< float > negW;
-	float sumPosW = 0;
-	float sumNegW = 0;
-	for (unsigned int i = subsetSamplesNo; i < samples.size(); ++i) {
-		if (samples[idxs[i]].label == POS_GT_CLASS) {
-			posIdxs.push_back(idxs[i]);
-			posW.push_back(W(idxs[i]));
-			sumPosW += W(idxs[i]);
-		} else if (samples[idxs[i]].label == NEG_GT_CLASS) {
-			negIdxs.push_back(idxs[i]);
-			negW.push_back(W(idxs[i]));
-			sumNegW += W(idxs[i]);
-		} else {
-			log_err("Unrecognized label %d (sample %d)",
-				samples[idxs[i]].label, idxs[i]);
-			return -EXIT_FAILURE;
-		}
-	}
-	/*
-	  Randomly sample, in these two pools, according to the weight.
-	  WARNING: the returned indexes are indexes in the posIdx/negIdx
-	  vectors!
-	*/
-	const unsigned int posNo = subsetSamplesNo/2;
-	const unsigned int negNo = subsetSamplesNo-subsetSamplesNo/2;
-	std::vector< unsigned int > idxPosIdxs =
-		randomWeightedSamplingWithReplacement(posNo, posW);
-	std::vector< unsigned int > idxNegIdxs =
-		randomWeightedSamplingWithReplacement(negNo, negW);
-
-	float posWeightsMul = 0;
-	float negWeightsMul = 0;
-	for (unsigned int i = 0; i < posNo; ++i) {
-		samples_fl[i] = samples[posIdxs[idxPosIdxs[i]]];
-		W_fl(i) = W(posIdxs[idxPosIdxs[i]]);
-		posWeightsMul += W_fl(i);
-		Y_fl(i) = Y(posIdxs[idxPosIdxs[i]]);
-	}
-	for (unsigned int i = 0; i < negNo; ++i) {
-		samples_fl[i+posNo] = samples[negIdxs[idxNegIdxs[i]]];
-		W_fl(i+posNo) = W(negIdxs[idxNegIdxs[i]]);
-		negWeightsMul += W_fl(i+posNo);
-		Y_fl(i+posNo) = Y(negIdxs[idxNegIdxs[i]]);
-	}
-
-	posWeightsMul = sumPosW / posWeightsMul;
-	negWeightsMul = sumNegW / negWeightsMul;
-
-	W_fl.head(posNo) *= posWeightsMul;
-	W_fl.tail(negNo) *= negWeightsMul;
-
-	W_fl /= W_fl.array().sum();
-
-	return EXIT_SUCCESS;
-}
-
-bool
-checkChannelPresent(const std::string &sought,
-		    const std::vector< std::string > &chList)
-{
-	return std::find(chList.begin(), chList.end(),
-			 sought) != chList.end();
-}
-
 bool
 cvMatEquals(const cv::Mat m1, const cv::Mat m2)
 {
@@ -263,6 +137,36 @@ normalizeImage(const EMat &resultImage, const int borderSize,
 	} else {
 		img.setTo(cv::Scalar(0));
 	}
+}
+
+std::vector< unsigned int >
+randomSamplingWithoutReplacement(const unsigned int M,
+				 const unsigned int N)
+{
+	assert (M < N);
+	assert (M > 0);
+
+	/* Uniformly-distributed RNG */
+	std::random_device rd;
+	std::mt19937 randomGenerator(rd());
+
+	/* Index pool */
+	std::vector< unsigned int > idxs(N);
+	std::iota(idxs.begin(), idxs.end(), 0);
+
+	/* Returned indexes */
+	std::vector< unsigned int > vResult(M);
+
+	for (unsigned int i = 0, max = N - 1; i < M; ++i, --max) {
+		std::uniform_int_distribution<> uniformDistribution(0, (int)max);
+		int index = uniformDistribution(randomGenerator);
+		std::swap(idxs[(unsigned int)index], idxs[max]);
+		vResult[i] = idxs[max];
+	}
+
+	assert (vResult.size() == M);
+
+	return vResult;
 }
 
 void
@@ -421,6 +325,103 @@ saveThresholdedImage(const cv::Mat &classResult,
 	/* Save resulting image */
 	std::string dstPath = dirPath + "/" + imgName + "_thresh.png";
 	cv::imwrite(dstPath.c_str(), finalBinary);
+}
+
+int
+splitSampleSet(const sampleSet &samples,
+	       const EVec &Y,
+	       const EVec &W,
+	       const unsigned int subsetSamplesNo,
+	       sampleSet &samples_fl,
+	       sampleSet &samples_tree,
+	       EVec &Y_fl,
+	       EVec &Y_tree,
+	       EVec &W_fl,
+	       EVec &W_tree)
+{
+	assert(samples.size() > 2*subsetSamplesNo);
+
+	samples_fl.clear();
+	samples_fl.resize(subsetSamplesNo);
+	samples_tree.clear();
+	samples_tree.resize(subsetSamplesNo);
+	Y_fl.resize(subsetSamplesNo);
+	Y_tree.resize(subsetSamplesNo);
+	W_fl.resize(subsetSamplesNo);
+	W_tree.resize(subsetSamplesNo);
+
+	/* Shuffle vector and reserve the first third of the indexes to the tree
+	   learning, then sample another third from the remaining indexes
+	   according to the weight */
+	std::vector< unsigned int > idxs(samples.size());
+	std::iota(idxs.begin(), idxs.end(), 0);
+	std::random_shuffle(idxs.begin(), idxs.end());
+
+	for (unsigned int i = 0; i < subsetSamplesNo; ++i) {
+		samples_tree[i] = samples[idxs[i]];
+		Y_tree(i) = Y[idxs[i]];
+		W_tree(i) = W[idxs[i]];
+	}
+	W_tree /= W_tree.array().sum();
+
+	std::vector< unsigned int > posIdxs;
+	std::vector< unsigned int > negIdxs;
+	std::vector< float > posW;
+	std::vector< float > negW;
+	float sumPosW = 0;
+	float sumNegW = 0;
+	for (unsigned int i = subsetSamplesNo; i < samples.size(); ++i) {
+		if (samples[idxs[i]].label == POS_GT_CLASS) {
+			posIdxs.push_back(idxs[i]);
+			posW.push_back(W(idxs[i]));
+			sumPosW += W(idxs[i]);
+		} else if (samples[idxs[i]].label == NEG_GT_CLASS) {
+			negIdxs.push_back(idxs[i]);
+			negW.push_back(W(idxs[i]));
+			sumNegW += W(idxs[i]);
+		} else {
+			log_err("Unrecognized label %d (sample %d)",
+				samples[idxs[i]].label, idxs[i]);
+			return -EXIT_FAILURE;
+		}
+	}
+
+	/*
+	  Randomly sample, in these two pools, according to the weight.
+	  WARNING: the returned indexes are indexes in the posIdx/negIdx
+	  vectors!
+	*/
+	const unsigned int posNo = subsetSamplesNo/2;
+	const unsigned int negNo = subsetSamplesNo-subsetSamplesNo/2;
+	std::vector< unsigned int > idxPosIdxs =
+		randomWeightedSamplingWithReplacement(posNo, posW);
+	std::vector< unsigned int > idxNegIdxs =
+		randomWeightedSamplingWithReplacement(negNo, negW);
+
+	float posWeightsMul = 0;
+	float negWeightsMul = 0;
+	for (unsigned int i = 0; i < posNo; ++i) {
+		samples_fl[i] = samples[posIdxs[idxPosIdxs[i]]];
+		W_fl(i) = W(posIdxs[idxPosIdxs[i]]);
+		posWeightsMul += W_fl(i);
+		Y_fl(i) = Y(posIdxs[idxPosIdxs[i]]);
+	}
+
+	for (unsigned int i = 0; i < negNo; ++i) {
+		samples_fl[i+posNo] = samples[negIdxs[idxNegIdxs[i]]];
+		W_fl(i+posNo) = W(negIdxs[idxNegIdxs[i]]);
+		negWeightsMul += W_fl(i+posNo);
+		Y_fl(i+posNo) = Y(negIdxs[idxNegIdxs[i]]);
+	}
+
+	posWeightsMul = sumPosW / posWeightsMul;
+	negWeightsMul = sumNegW / negWeightsMul;
+
+	W_fl.head(posNo) *= posWeightsMul;
+	W_fl.tail(negNo) *= negWeightsMul;
+	W_fl /= W_fl.array().sum();
+
+	return EXIT_SUCCESS;
 }
 
 #ifdef MOVABLE_TRAIN

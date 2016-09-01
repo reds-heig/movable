@@ -69,6 +69,7 @@ public:
 		   const unsigned int chNo,
 		   const sampleSet &samplePositions,
 		   const EVec &weights);
+
 	/**
 	 * FilterBank() - Create a new filter bank from a set of filter banks
 	 *		  and a list of retained features
@@ -82,7 +83,6 @@ public:
 	 */
 	FilterBank(const std::vector< FilterBank > &filterBanks,
 		   const std::vector< unsigned int > &featsIdxs);
-#endif /* MOVABLE_TRAIN */
 
 	/**
 	 * FilterBank() - Build a filter bank starting from its JSON description
@@ -92,6 +92,8 @@ public:
 	 *		bank
 	 */
 	FilterBank(std::string &descr_json);
+
+#endif /* MOVABLE_TRAIN */
 
 	/**
 	 * FilterBank() - Create a filter bank starting from a JSON node
@@ -144,13 +146,6 @@ public:
 			     EMat& features) const;
 
 	/**
-	 * getChCount() - Get the fraction of filters for each specific channel
-	 *
-	 * @count: output filter count
-	 */
-	void getChCount(std::vector< int > &count);
-
-	/**
 	 * evaluateFiltersOnImage() - Evaluate the filters over the channels of
 	 *			      a specific image
 	 *
@@ -162,6 +157,13 @@ public:
 	void evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
 				    const unsigned int borderSize,
 				    EMat& features) const;
+
+	/**
+	 * getChCount() - Get the fraction of filters for each specific channel
+	 *
+	 * @count: output filter count
+	 */
+	void getChCount(std::vector< int > &count);
 
 	/**
 	 * Serialize() - Serialize a filter bank in JSON format

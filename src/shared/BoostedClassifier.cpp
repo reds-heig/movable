@@ -186,6 +186,18 @@ BoostedClassifier::BoostedClassifier(const Parameters &params,
 }
 #endif /* MOVABLE_TRAIN */
 
+BoostedClassifier::BoostedClassifier(std::string &descr_json)
+{
+	Json::Value root;
+	Json::Reader reader;
+
+	if (!reader.parse(descr_json, root)) {
+		throw std::runtime_error("invalidJSONDescription");
+	}
+
+	Deserialize(root);
+}
+
 BoostedClassifier::BoostedClassifier(Json::Value &root)
 {
 	Deserialize(root);
@@ -258,27 +270,6 @@ operator!=(const BoostedClassifier &bc1, const BoostedClassifier &bc2)
 	return !(bc1 == bc2);
 }
 
-
-BoostedClassifier::BoostedClassifier(std::string &descr_json)
-{
-	Json::Value root;
-	Json::Reader reader;
-
-	if (!reader.parse(descr_json, root)) {
-		throw std::runtime_error("invalidJSONDescription");
-	}
-
-	Deserialize(root);
-}
-
-/**
- * classify() - Classify a set of samples using the learned classifier
- *
- * @dataset    : simulation's dataset
- * @samplingPos: considered sampling positions
- *
- * @predictions: computed predictions
- */
 void
 BoostedClassifier::classify(const Dataset &dataset,
 			    const sampleSet &samplePositions,
@@ -293,19 +284,6 @@ BoostedClassifier::classify(const Dataset &dataset,
 					  samplePositions,
 					  currentResponse);
 		predictions += currentResponse;
-	}
-}
-
-/**
- * getChCount() - Get the fraction of filters for each specific channel
- *
- * @count: output filter count
- */
-void
-BoostedClassifier::getChCount(std::vector< int > &count)
-{
-	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
-		weakLearners[w]->getChCount(count);
 	}
 }
 
@@ -352,6 +330,14 @@ BoostedClassifier::classifyFullImage(const std::vector< cv::Mat > &imgVec,
 						 borderSize,
 						 currentResponse);
 		prediction += currentResponse;
+	}
+}
+
+void
+BoostedClassifier::getChCount(std::vector< int > &count)
+{
+	for (unsigned int w = 0; w < weakLearners.size(); ++w) {
+		weakLearners[w]->getChCount(count);
 	}
 }
 

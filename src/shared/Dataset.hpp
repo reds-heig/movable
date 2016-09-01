@@ -43,10 +43,12 @@ extern "C" {
 #include "utils.hpp"
 #include "Parameters.hpp"
 
+/* Data classes used internally in GT: positive, negative, ignore */
 const int POS_GT_CLASS = 1;
 const int NEG_GT_CLASS = -1;
 const int IGN_GT_CLASS = 0;
 
+/* Values for mask included/excluded */
 const int MASK_EXCLUDED = 0;
 const int MASK_INCLUDED = 255;
 
@@ -61,6 +63,7 @@ const double B_THRESHOLD = 0.02;
 // const int ERODE_SIZE = 3;
 // const int M_BLUR_SIZE = 5;
 
+/* Weight given to images fed back from users */
 const int FEEDBACK_SAMPLE_WEIGHT = 10;
 
 class BoostedClassifier;
@@ -108,6 +111,7 @@ public:
 	 */
 	Dataset(const Parameters &params);
 
+#ifdef MOVABLE_TRAIN
 	/**
 	 * Dataset() - Create a new dataset where the channels are those
 	 *	       inherited by the source dataset complemented with the
@@ -119,42 +123,23 @@ public:
 	 * @boostedClassifiers: classifiers used for the generation of the
 	 *			additional channels
 	 */
-#ifndef TESTS
-#ifdef MOVABLE_TRAIN
 	Dataset(const Parameters &params,
 		const Dataset &srcDataset,
 		const std::vector< BoostedClassifier * > &boostedClassifiers);
 #else
+	/**
+	 * Dataset() - Create a new dataset where the channels are those
+	 *	       inherited by the source dataset complemented with the
+	 *	       results obtained by applying the specified boosted
+	 *	       classifiers to these images
+	 *
+	 * @srcDataset	      : source dataset
+	 * @boostedClassifiers: classifiers used for the generation of the
+	 *			additional channels
+	 */
 	Dataset(const Dataset &srcDataset,
 		const std::vector< BoostedClassifier * > &boostedClassifiers);
 #endif /* MOVABLE_TRAIN */
-#else
-	Dataset(const Dataset &srcDataset,
-		const std::vector< BoostedClassifier * > &boostedClassifiers);
-#endif /* TESTS */
-
-	/**
-	 * getSampleMatrix() - Fill a matrix with a specified set of samples
-	 *
-	 * @samplePositions: list of available sampling positions
-	 * @samplesIdx	   : indexes of the subset of patches to sample
-	 * @chNo	   : channel from which to sample from
-	 * @rowOffset	   : row offset to impose while sampling
-	 * @colOffset	   : col offset to impose while sampling
-	 * @size	   : size of the samples to extract
-	 *
-	 * @samples	   : resulting matrix filled with the extracted samples
-	 *
-	 * Samples are taken from the given upper-left corner plus the offsets.
-	 * Samples are row-major (that is, each sample is taken row-by-row).
-	 */
-	void getSampleMatrix(const sampleSet &samplePositions,
-			     const std::vector< unsigned int > &samplesIdx,
-			     const unsigned int chNo,
-			     const unsigned int rowOffset,
-			     const unsigned int colOffset,
-			     const unsigned int size,
-			     EMat &samples) const;
 
 #ifdef MOVABLE_TRAIN
 	/**
@@ -227,19 +212,6 @@ public:
 	const EMat& getOriginalGt(const unsigned int imageNo) const;
 
 	/**
-	 * isFeedbackImage() - Returns whether an image given as a parameter has
-	 *		       been returned by a technician as feedback or not
-	 *		       (this increases the weight of its samples)
-	 *
-	 * @imageNo: number of the image to check
-	 *
-	 * Return: true if the image is a feedback one, false otherwise
-	 */
-	bool isFeedbackImage(const int imageNo) const;
-
-#endif
-
-	/**
 	 * getSamplePositions() - Get a set of sampling positions from the
 	 *			  dataset
 	 *
@@ -257,6 +229,42 @@ public:
 			       const unsigned int gtPair,
 			       const unsigned int samplesNo,
 			       sampleSet &samplePositions) const;
+
+	/**
+	 * isFeedbackImage() - Returns whether an image given as a parameter has
+	 *		       been returned by a technician as feedback or not
+	 *		       (this increases the weight of its samples)
+	 *
+	 * @imageNo: number of the image to check
+	 *
+	 * Return: true if the image is a feedback one, false otherwise
+	 */
+	bool isFeedbackImage(const int imageNo) const;
+
+#endif /* MOVABLE_TRAIN */
+
+	/**
+	 * getSampleMatrix() - Fill a matrix with a specified set of samples
+	 *
+	 * @samplePositions: list of available sampling positions
+	 * @samplesIdx	   : indexes of the subset of patches to sample
+	 * @chNo	   : channel from which to sample from
+	 * @rowOffset	   : row offset to impose while sampling
+	 * @colOffset	   : col offset to impose while sampling
+	 * @size	   : size of the samples to extract
+	 *
+	 * @samples	   : resulting matrix filled with the extracted samples
+	 *
+	 * Samples are taken from the given upper-left corner plus the offsets.
+	 * Samples are row-major (that is, each sample is taken row-by-row).
+	 */
+	void getSampleMatrix(const sampleSet &samplePositions,
+			     const std::vector< unsigned int > &samplesIdx,
+			     const unsigned int chNo,
+			     const unsigned int rowOffset,
+			     const unsigned int colOffset,
+			     const unsigned int size,
+			     EMat &samples) const;
 
 	/**
 	 * shrinkSamplePositions() - Drop samples from a sample set until the

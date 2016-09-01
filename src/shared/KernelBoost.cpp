@@ -44,11 +44,8 @@ KernelBoost::KernelBoost(Parameters &params,
 	params.posSamplesNo = params.finalSamplesNo;
 	params.negSamplesNo = params.finalSamplesNo;
 	params.treeDepth = params.finalTreeDepth;
-#ifndef TESTS
+
 	Dataset dataset_final(params, dataset, boostedClassifiers);
-#else
-	Dataset dataset_final(dataset, boostedClassifiers);
-#endif /* TESTS */
 	finalClassifier = new BoostedClassifier(params, SM, dataset_final, 0);
 
 	std::vector< cv::Mat > scoreImages(dataset_final.getImagesNo());
@@ -175,7 +172,7 @@ KernelBoost::KernelBoost(std::string &descr_json)
 	Deserialize(root);
 }
 
-#else
+#else /* !MOVABLE_TRAIN */
 
 KernelBoost::KernelBoost(std::string &descr_json,
 			 const Parameters &params,

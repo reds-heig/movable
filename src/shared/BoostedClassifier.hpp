@@ -132,13 +132,6 @@ public:
 		      EVec &predictions) const;
 
 	/**
-	 * getChCount() - Get the fraction of filters for each specific channel
-	 *
-	 * @count: output filter count
-	 */
-	void getChCount(std::vector< int > &count);
-
-	/**
 	 * classifyImage() - Classify an image using the learned classifier on
 	 *                   the set of detected candidate points
 	 *
@@ -164,6 +157,13 @@ public:
 	void classifyFullImage(const std::vector< cv::Mat > &imgVec,
 			       const unsigned int borderSize,
 			       EMat &prediction) const;
+
+	/**
+	 * getChCount() - Get the fraction of filters for each specific channel
+	 *
+	 * @count: output filter count
+	 */
+	void getChCount(std::vector< int > &count);
 
 	/**
 	 * Serialize() - Serialize a boosted classifier in JSON format

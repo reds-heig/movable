@@ -152,15 +152,24 @@ public:
 		      EVec &predictions) const;
 
 	/**
+	 * evaluate() - Evaluate a weak learner on a given image
+	 *
+	 * @imgVec    : image vector
+	 * @borderSize: size of the border
+	 *
+	 * @wlResponse: resulting (weighted) predictions for the current weak
+	 *		learner on the considered image
+	 */
+	void evaluateOnImage(const std::vector< cv::Mat > &imgVec,
+			     const unsigned int borderSize,
+			     EMat &wlResponse) const;
+
+	/**
 	 * getChCount() - Get the fraction of filters for each specific channel
 	 *
 	 * @count: output filter count
 	 */
 	void getChCount(std::vector< int > &count);
-
-	void evaluateOnImage(const std::vector< cv::Mat > &imgVec,
-			     const unsigned int borderSize,
-			     EMat &wlResponse) const;
 
 	/**
 	 * getLoss() - Return the weak learner's loss on train data

@@ -25,31 +25,6 @@
 #include "FilterBank.hpp"
 #include "utils.hpp"
 
-FilterBank::FilterBank(Json::Value &root)
-{
-	Deserialize(root);
-}
-
-FilterBank::FilterBank(const FilterBank &obj)
-{
-	this->filters = obj.filters;
-}
-bool
-operator==(const FilterBank &fb1, const FilterBank &fb2)
-{
-	if (fb1.filters == fb2.filters) {
-		return true;
-	}
-	return false;
-}
-
-bool
-operator!=(const FilterBank &fb1, const FilterBank &fb2)
-{
-	return !(fb1 == fb2);
-}
-
-
 #ifdef MOVABLE_TRAIN
 FilterBank::FilterBank(const Parameters &params,
 		       const SmoothingMatrices &SM,
@@ -221,7 +196,33 @@ FilterBank::FilterBank(std::string &descr_json)
 	}
 	Deserialize(root);
 }
+
 #endif /* MOVABLE_TRAIN */
+
+
+FilterBank::FilterBank(Json::Value &root)
+{
+	Deserialize(root);
+}
+
+FilterBank::FilterBank(const FilterBank &obj)
+{
+	this->filters = obj.filters;
+}
+bool
+operator==(const FilterBank &fb1, const FilterBank &fb2)
+{
+	if (fb1.filters == fb2.filters) {
+		return true;
+	}
+	return false;
+}
+
+bool
+operator!=(const FilterBank &fb1, const FilterBank &fb2)
+{
+	return !(fb1 == fb2);
+}
 
 void
 FilterBank::evaluateFilters(const Dataset &dataset,
