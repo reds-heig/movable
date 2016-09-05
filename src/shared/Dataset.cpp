@@ -203,6 +203,7 @@ Dataset::Dataset(const Parameters &params,
 	this->borderSize = srcDataset.borderSize;
 	this->masks = srcDataset.masks;
 	this->ePoints = srcDataset.ePoints;
+	this->fastClassifier = srcDataset.fastClassifier;
 	this->originalSizes = srcDataset.originalSizes;
 	this->houghMinDist = srcDataset.houghMinDist;
 	this->houghHThresh = srcDataset.houghHThresh;
