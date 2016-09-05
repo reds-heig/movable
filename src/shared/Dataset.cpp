@@ -100,6 +100,7 @@ Dataset::Dataset(const Parameters &params)
 	houghMinRad = params.houghMinRad;
 	houghMaxRad = params.houghMaxRad;
 	fastClassifier = params.fastClassifier;
+	RBCdetection = params.RBCdetection;
 
 #ifdef MOVABLE_TRAIN
 	gtValues = params.gtValues;
@@ -188,7 +189,12 @@ Dataset::Dataset(const Parameters &params)
 
 
 #ifdef MOVABLE_TRAIN
-Dataset::Dataset(const Parameters &params,
+Dataset::Dataset(
+#ifndef TESTS
+		 const Parameters &params,
+#else
+		 const Parameters & /* params */,
+#endif /* TESTS */
 		 const Dataset &srcDataset,
 		 const std::vector< BoostedClassifier * > &boostedClassifiers)
 {
@@ -204,6 +210,7 @@ Dataset::Dataset(const Parameters &params,
 	this->masks = srcDataset.masks;
 	this->ePoints = srcDataset.ePoints;
 	this->fastClassifier = srcDataset.fastClassifier;
+	this->RBCdetection = srcDataset.RBCdetection;
 	this->originalSizes = srcDataset.originalSizes;
 	this->houghMinDist = srcDataset.houghMinDist;
 	this->houghHThresh = srcDataset.houghHThresh;
@@ -236,6 +243,7 @@ Dataset::Dataset(const Parameters &params,
 			for (unsigned int bc = 0;
 			     bc < boostedClassifiers.size(); ++bc) {
 				boostedClassifiers[bc]->classifyImage(*this,
+								      i,
 								      ePoints[i],
 								      data[dataChNo+bc][i]);
 #ifndef TESTS
@@ -345,6 +353,7 @@ Dataset::Dataset(const Dataset &srcDataset,
 			for (unsigned int bc = 0;
 			     bc < boostedClassifiers.size(); ++bc) {
 				boostedClassifiers[bc]->classifyImage(*this,
+								      i,
 								      ePoints[i],
 								      data[dataChNo+bc][i]);
 			}
@@ -774,55 +783,68 @@ Dataset::computeCandidatePointsMask(const unsigned int imageID,
 		}
 	}
 
-	// cv::namedWindow("mau", CV_WINDOW_NORMAL);
-	// cv::imshow("mau", dst);
-	// cv::waitKey();
+	if (RBCdetection) {
+		/* Detect RBCs on smoothed grayscale image */
+		cv::medianBlur(grayImg, grayImg, M_BLUR_SIZE);
 
-	// /* Detect RBCs on smoothed grayscale image */
-	// cv::medianBlur(grayImg, grayImg, M_BLUR_SIZE);
-	// std::vector< cv::Vec3f > RBCs;
-	// cv::HoughCircles(grayImg, RBCs, cv::HOUGH_GRADIENT, 1,
-	// 		 houghMinDist,
-	// 		 houghHThresh, houghLThresh,
-	// 		 houghMinRad, houghMaxRad);
+		std::vector< cv::Vec3f > RBCs;
+		cv::HoughCircles(grayImg, RBCs, cv::HOUGH_GRADIENT, 1,
+				 houghMinDist,
+				 houghHThresh, houghLThresh,
+				 houghMinRad, houghMaxRad);
 
-	// cv::Mat dst(eroded.rows, eroded.cols, CV_8U);
-	// dst = cv::Scalar(0);
+		cv::Mat dstRBC(dst.rows, dst.cols, CV_8U);
+		dstRBC = cv::Scalar(0);
 
-	// for (size_t i = 0; i < RBCs.size(); ++i) {
-	// 	cv::Vec3i c = RBCs[i];
-	// 	cv::Mat tmp(eroded.rows, eroded.cols, CV_8U);
-	// 	tmp = cv::Scalar(0);
-	// 	cv::circle(tmp, cv::Point(c[0], c[1]), c[2], cv::Scalar(255),
-	// 		   -1, cv::LINE_8);
+		for (size_t i = 0; i < RBCs.size(); ++i) {
+			cv::Vec3i c = RBCs[i];
+			cv::Mat tmp(dst.rows, dst.cols, CV_8U);
+			tmp = cv::Scalar(0);
+			cv::circle(tmp, cv::Point(c[0], c[1]),
+				   c[2], cv::Scalar(255),
+				   -1, cv::LINE_8);
 
-	// 	cv::Mat roi_rbc = tmp(cv::Range(std::max(c[1]-c[2],
-	// 						 0),
-	// 					std::min(c[1]+c[2],
-	// 						 eroded.rows-1)),
-	// 			      cv::Range(std::max(c[0]-c[2],
-	// 						 0),
-	// 					std::min(c[0]+c[2],
-	// 						 eroded.cols-1)));
-	// 	cv::Mat roi_detection = eroded(cv::Range(std::max(c[1]-c[2],
-	// 							  0),
-	// 						 std::min(c[1]+c[2],
-	// 							  eroded.rows-1)),
-	// 				       cv::Range(std::max(c[0]-c[2],
-	// 							  0),
-	// 						 std::min(c[0]+c[2],
-	// 							  eroded.cols-1)));
-	// 	cv::Mat roi_region;
-	// 	cv::bitwise_and(roi_rbc, roi_detection, roi_region);
-	// 	if (cv::countNonZero(roi_region) > 0) {
-	// 		cv::circle(dst,
-	// 			   cv::Point(c[0], c[1]),
-	// 			   c[2]+(houghMaxRad/10),
-	// 			   cv::Scalar(255),
-	// 			   -1,
-	// 			   cv::LINE_8);
-	// 	}
-	// }
+			cv::Mat roi_rbc = tmp(cv::Range(std::max(c[1]-c[2],
+								 0),
+							std::min(c[1]+c[2],
+								 dst.rows-1)),
+					      cv::Range(std::max(c[0]-c[2],
+								 0),
+							std::min(c[0]+c[2],
+								 dst.cols-1)));
+			cv::Mat roi_detection = dst(cv::Range(std::max(c[1]-c[2],
+									  0),
+								 std::min(c[1]+c[2],
+									  dst.rows-1)),
+						       cv::Range(std::max(c[0]-c[2],
+									  0),
+								 std::min(c[0]+c[2],
+									  dst.cols-1)));
+			cv::Mat roi_region;
+			cv::bitwise_and(roi_rbc, roi_detection, roi_region);
+			if (cv::countNonZero(roi_region) > 0) {
+				cv::circle(dstRBC,
+					   cv::Point(c[0], c[1]),
+					   c[2]+(houghMaxRad/10),
+					   cv::Scalar(255),
+					   -1,
+					   cv::LINE_8);
+			}
+		}
+
+		// cv::namedWindow("grayImg", CV_WINDOW_NORMAL);
+		// cv::imshow("grayImg", grayImg);
+
+		// cv::namedWindow("dst", CV_WINDOW_NORMAL);
+		// cv::imshow("dst", dst);
+
+		// cv::namedWindow("dstRBC", CV_WINDOW_NORMAL);
+		// cv::imshow("dstRBC", dstRBC);
+
+		// cv::waitKey();
+
+		dst = dstRBC;
+	}
 	//
 	// cv::namedWindow("inColor", CV_WINDOW_NORMAL);
 	// cv::imshow("inColor", colorImg);
@@ -838,6 +860,7 @@ Dataset::computeCandidatePointsMask(const unsigned int imageID,
 	cv::resize(dst, dst, cv::Size(mask.cols, mask.rows), 0, 0,
 		   cv::INTER_NEAREST);
 	cv::bitwise_and(dst, mask, dst);
+
 	cv::copyMakeBorder(dst, dst,
 			   borderSize, borderSize, borderSize, borderSize,
 			   cv::BORDER_CONSTANT, cv::Scalar(0));

@@ -60,6 +60,7 @@ KernelBoost::KernelBoost(Parameters &params,
 		if (params.fastClassifier) {
 			const sampleSet& ePoints = dataset_final.getEPoints(i);
 			finalClassifier->classifyImage(dataset_final,
+						       i,
 						       ePoints,
 						       result);
 		} else {
@@ -204,6 +205,7 @@ KernelBoost::KernelBoost(std::string &descr_json,
 		if (params.fastClassifier) {
 			const sampleSet& ePoints = dataset_final.getEPoints(i);
 			finalClassifier->classifyImage(dataset_final,
+						       i,
 						       ePoints,
 						       result);
 		} else {
@@ -363,6 +365,7 @@ KernelBoost::serialize(Json::Value &root, const Parameters &params)
 	kb_json["FinalClassifier"] = final_bc_json;
 	kb_json["binaryThreshold"] = binaryThreshold;
 	kb_json["fastClassifier"] = params.fastClassifier;
+	kb_json["RBCdetection"] = params.RBCdetection;
 
 	kb_json["sampleSize"] = params.sampleSize;
 	kb_json["imgRescaleFactor"] = params.imgRescaleFactor;

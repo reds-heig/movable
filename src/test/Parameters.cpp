@@ -168,6 +168,8 @@ Parameters::Parameters(int argc, char **argv)
 			KB_root["KernelBoost"].get("houghMaxRad", 70).asInt();
 		fastClassifier =
 			KB_root["KernelBoost"].get("fastClassifier", false).asBool();
+		RBCdetection =
+			KB_root["KernelBoost"].get("RBCdetection", false).asBool();
 
 		for (Json::Value::iterator it =
 			     KB_root["KernelBoost"]["Channels"].begin();

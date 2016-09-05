@@ -61,6 +61,8 @@ const std::string defaultConfigFName = "test_config.json";
  * @houghMaxRad     : maximum radius for the retained RBCs in the Hough method
  * @fastClassifier  : enable fast classification (only candidate points are
  *                    tested)
+ * @RBCdetection    : in fast classification mode, enlarge candidate points to
+ *                    the RBCs containing them
  * @baseResDir	    : base directory path for output results
  * @channelList	    : list of channels requested by user
  * @configFName	    : path of the configuration file
@@ -86,6 +88,7 @@ public:
 
 	float threshold;
 	bool fastClassifier;
+	bool RBCdetection;
 
 	std::string baseResDir;
 	std::vector< std::string > channelList;

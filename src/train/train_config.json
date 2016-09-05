@@ -23,6 +23,7 @@
 		    "SOBEL_DRV_Y"],
     "datasetBalance": true,
     "fastClassifier": false,
+    "RBCdetection": true,
     "imgRescaleFactor": 4,
     "posSamplesNo": 500000,
     "negSamplesNo": 500000,

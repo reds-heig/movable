@@ -140,6 +140,7 @@ Parameters::Parameters(int argc, char **argv)
 
 		GET_INT_ARRAY(gtValues);
 		GET_BOOL_PARAM(fastClassifier);
+		GET_BOOL_PARAM(RBCdetection);
 
 		GET_BOOL_PARAM(datasetBalance);
 		GET_INT_PARAM(imgRescaleFactor);

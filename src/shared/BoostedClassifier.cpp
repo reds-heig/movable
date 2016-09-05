@@ -289,14 +289,20 @@ BoostedClassifier::classify(const Dataset &dataset,
 
 void
 BoostedClassifier::classifyImage(const Dataset &DS,
+				 const int imageNo,
 				 const sampleSet& ePoints,
 				 EMat &prediction) const
 {
-	EMat tmp = DS.getData(0, ePoints[0].imageNo);
+	EMat tmp = DS.getData(0, imageNo);
 
 	prediction.resize(tmp.rows(),
 			  tmp.cols());
 	prediction.setZero();
+
+	if (ePoints.size() == 0) {
+		return;
+	}
+
 	EVec partialResults(ePoints.size());
 	partialResults.setZero();
 

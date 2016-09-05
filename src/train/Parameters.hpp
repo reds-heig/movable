@@ -83,6 +83,8 @@ const std::string defaultConfigFName = "train_config.json";
  * @smoothingValues : list of smoothing values
  * @fastClassifier  : enable fast classification (only candidate points are
  *                    tested)
+ * @RBCdetection    : in fast classification mode, enlarge candidate points to
+ *                    the RBCs containing them
  * @intermedResDir  : directories where the intermediate results will be
  *		      stored
  * @finalResDir	    : directory where final results will be stored
@@ -127,6 +129,7 @@ public:
 	int houghMaxRad;
 
 	bool fastClassifier;
+	bool RBCdetection;
 
 	unsigned int wlNo;
 	unsigned int treeDepth;

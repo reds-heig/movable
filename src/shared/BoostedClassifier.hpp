@@ -136,11 +136,13 @@ public:
 	 *                   the set of detected candidate points
 	 *
 	 * @DS        : dataset where the points have to be extracted
+	 * @imageNo   : number of the image to classify
 	 * @ePoints   : set of candidate points
 	 *
 	 * @prediction: computed result image
 	 */
 	void classifyImage(const Dataset &DS,
+			   const int imageNo,
 			   const sampleSet& ePoints,
 			   EMat &prediction) const;
 

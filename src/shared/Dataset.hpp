@@ -61,7 +61,7 @@ const double L_THRESHOLD_NEXT = 0.05;
 const double B_THRESHOLD = 0.02;
 
 // const int ERODE_SIZE = 3;
-// const int M_BLUR_SIZE = 5;
+const int M_BLUR_SIZE = 5;
 
 /* Weight given to images fed back from users */
 const int FEEDBACK_SAMPLE_WEIGHT = 10;
@@ -88,6 +88,8 @@ class BoostedClassifier;
  *                      evaluated
  * @fastClassifier    : enable fast classification (only candidate points are
  *                      tested)
+ * @RBCdetection      : in fast classification mode, enlarge candidate points to
+ *                      the RBCs containing them
  * @houghMinDist      : minimum distance between RBCs for the Hough method
  * @houghHThresh      : higher threshold on Canny's output in the Hough method
  * @houghLThresh      : lower threshold on Canny's output in the Hough method
@@ -419,6 +421,7 @@ private:
 	std::vector< bool > feedbackImagesFlag;
 
 	bool fastClassifier;
+	bool RBCdetection;
 	std::vector< sampleSet > ePoints;
 	double houghMinDist;
 	double houghHThresh;
