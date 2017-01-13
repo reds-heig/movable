@@ -1,5 +1,5 @@
 # Install packets required by the code
-sudo apt-get install libjsoncpp-dev libjsoncpp1 build-essential libtool automake autoconf autotools-dev cmake
+sudo apt install libjsoncpp-dev libjsoncpp1 build-essential libtool automake autoconf autotools-dev cmake
 
 # Install required submodules
 git submodule init
@@ -11,27 +11,26 @@ cd libs/liblbfgs
 # ==> If you get an error here of the type "Libtool library used but 'LIBTOOL' is undefined', type in the same console:
       export PATH=/usr/bin:$PATH
 ./configure
-make
+make -j 8
 cd ../..
 
 # Download and install OpenCV (www.opencv.org):
 mkdir OpenCV
 cd OpenCV
 sudo apt-get -qq remove ffmpeg x264 libx264-dev
-sudo apt-get -qq install libopencv-dev build-essential checkinstall cmake pkg-config yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libxine2-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils cmake qt5-default unzip checkinstall
-wget https://sourceforge.net/projects/opencvlibrary/files/latest/download?source=files -O OpenCV.zip
-unzip OpenCV.zip
-version="$(ls -a | grep opencv-* | cut -c8-)"
-cd opencv-$version
+sudo apt-get -qq install libopencv-dev build-essential checkinstall cmake pkg-config yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libxine2-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils cmake qt5-default unzip checkinstall libavresample-dev libgphoto2-dev libopenblas-dev
+wget https://github.com/opencv/opencv/archive/3.2.0.zip
+unzip 3.2.0.zip
+cd opencv-3.2.0
 mkdir build
 cd build
-cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_OPENMP=ON -D WITH_QT=ON -D WITH_OPENGL=ON ..
-make -j8
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_DOCS=OFF -D BUILD_EXAMPLES=OFF -D WITH_TBB=OFF -D BUILD_TIFF=ON -D WITH_CUDA=OFF -D WITH_CUFFT=OFF -D WITH_OPENMP=ON -D WITH_QT=OFF -D WITH_OPENCL=OFF -D WITH_OPENGL=ON -D WITH_LAPACK=OFF -D WITH_IPP=OFF -D WITH_VTK=OFF -D WITH_V4L=OFF ..
+make -j 8
 sudo checkinstall
 sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf'
 sudo ldconfig
 
-# Enter the directory of Movable, then compile it with:
+# Enter the directory of the sources of Movable, then compile with:
 mkdir build
 cd build
 cmake ..
