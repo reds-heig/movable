@@ -102,7 +102,7 @@ Parameters::Parameters(int argc, char **argv)
 		Json::Reader reader;
 		Json::Value root;
 		if (!reader.parse(configData, root)) {
-			std::cerr << reader.getFormatedErrorMessages() << "\n";
+			std::cerr << reader.getFormattedErrorMessages() << "\n";
 		}
 
 		GET_STRING_PARAM(resultsDir);

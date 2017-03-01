@@ -948,10 +948,8 @@ Dataset::addGt(const unsigned int imageID, const cv::Mat &src)
 #ifdef VISUALIZE_IMG_DATA
 		cv::namedWindow("InGt", cv::WINDOW_NORMAL);
 		cv::imshow("InGt", src);
-		cv::imwrite("/home/rob/src.png", tmp);
 		cv::namedWindow("OutGt", cv::WINDOW_NORMAL);
 		cv::imshow("OutGt", tmp);
-		cv::imwrite("/home/rob/out.png", tmp);
 		cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 	}
