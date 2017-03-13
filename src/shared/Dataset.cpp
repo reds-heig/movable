@@ -39,6 +39,9 @@ Dataset::Dataset(const Parameters &params)
     sampleSize = params.sampleSize;
     borderSize = 2*(sampleSize-1);
 
+    if (checkChannelPresent("GAUSSIAN_FILTERING", params.channelList)) {
+        imageOps.push_back(&Dataset::gaussianFiltering);
+    }
     if (checkChannelPresent("IMAGE_GRAY_CH", params.channelList)) {
         imageOps.push_back(&Dataset::imageGrayCh);
     }
@@ -69,14 +72,14 @@ Dataset::Dataset(const Parameters &params)
     if (checkChannelPresent("IMAGE_B_CH", params.channelList)) {
         imageOps.push_back(&Dataset::imageBCh);
     }
-    if (checkChannelPresent("MEDIAN_FILTERING", params.channelList)) {
-        imageOps.push_back(&Dataset::medianFiltering);
-    }
     if (checkChannelPresent("LAPLACIAN_FILTERING", params.channelList)) {
         imageOps.push_back(&Dataset::laplacianFiltering);
     }
-    if (checkChannelPresent("GAUSSIAN_FILTERING", params.channelList)) {
-        imageOps.push_back(&Dataset::gaussianFiltering);
+    if (checkChannelPresent("LBP", params.channelList)) {
+        imageOps.push_back(&Dataset::LBP);
+    }
+    if (checkChannelPresent("MEDIAN_FILTERING", params.channelList)) {
+        imageOps.push_back(&Dataset::medianFiltering);
     }
     if (checkChannelPresent("SOBEL_DRV_X", params.channelList)) {
         imageOps.push_back(&Dataset::sobelDrvX);
@@ -1876,6 +1879,64 @@ Dataset::laplacianFiltering(const cv::Mat &src, EMat &dst, const void *opaque)
         greenCh.setTo(cv::Scalar(0));
     }
     cv::imshow("Laplacian", greenCh);
+    cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+    return EXIT_SUCCESS;
+}
+
+int
+Dataset::LBP(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+    std::vector< cv::Mat> colorCh(3);
+    const unsigned int borderSize = *((unsigned int *)opaque);
+
+    cv::split(src, colorCh);
+
+    cv::Mat greenCh = colorCh[1];
+    cv::Mat tmpDst = cv::Mat::zeros(greenCh.rows-2, greenCh.cols-2, CV_8UC1);
+	for(int i=1;i<greenCh.rows-1;i++) {
+		for(int j=1;j<greenCh.cols-1;j++) {
+			float center = greenCh.at<float>(i,j);
+			unsigned char code = 0;
+			code |= (greenCh.at<float>(i-1,j-1) > center) << 7;
+			code |= (greenCh.at<float>(i-1,j) > center) << 6;
+			code |= (greenCh.at<float>(i-1,j+1) > center) << 5;
+			code |= (greenCh.at<float>(i,j+1) > center) << 4;
+			code |= (greenCh.at<float>(i+1,j+1) > center) << 3;
+			code |= (greenCh.at<float>(i+1,j) > center) << 2;
+			code |= (greenCh.at<float>(i+1,j-1) > center) << 1;
+			code |= (greenCh.at<float>(i,j-1) > center) << 0;
+			tmpDst.at<unsigned char>(i-1,j-1) = code;
+		}
+	}
+    tmpDst.convertTo(greenCh, CV_32FC1);
+
+    cv::Mat imgCenter = greenCh(cv::Range(borderSize,
+                                          greenCh.rows-borderSize+1),
+                                cv::Range(borderSize,
+                                          greenCh.cols-borderSize+1));
+    cv::Scalar mean;
+    cv::Scalar std_dev;
+    cv::meanStdDev(imgCenter, mean, std_dev);
+    greenCh -= mean[0];
+    greenCh /= (std_dev[0]+ 10*std::numeric_limits< float >::epsilon());
+
+    dst.resize(src.rows, src.cols);
+    cv::cv2eigen(greenCh, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+    cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+    cv::imshow("ImgColor", src);
+    cv::namedWindow("LBP", cv::WINDOW_NORMAL);
+    double min, max;
+    cv::minMaxLoc(greenCh, &min, &max);
+    if (max-min > 1e-4) {
+        greenCh = (greenCh-min)/(max-min);
+    } else {
+        greenCh.setTo(cv::Scalar(0));
+    }
+    cv::imshow("LBP", greenCh);
     cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 

@@ -758,6 +758,19 @@ private:
                                   const void *opaque);
 
     /**
+     * LBP() - Process an image, taking its green channel and
+     *         extracting its Local Binary Pattern
+     *
+     * @src   : input image
+     * @dst   : converted image
+     * @opaque: opaque pointer to useful data (here: border size)
+     *
+     * Return: EXIT_SUCCESS
+     */
+    static int LBP(const cv::Mat &src, EMat &dst,
+                   const void *opaque);
+
+    /**
      * medianFiltering() - Process an image, converting it to grayscale and
      *             then passing it through a median filter with 3
      *             pixel of radius (1.5 would have been better, but
