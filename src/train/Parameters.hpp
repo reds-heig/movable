@@ -72,6 +72,8 @@ const std::string defaultConfigFName = "train_config.json";
  * @filtersPerChNo  : number of filters to learn for each channel
  * @minFilterSize   : minimum filter size
  * @maxFilterSize   : maximum filter size
+ * @nRotations      : number of rotated versions of the training samples that
+ *                    have to be considered
  * @houghMinDist    : minimum distance between RBCs for the Hough method
  * @houghHThresh    : higher threshold on Canny's output in the Hough method
  * @houghLThresh    : lower threshold on Canny's output in the Hough method
@@ -121,6 +123,7 @@ public:
 	unsigned int filtersPerChNo;
 	unsigned int minFilterSize;
 	unsigned int maxFilterSize;
+    unsigned int nRotations;
 
 	double houghMinDist;
 	double houghHThresh;

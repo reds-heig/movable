@@ -33,6 +33,7 @@
     "filtersPerChNo": 200,
     "minFilterSize": 3,
     "maxFilterSize": 21,
+    "nRotations": 5,
     "houghMinDist": 20,
     "houghHThresh": 50,
     "houghLThresh": 16,

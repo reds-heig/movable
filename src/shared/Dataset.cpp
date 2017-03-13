@@ -128,7 +128,7 @@ Dataset::Dataset(const Parameters &params)
     }
 
     /* Pre-allocate structures */
-    imagesNo = img_paths.size();
+    imagesNo = img_paths.size()*params.nRotations;
     originalSizes.resize(imagesNo);
     masks.resize(imagesNo);
     originalGts.resize(imagesNo);
@@ -142,6 +142,7 @@ Dataset::Dataset(const Parameters &params)
     }
     /* Load images */
 #pragma omp parallel for schedule(dynamic)
+    /* Load plain images */
     for (unsigned int i = 0; i < img_paths.size(); ++i) {
         log_info("\t\tAdding image %d/%d...",
                  (int)i+1, (int)img_paths.size());
@@ -152,7 +153,25 @@ Dataset::Dataset(const Parameters &params)
             throw std::runtime_error("imageLoading");
         }
     }
-#else
+
+    /* Load rotated versions of the plain images */
+    for (unsigned int rot = 1; rot < params.nRotations; ++rot) {
+        for (unsigned int i = 0; i < img_paths.size(); ++i) {
+            log_info("\t\tAdding image %d/%d rotation angle %f/360 ...",
+                     (int)i+1, (int)img_paths.size(),
+                     360.0/params.nRotations*rot);
+            if (addRotatedImage(rot*img_paths.size()+i,
+                                360.0/params.nRotations*rot,
+                                img_paths[i], mask_paths[i],
+                                gt_paths[i]) != EXIT_SUCCESS) {
+                log_err("Error encountered while loading image %d/%d",
+                        (int)i+1, (int)img_paths.size());
+                throw std::runtime_error("imageLoading");
+            }
+        }
+    }
+
+#else /* !MOVABLE_TRAIN */
     if (loadPaths(params, img_paths, mask_paths) != EXIT_SUCCESS) {
         throw std::runtime_error("loadPaths");
     }
@@ -187,14 +206,8 @@ Dataset::Dataset(const Parameters &params)
 
 }
 
-
 #ifdef MOVABLE_TRAIN
-Dataset::Dataset(
-#ifndef TESTS
-                 const Parameters &params,
-#else
-                 const Parameters & /* params */,
-#endif /* TESTS */
+Dataset::Dataset(const Parameters &params,
                  const Dataset &srcDataset,
                  const std::vector< BoostedClassifier * > &boostedClassifiers)
 {
@@ -202,7 +215,11 @@ Dataset::Dataset(
     this->data = srcDataset.data;
     this->dataChNo = srcDataset.dataChNo;
     this->imageOps = srcDataset.imageOps;
-    this->imagesNo = srcDataset.imagesNo;
+    /*
+     * Warning! srcDataset.imagesNo might include additional rotations, and we
+     * are not willing to consider them at this point.
+     */
+    this->imagesNo = srcDataset.imagesNo/params.nRotations;
     this->imageNames = srcDataset.imageNames;
     this->imagePaths = srcDataset.imagePaths;
     this->sampleSize = srcDataset.sampleSize;
@@ -1056,6 +1073,129 @@ Dataset::addImage(const unsigned int imageID,
 
     return EXIT_SUCCESS;
 }
+
+#ifdef MOVABLE_TRAIN
+int
+Dataset::addRotatedImage(const unsigned int imageID,
+                         const double rot,
+                         const std::string &imgPath,
+                         const std::string &maskPath,
+                         const std::string &gtPath)
+{
+    CHECK_FILE_EXISTS(imgPath.c_str());
+    CHECK_FILE_EXISTS(maskPath.c_str());
+    CHECK_FILE_EXISTS(gtPath.c_str());
+
+    /* Groundtruth and mask are assumed to be grayscale */
+    cv::Mat mask = cv::imread(maskPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+
+    /* Rescale mask. Its size will be used to alter the size of the input
+       image and the gt */
+    originalSizes[imageID] = std::make_pair(mask.rows, mask.cols);
+
+    cv::resize(mask, mask, cv::Size(0, 0),
+               1.0/(double)imgRescaleFactor,
+               1.0/(double)imgRescaleFactor,
+               cv::INTER_NEAREST);
+
+    /* Compute rotation matrix */
+    cv::Point mask_center = cv::Point(mask.cols/2, mask.rows/2);
+    cv::Mat mask_rot_mat = cv::getRotationMatrix2D(mask_center, rot, 1.0);
+
+    cv::Mat tmp;
+    mask.convertTo(tmp, CV_32FC1);
+    cv::Mat rotated_tmp;
+    /* Rotate mask */
+    warpAffine(tmp, rotated_tmp, mask_rot_mat, tmp.size());
+    cv::Rect roi((rotated_tmp.cols-tmp.cols)/2,
+                 (rotated_tmp.rows-tmp.rows)/2,
+                 tmp.cols, tmp.rows);
+    cv::Mat cropped_rotated_tmp = rotated_tmp(roi);
+    addMask(imageID, cropped_rotated_tmp);
+
+    imagePaths[imageID] = imgPath;
+    /* Always read a color image, it will be the loop over the operations
+       that will grab the different component and eventually keep the
+       grayscale one only */
+    cv::Mat img = cv::imread(imgPath.c_str(), CV_LOAD_IMAGE_COLOR);
+
+    cv::Point img_center = cv::Point(img.cols/2, img.rows/2);
+    cv::Mat img_rot_mat = cv::getRotationMatrix2D(img_center, rot, 1.0);
+
+    /* Rotate image */
+    warpAffine(img, rotated_tmp, img_rot_mat, img.size());
+    roi = cv::Rect((rotated_tmp.cols-img.cols)/2,
+                   (rotated_tmp.rows-img.rows)/2,
+                   img.cols, img.rows);
+    img = rotated_tmp(roi);
+
+
+    /* Use the image as a source to the algorithm that finds the candidate
+       points for classification and stores them in a mask that
+       will be later used for the actual classification */
+    if (fastClassifier) {
+        computeCandidatePointsMask(imageID, img, mask);
+    }
+
+    cv::resize(img, img, cv::Size(mask.cols, mask.rows), 0, 0,
+               cv::INTER_LANCZOS4);
+
+    /* Replicate image borders */
+    cv::copyMakeBorder(img, img,
+                       borderSize, borderSize, borderSize, borderSize,
+                       cv::BORDER_REPLICATE);
+
+    /* Convert image to float and rescale it in [0, 1] */
+    img.convertTo(img, CV_32FC3);
+    img = img/255;
+
+    /* Now alter the image according to user specifications, creating the
+       corresponding channels */
+    for (unsigned int i = 0; i < imageOps.size(); ++i) {
+        EMat tmp;
+        imageOps[i](img, tmp, (void *)&borderSize);
+        data[i][imageID] = tmp;
+    }
+
+    /* Check that all sizes are consistent */
+    const unsigned int rowsNo = masks[imageID].rows();
+    const unsigned int colsNo = masks[imageID].cols();
+
+    for (unsigned int i = 0; i < imageOps.size(); ++i) {
+        if (data[i][imageID].rows() != rowsNo ||
+            data[i][imageID].cols() != colsNo) {
+            log_err("Invalid image size -- image %d, channel %d",
+                    imageID+1, i);
+            return -EXIT_FAILURE;
+        }
+    }
+
+    cv::Mat gt = cv::imread(gtPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    gt.convertTo(tmp, CV_32FC1);
+    cv::resize(tmp, tmp, cv::Size(mask.cols, mask.rows), 0, 0,
+               cv::INTER_NEAREST);
+    cv::Point gt_center = cv::Point(gt.cols/2, gt.rows/2);
+    cv::Mat gt_rot_mat = cv::getRotationMatrix2D(gt_center, rot, 1.0);
+
+    warpAffine(tmp, rotated_tmp, gt_rot_mat, tmp.size());
+    roi = cv::Rect((rotated_tmp.cols-tmp.cols)/2,
+                   (rotated_tmp.rows-tmp.rows)/2,
+                   tmp.cols, tmp.rows);
+    cropped_rotated_tmp = rotated_tmp(roi);
+
+    addGt(imageID, cropped_rotated_tmp);
+    for (unsigned int i = 0; i < gtPairsNo; ++i) {
+        if (gts[i][imageID].rows() != rowsNo ||
+            gts[i][imageID].cols() != colsNo) {
+            log_err("Invalid GT size -- image %d, gt pair %d",
+                    imageID+1, i);
+            return -EXIT_FAILURE;
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+#endif /* MOVABLE_TRAIN */
 
 #ifdef MOVABLE_TRAIN
 unsigned int

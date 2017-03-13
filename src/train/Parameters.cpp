@@ -153,6 +153,7 @@ Parameters::Parameters(int argc, char **argv)
 		GET_INT_PARAM(filtersPerChNo);
 		GET_INT_PARAM(minFilterSize);
 		GET_INT_PARAM(maxFilterSize);
+        GET_INT_PARAM(nRotations);
 
 		GET_FLOAT_PARAM(houghMinDist);
 		GET_FLOAT_PARAM(houghHThresh);
