@@ -605,6 +605,21 @@ private:
                            const void *opaque);
 
     /**
+     * imageCLAHE() - Process an image, converting it to grayscale and
+     *                computing its local contrast enhancement before
+     *                pushing it into the corresponding channel of the
+     *                dataset
+     *
+     * @src   : input image
+     * @dst   : converted image
+     * @opaque: opaque pointer to useful data (here: border size)
+     *
+     * Return: EXIT_SUCCESS
+     */
+    static int imageCLAHE(const cv::Mat &src, EMat &dst,
+                          const void *opaque);
+
+    /**
      * imageGreenCh() - Process an image, taking the green channel only and
      *          pushing it into the corresponding channel of the
      *          dataset

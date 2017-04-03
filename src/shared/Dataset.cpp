@@ -45,6 +45,9 @@ Dataset::Dataset(const Parameters &params)
     if (checkChannelPresent("IMAGE_GRAY_CH", params.channelList)) {
         imageOps.push_back(&Dataset::imageGrayCh);
     }
+    if (checkChannelPresent("IMAGE_CLAHE", params.channelList)) {
+        imageOps.push_back(&Dataset::imageCLAHE);
+    }
     if (checkChannelPresent("IMAGE_GREEN_CH", params.channelList)) {
         imageOps.push_back(&Dataset::imageGreenCh);
     }
@@ -1132,7 +1135,6 @@ Dataset::addRotatedImage(const unsigned int imageID,
                    img.cols, img.rows);
     img = rotated_tmp(roi);
 
-
     /* Use the image as a source to the algorithm that finds the candidate
        points for classification and stores them in a mask that
        will be later used for the actual classification */
@@ -1415,6 +1417,38 @@ Dataset::imageGrayCh(const cv::Mat &src, EMat &dst, const void *opaque)
         gray.setTo(cv::Scalar(0));
     }
     cv::imshow("grayCh", gray);
+    cv::waitKey(0);
+#endif /* VISUALIZE_IMG_DATA */
+
+    return EXIT_SUCCESS;
+}
+
+int
+Dataset::imageCLAHE(const cv::Mat &src, EMat &dst, const void *opaque)
+{
+    cv::Mat gray;
+    cv::Mat tmp;
+    cv::Mat tmp2;
+
+    cv::cvtColor(src, gray, CV_BGR2GRAY);
+
+    /* Undo float conversion! */
+    gray *= 255;
+    gray.convertTo(tmp, CV_8UC1);
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    clahe->setClipLimit(4);
+    clahe->apply(tmp, tmp2);
+    tmp2.convertTo(gray, CV_32FC1);
+    gray /= 255;
+
+    dst.resize(gray.rows, gray.cols);
+    cv::cv2eigen(gray, dst);
+
+#ifdef VISUALIZE_IMG_DATA
+    cv::namedWindow("ImgColor", cv::WINDOW_NORMAL);
+    cv::imshow("ImgColor", src);
+    cv::namedWindow("CLAHE", cv::WINDOW_NORMAL);
+    cv::imshow("CLAHE", gray);
     cv::waitKey(0);
 #endif /* VISUALIZE_IMG_DATA */
 
