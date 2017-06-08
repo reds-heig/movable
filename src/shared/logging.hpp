@@ -28,36 +28,36 @@ extern "C" {
 
 /* Message helpers found on StackOverflow */
 #ifdef DEBUG
-#define debug(M, ...)						\
-	do {							\
-		fprintf(stderr, "[DEBUG] ");			\
-		fprintf(stderr, "%s:%d: " M "\n",		\
-			__FILE__, __LINE__, ##__VA_ARGS__);	\
-	} while(0);
-#else
+#define debug(M, ...)                               \
+    do {                                            \
+        fprintf(stderr, "[DEBUG] ");                \
+        fprintf(stderr, "%s:%d: " M "\n",           \
+                __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while(0);
+#else // !DEBUG
 #define debug(M, ...)
-#endif /* DEBUG */
+#endif // DEBUG
 
 #ifdef INFO_MSG
-#define log_info(M, ...)				\
-	do {						\
-		fprintf(stderr, "[INFO] ");		\
-		fprintf(stderr, M "\n", ##__VA_ARGS__);	\
-	} while (0);
-#else
+#define log_info(M, ...)                        \
+    do {                                        \
+        fprintf(stderr, "[INFO] ");             \
+        fprintf(stderr, M "\n", ##__VA_ARGS__); \
+    } while (0);
+#else // !INFO_MSG
 #define log_info(M, ...)
-#endif /* INFO_MSG */
+#endif // INFO_MSG
 
-#define log_err(M, ...)						\
-	do {							\
-		fprintf(stderr, "[ERROR] (%s:%d) " M "\n",	\
-			__FILE__, __LINE__, ##__VA_ARGS__);	\
-	} while (0);
-#define log_warn(M, ...)					\
-	do {							\
-		fprintf(stderr, "[WARN] (%s:%d) " M "\n",	\
-			__FILE__, __LINE__,  ##__VA_ARGS__);	\
-	} while (0);
+#define log_err(M, ...)                             \
+    do {                                            \
+        fprintf(stderr, "[ERROR] (%s:%d) " M "\n",  \
+                __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while (0);
+#define log_warn(M, ...)                                \
+    do {                                                \
+        fprintf(stderr, "[WARN] (%s:%d) " M "\n",       \
+                __FILE__, __LINE__,  ##__VA_ARGS__);    \
+    } while (0);
 #define log_trace(M, ...)
 
 #endif /* LOGGING_HPP_ */

@@ -42,18 +42,18 @@ const std::string defaultConfigFName = "test_config.json";
 /**
  * class Parameters - Set of parameters for the application
  *
- * @simName	    : codename of the simulation
- * @resultsDir	    : base path of the results directory
- * @datasetPath	    : dataset's path
- * @datasetName	    : dataset's name
+ * @simName         : codename of the simulation
+ * @resultsDir      : base path of the results directory
+ * @datasetPath     : dataset's path
+ * @datasetName     : dataset's name
  * @imgPathFName    : name of the file containing image paths
  * @maskPathFName   : name of the file containing mask paths
- * @sampleSize	    : lateral size (in pixels) of each sample (for
- *		      instance, if this is 51, this means sampling
- *		      51x51 squared around the sample point)
+ * @sampleSize      : lateral size (in pixels) of each sample (for
+ *                    instance, if this is 51, this means sampling
+ *                    51x51 squared around the sample point)
  * @imgRescaleFactor: rescale input images by this factor (that is, divide each
  *                    image coordinate by this value)
- * @threshold	    : fixed threshold applied when binarizing the image
+ * @threshold       : fixed threshold applied when binarizing the image
  * @houghMinDist    : minimum distance between RBCs for the Hough method
  * @houghHThresh    : higher threshold on Canny's output in the Hough method
  * @houghLThresh    : lower threshold on Canny's output in the Hough method
@@ -63,52 +63,54 @@ const std::string defaultConfigFName = "test_config.json";
  *                    tested)
  * @RBCdetection    : in fast classification mode, enlarge candidate points to
  *                    the RBCs containing them
- * @baseResDir	    : base directory path for output results
- * @channelList	    : list of channels requested by user
- * @configFName	    : path of the configuration file
+ * @useAutoContext  : enable the use of AutoContext
+ * @baseResDir      : base directory path for output results
+ * @channelList     : list of channels requested by user
+ * @configFName     : path of the configuration file
  */
 class Parameters {
 public:
-	std::string simName;
-	std::string resultsDir;
-	std::string classifierPath;
-	std::string datasetPath;
-	std::string datasetName;
-	std::string imgPathsFName;
-	std::string maskPathsFName;
+    std::string simName;
+    std::string resultsDir;
+    std::string classifierPath;
+    std::string datasetPath;
+    std::string datasetName;
+    std::string imgPathsFName;
+    std::string maskPathsFName;
 
-	double houghMinDist;
-	double houghHThresh;
-	double houghLThresh;
-	int houghMinRad;
-	int houghMaxRad;
+    double houghMinDist;
+    double houghHThresh;
+    double houghLThresh;
+    int houghMinRad;
+    int houghMaxRad;
 
-	unsigned int sampleSize;
-	unsigned int imgRescaleFactor;
+    unsigned int sampleSize;
+    unsigned int imgRescaleFactor;
 
-	float threshold;
-	bool fastClassifier;
-	bool RBCdetection;
+    float threshold;
+    bool fastClassifier;
+    bool RBCdetection;
+    bool useAutoContext;
 
-	std::string baseResDir;
-	std::vector< std::string > channelList;
+    std::string baseResDir;
+    std::vector< std::string > channelList;
 
-	/**
-	 * Parameters() - Empty constructor for testing
-	 */
-	Parameters() { };
+    /**
+     * Parameters() - Empty constructor for testing
+     */
+    Parameters() { };
 
-	/**
-	 * Parameters() - Load a set of parameters from the JSON configuration
-	 *		  file and the command line
-	 *
-	 * @argc    : command line's argument count
-	 * @argv    : command line's argument list
-	 */
-	Parameters(int argc, char **argv);
+    /**
+     * Parameters() - Load a set of parameters from the JSON configuration
+     *                file and the command line
+     *
+     * @argc    : command line's argument count
+     * @argv    : command line's argument list
+     */
+    Parameters(int argc, char **argv);
 
 private:
-	std::string configFName;
+    std::string configFName;
 };
 
 #endif /* PARAMETERS_HPP_ */

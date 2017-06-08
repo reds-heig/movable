@@ -43,32 +43,32 @@ const std::string defaultConfigFName = "train_config.json";
 /**
  * class Parameters - Set of parameters for the application
  *
- * @simName	    : codename of the simulation
- * @resultsDir	    : base path of the results directory
+ * @simName         : codename of the simulation
+ * @resultsDir      : base path of the results directory
  * @classifierPath  : final classifier's path
- * @datasetPath	    : dataset's path
- * @datasetName	    : dataset's name
+ * @datasetPath     : dataset's path
+ * @datasetName     : dataset's name
  * @imgPathFName    : name of the file containing image paths
  * @maskPathFName   : name of the file containing mask paths
- * @gtPathFName	    : name of the file containing gt paths
- * @regMinVal	    : minimum value for the regularization parameter
- * @regMaxVal	    : maximum value for the regularization parameter
- * @regValStep	    : step between regularization parameter's values
+ * @gtPathFName     : name of the file containing gt paths
+ * @regMinVal       : minimum value for the regularization parameter
+ * @regMaxVal       : maximum value for the regularization parameter
+ * @regValStep      : step between regularization parameter's values
  * @shrinkageFactor : shrinkage factor for the boosting algorithm
- * @gtValues	    : list of considered gt values
+ * @gtValues        : list of considered gt values
  * @datasetBalance  : balance the number of positives and negatives in
- *		      the dataset
+ *                    the dataset
  * @imgRescaleFactor: rescale input images by this factor (that is, divide each
  *                    image coordinate by this value)
  * @posSamplesNo    : number of positive samples
  * @negSamplesNo    : number of negative samples
  * @randSamplesNo   : number of samples randomly taken for each
- *		      filter learning round
+ *                    filter learning round
  * @finalSamplesNo  : number of samples for each class used in the training of
- *		      the final classifier
- * @sampleSize	    : lateral size (in pixels) of each sample (for
- *		      instance, if this is 51, this means sampling
- *		      51x51 squared around the sample point)
+ *                    the final classifier
+ * @sampleSize      : lateral size (in pixels) of each sample (for
+ *                    instance, if this is 51, this means sampling
+ *                    51x51 squared around the sample point)
  * @filtersPerChNo  : number of filters to learn for each channel
  * @minFilterSize   : minimum filter size
  * @maxFilterSize   : maximum filter size
@@ -79,89 +79,91 @@ const std::string defaultConfigFName = "train_config.json";
  * @houghLThresh    : lower threshold on Canny's output in the Hough method
  * @houghMinRad     : minimum radius for the retained RBCs in the Hough method
  * @houghMaxRad     : maximum radius for the retained RBCs in the Hough method
- * @wlNo	    : number of weak-learners to learn
- * @treeDepth	    : maximum depth of the regression trees
+ * @wlNo            : number of weak-learners to learn
+ * @treeDepth       : maximum depth of the regression trees
  * @finalTreeDepth  : depth of the final tree
  * @smoothingValues : list of smoothing values
  * @fastClassifier  : enable fast classification (only candidate points are
  *                    tested)
  * @RBCdetection    : in fast classification mode, enlarge candidate points to
  *                    the RBCs containing them
+ * @useAutoContext  : enable the use of AutoContext
  * @intermedResDir  : directories where the intermediate results will be
- *		      stored
- * @finalResDir	    : directory where final results will be stored
- * @channelList	    : list of channels requested by user
- * @configFName	    : path of the configuration file
+ *                    stored
+ * @finalResDir     : directory where final results will be stored
+ * @channelList     : list of channels requested by user
+ * @configFName     : path of the configuration file
  */
 class Parameters {
 public:
-	std::string simName;
-	std::string resultsDir;
-	std::string classifierPath;
-	std::string datasetPath;
-	std::string datasetName;
-	std::string imgPathsFName;
-	std::string maskPathsFName;
-	std::string gtPathsFName;
+    std::string simName;
+    std::string resultsDir;
+    std::string classifierPath;
+    std::string datasetPath;
+    std::string datasetName;
+    std::string imgPathsFName;
+    std::string maskPathsFName;
+    std::string gtPathsFName;
 
-	float shrinkageFactor;
+    float shrinkageFactor;
 
-	float regMinVal;
-	float regMaxVal;
-	float regValStep;
+    float regMinVal;
+    float regMaxVal;
+    float regValStep;
 
-	std::vector< int > gtValues;
+    std::vector< int > gtValues;
 
-	bool datasetBalance;
-	unsigned int imgRescaleFactor;
+    bool datasetBalance;
+    unsigned int imgRescaleFactor;
 
-	unsigned int posSamplesNo;
-	unsigned int negSamplesNo;
-	unsigned int randSamplesNo;
-	unsigned int finalSamplesNo;
-	unsigned int sampleSize;
-	unsigned int filtersPerChNo;
-	unsigned int minFilterSize;
-	unsigned int maxFilterSize;
+    unsigned int posSamplesNo;
+    unsigned int negSamplesNo;
+    unsigned int randSamplesNo;
+    unsigned int finalSamplesNo;
+    unsigned int sampleSize;
+    unsigned int filtersPerChNo;
+    unsigned int minFilterSize;
+    unsigned int maxFilterSize;
     unsigned int nRotations;
 
-	double houghMinDist;
-	double houghHThresh;
-	double houghLThresh;
-	int houghMinRad;
-	int houghMaxRad;
+    double houghMinDist;
+    double houghHThresh;
+    double houghLThresh;
+    int houghMinRad;
+    int houghMaxRad;
 
-	bool fastClassifier;
-	bool RBCdetection;
+    bool fastClassifier;
+    bool RBCdetection;
+    bool useAutoContext;
 
-	unsigned int wlNo;
-	unsigned int treeDepth;
-	unsigned int finalTreeDepth;
+    unsigned int wlNo;
+    unsigned int treeDepth;
+    unsigned int finalTreeDepth;
 
-	std::vector< std::string > channelList;
+    std::vector< std::string > channelList;
 
-	/* Computed values */
-	std::vector< float > smoothingValues;
-	std::string baseResDir;
-	std::vector< std::string > intermedResDir;
-	std::string finalResDir;
+    /* Computed values */
+    std::vector< float > smoothingValues;
+    std::string baseResDir;
+    std::vector< std::string > intermedResDir;
+    std::string finalResDir;
 
-	/**
-	 * Parameters() - Empty constructor for testing
-	 */
-	Parameters() { };
+    /**
+     * Parameters() - Empty constructor for testing
+     */
+    Parameters() { };
 
-	/**
-	 * Parameters() - Load a set of parameters from the JSON configuration
-	 *		  file and the command line
-	 *
-	 * @argc: command line's argument count
-	 * @argv: command line's argument list
-	 */
-	Parameters(int argc, char **argv);
+    /**
+     * Parameters() - Load a set of parameters from the JSON configuration
+     *                file and the command line
+     *
+     * @argc: command line's argument count
+     * @argv: command line's argument list
+     */
+    Parameters(int argc, char **argv);
 
 private:
-	std::string configFName;
+    std::string configFName;
 };
 
 #endif /* PARAMETERS_HPP_ */

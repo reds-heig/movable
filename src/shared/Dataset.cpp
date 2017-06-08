@@ -107,11 +107,12 @@ Dataset::Dataset(const Parameters &params)
     houghMaxRad = params.houghMaxRad;
     fastClassifier = params.fastClassifier;
     RBCdetection = params.RBCdetection;
+    useAutoContext = params.useAutoContext;
 
 #ifdef MOVABLE_TRAIN
     gtValues = params.gtValues;
     createGtPairs(params.gtValues);
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
     /* Load paths */
     std::vector< std::string > img_paths;
@@ -134,7 +135,11 @@ Dataset::Dataset(const Parameters &params)
     }
 
     /* Pre-allocate structures */
-    imagesNo = img_paths.size()*params.nRotations;
+    if (params.nRotations > 0) {
+        imagesNo = img_paths.size()*params.nRotations;
+    } else {
+        imagesNo = img_paths.size();
+    }
     originalSizes.resize(imagesNo);
     masks.resize(imagesNo);
     originalGts.resize(imagesNo);
@@ -177,7 +182,7 @@ Dataset::Dataset(const Parameters &params)
         }
     }
 
-#else /* !MOVABLE_TRAIN */
+#else // !MOVABLE_TRAIN
     if (loadPaths(params, img_paths, mask_paths) != EXIT_SUCCESS) {
         throw std::runtime_error("loadPaths");
     }
@@ -208,7 +213,7 @@ Dataset::Dataset(const Parameters &params)
             throw std::runtime_error("imageLoading");
         }
     }
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 }
 
@@ -234,6 +239,7 @@ Dataset::Dataset(const Parameters &params,
     this->ePoints = srcDataset.ePoints;
     this->fastClassifier = srcDataset.fastClassifier;
     this->RBCdetection = srcDataset.RBCdetection;
+    this->useAutoContext = srcDataset.useAutoContext;
     this->originalSizes = srcDataset.originalSizes;
     this->houghMinDist = srcDataset.houghMinDist;
     this->houghHThresh = srcDataset.houghHThresh;
@@ -260,7 +266,7 @@ Dataset::Dataset(const Parameters &params,
         std::chrono::time_point< std::chrono::system_clock > start;
         std::chrono::time_point< std::chrono::system_clock > end;
         start = std::chrono::system_clock::now();
-#endif /* TESTS */
+#endif // !TESTS
 
         if (fastClassifier) {
             for (unsigned int bc = 0;
@@ -274,7 +280,7 @@ Dataset::Dataset(const Parameters &params,
                                     params.intermedResDir[bc],
                                     imageNames[i],
                                     borderSize);
-#endif /* TESTS */
+#endif // !TESTS
             }
         } else {
             std::vector< cv::Mat > chs;
@@ -288,7 +294,7 @@ Dataset::Dataset(const Parameters &params,
                                     params.intermedResDir[bc],
                                     imageNames[i],
                                     borderSize);
-#endif /* TESTS */
+#endif // !TESTS
 
             }
         }
@@ -298,7 +304,7 @@ Dataset::Dataset(const Parameters &params,
         std::chrono::duration< double > elapsed_s = end-start;
         log_info("\t\tImage %d/%d DONE! (took %.3fs)",
                  i+1, imagesNo, elapsed_s.count());
-#endif /* TESTS */
+#endif // !TESTS
     }
     dataChNo += boostedClassifiers.size();
 
@@ -334,7 +340,7 @@ Dataset::Dataset(const Parameters &params,
         }
     }
 }
-#else /* !MOVABLE_TRAIN */
+#else // !MOVABLE_TRAIN
 Dataset::Dataset(const Dataset &srcDataset,
                  const std::vector< BoostedClassifier * > &boostedClassifiers)
 {
@@ -355,9 +361,14 @@ Dataset::Dataset(const Dataset &srcDataset,
     this->houghLThresh = srcDataset.houghLThresh;
     this->houghMinRad = srcDataset.houghMinRad;
     this->houghMaxRad = srcDataset.houghMaxRad;
+    this->fastClassifier = srcDataset.fastClassifier;
+    this->RBCdetection = srcDataset.RBCdetection;
+    this->useAutoContext = srcDataset.useAutoContext;
 
-    /* Now iterate on the images, and for each image and each boosted
-       classifier create an additional channel with the obtained result */
+    /*
+     * Now iterate on the images, and for each image and each boosted
+     * classifier create an additional channel with the obtained result
+     */
     for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
         dataVector tmpVec(imagesNo);
         data.push_back(tmpVec);
@@ -370,7 +381,7 @@ Dataset::Dataset(const Dataset &srcDataset,
         std::chrono::time_point< std::chrono::system_clock > start;
         std::chrono::time_point< std::chrono::system_clock > end;
         start = std::chrono::system_clock::now();
-#endif /* TESTS */
+#endif // !TESTS
 
         if (fastClassifier) {
             for (unsigned int bc = 0;
@@ -395,12 +406,12 @@ Dataset::Dataset(const Dataset &srcDataset,
         std::chrono::duration< double > elapsed_s = end-start;
         log_info("\t\tImage %d/%d DONE! (took %.3fs)",
                  i+1, imagesNo, elapsed_s.count());
-#endif /* TESTS */
+#endif // !TESTS
     }
     dataChNo += boostedClassifiers.size();
 }
 
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 #ifdef MOVABLE_TRAIN
 const EMat&
@@ -488,7 +499,7 @@ Dataset::getGtValuesNo() const
     return gtValues.size();
 }
 
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 void Dataset::getSampleMatrix(const sampleSet &samplePositions,
                               const std::vector< unsigned int > &samplesIdx,
@@ -552,7 +563,7 @@ Dataset::getChsForImage(const unsigned int n, std::vector< cv::Mat > &chs) const
         cv::copyMakeBorder(img, img,
                            borderSize, borderSize,
                            borderSize, borderSize,
-                           cv::BORDER_REPLICATE);
+                           cv::BORDER_REFLECT);
         chs.push_back(img);
     }
 }
@@ -974,12 +985,12 @@ Dataset::addGt(const unsigned int imageID, const cv::Mat &src)
         cv::namedWindow("OutGt", cv::WINDOW_NORMAL);
         cv::imshow("OutGt", tmp);
         cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
     }
 
     return EXIT_SUCCESS;
 }
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 #ifdef MOVABLE_TRAIN
 int
@@ -987,18 +998,18 @@ Dataset::addImage(const unsigned int imageID,
                   const std::string &imgPath,
                   const std::string &maskPath,
                   const std::string &gtPath)
-#else /* !MOVABLE_TRAIN */
-    int
-    Dataset::addImage(const unsigned int imageID,
-                      const std::string &imgPath,
-                      const std::string &maskPath)
-#endif /* MOVABLE_TRAIN */
+#else // !MOVABLE_TRAIN
+int
+Dataset::addImage(const unsigned int imageID,
+                  const std::string &imgPath,
+                  const std::string &maskPath)
+#endif // MOVABLE_TRAIN
 {
     CHECK_FILE_EXISTS(imgPath.c_str());
     CHECK_FILE_EXISTS(maskPath.c_str());
 #ifdef MOVABLE_TRAIN
     CHECK_FILE_EXISTS(gtPath.c_str());
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
     /* Groundtruth and mask are assumed to be grayscale */
     cv::Mat mask = cv::imread(maskPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
@@ -1032,9 +1043,10 @@ Dataset::addImage(const unsigned int imageID,
                cv::INTER_LANCZOS4);
 
     /* Replicate image borders */
+    /* Changed to border mirroring to ease CUDA implementation */
     cv::copyMakeBorder(img, img,
                        borderSize, borderSize, borderSize, borderSize,
-                       cv::BORDER_REPLICATE);
+                       cv::BORDER_REFLECT);
 
     /* Convert image to float and rescale it in [0, 1] */
     img.convertTo(img, CV_32FC3);
@@ -1075,7 +1087,7 @@ Dataset::addImage(const unsigned int imageID,
             return -EXIT_FAILURE;
         }
     }
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
     return EXIT_SUCCESS;
 }
@@ -1148,7 +1160,7 @@ Dataset::addRotatedImage(const unsigned int imageID,
     /* Replicate image borders */
     cv::copyMakeBorder(img, img,
                        borderSize, borderSize, borderSize, borderSize,
-                       cv::BORDER_REPLICATE);
+                       cv::BORDER_REFLECT);
 
     /* Convert image to float and rescale it in [0, 1] */
     img.convertTo(img, CV_32FC3);
@@ -1200,7 +1212,7 @@ Dataset::addRotatedImage(const unsigned int imageID,
 
     return EXIT_SUCCESS;
 }
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 #ifdef MOVABLE_TRAIN
 unsigned int
@@ -1324,7 +1336,7 @@ Dataset::getAvailableSamples(const gtVector &gt,
     return (int)returnedSamplesNo;
 }
 
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
 #ifdef MOVABLE_TRAIN
 int
@@ -1332,12 +1344,12 @@ Dataset::loadPaths(const Parameters &params,
                    std::vector< std::string > &img_paths,
                    std::vector< std::string > &mask_paths,
                    std::vector< std::string > &gt_paths)
-#else /* !MOVABLE_TRAIN */
+#else // !MOVABLE_TRAIN
     int
     Dataset::loadPaths(const Parameters &params,
                        std::vector< std::string > &img_paths,
                        std::vector< std::string > &mask_paths)
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 {
     if (loadPathFile(params.datasetPath, params.imgPathsFName,
                      img_paths) != EXIT_SUCCESS) {
@@ -1382,7 +1394,7 @@ Dataset::loadPaths(const Parameters &params,
         log_err("Error encountered while loading GT paths file");
         return -EXIT_FAILURE;
     }
-#endif /* MOVABLE_TRAIN */
+#endif // MOVABLE_TRAIN
 
     return EXIT_SUCCESS;
 }
@@ -1418,7 +1430,7 @@ Dataset::imageGrayCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("grayCh", gray);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1450,7 +1462,7 @@ Dataset::imageCLAHE(const cv::Mat &src, EMat &dst, const void *opaque)
     cv::namedWindow("CLAHE", cv::WINDOW_NORMAL);
     cv::imshow("CLAHE", gray);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1490,7 +1502,7 @@ Dataset::imageGreenCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("greenCh", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1531,7 +1543,7 @@ Dataset::imageRedCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("RED", redCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1572,7 +1584,7 @@ Dataset::imageBlueCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("BLUE", blueCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1615,7 +1627,7 @@ Dataset::imageHueCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("HUE", hueCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1658,7 +1670,7 @@ Dataset::imageLCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("L", LCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1701,7 +1713,7 @@ Dataset::imageACh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("A", ACh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1744,7 +1756,7 @@ Dataset::imageBCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("B", BCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1787,7 +1799,7 @@ Dataset::imageSaturCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("SATUR", saturCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1830,7 +1842,7 @@ Dataset::imageValueCh(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("VALUE", valueCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1872,7 +1884,7 @@ Dataset::gaussianFiltering(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("Gaussian", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1914,7 +1926,7 @@ Dataset::laplacianFiltering(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("Laplacian", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -1929,21 +1941,21 @@ Dataset::LBP(const cv::Mat &src, EMat &dst, const void *opaque)
 
     cv::Mat greenCh = colorCh[1];
     cv::Mat tmpDst = cv::Mat::zeros(greenCh.rows-2, greenCh.cols-2, CV_8UC1);
-	for(int i=1;i<greenCh.rows-1;i++) {
-		for(int j=1;j<greenCh.cols-1;j++) {
-			float center = greenCh.at<float>(i,j);
-			unsigned char code = 0;
-			code |= (greenCh.at<float>(i-1,j-1) > center) << 7;
-			code |= (greenCh.at<float>(i-1,j) > center) << 6;
-			code |= (greenCh.at<float>(i-1,j+1) > center) << 5;
-			code |= (greenCh.at<float>(i,j+1) > center) << 4;
-			code |= (greenCh.at<float>(i+1,j+1) > center) << 3;
-			code |= (greenCh.at<float>(i+1,j) > center) << 2;
-			code |= (greenCh.at<float>(i+1,j-1) > center) << 1;
-			code |= (greenCh.at<float>(i,j-1) > center) << 0;
-			tmpDst.at<unsigned char>(i-1,j-1) = code;
-		}
-	}
+    for(int i=1;i<greenCh.rows-1;i++) {
+        for(int j=1;j<greenCh.cols-1;j++) {
+            float center = greenCh.at<float>(i,j);
+            unsigned char code = 0;
+            code |= (greenCh.at<float>(i-1,j-1) > center) << 7;
+            code |= (greenCh.at<float>(i-1,j) > center) << 6;
+            code |= (greenCh.at<float>(i-1,j+1) > center) << 5;
+            code |= (greenCh.at<float>(i,j+1) > center) << 4;
+            code |= (greenCh.at<float>(i+1,j+1) > center) << 3;
+            code |= (greenCh.at<float>(i+1,j) > center) << 2;
+            code |= (greenCh.at<float>(i+1,j-1) > center) << 1;
+            code |= (greenCh.at<float>(i,j-1) > center) << 0;
+            tmpDst.at<unsigned char>(i-1,j-1) = code;
+        }
+    }
     tmpDst.convertTo(greenCh, CV_32FC1);
 
     cv::Mat imgCenter = greenCh(cv::Range(borderSize,
@@ -1972,7 +1984,7 @@ Dataset::LBP(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("LBP", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -2009,7 +2021,7 @@ Dataset::medianFiltering(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("medFilt", gray);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -2051,7 +2063,7 @@ Dataset::sobelDrvX(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("sobelDrvX", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -2093,7 +2105,7 @@ Dataset::sobelDrvY(const cv::Mat &src, EMat &dst, const void *opaque)
     }
     cv::imshow("sobelDrvX", greenCh);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     return EXIT_SUCCESS;
 }
@@ -2114,7 +2126,7 @@ Dataset::addMask(const unsigned int imageID,
     cv::namedWindow("OutMask", cv::WINDOW_NORMAL);
     cv::imshow("OutMask", dst);
     cv::waitKey(0);
-#endif /* VISUALIZE_IMG_DATA */
+#endif // VISUALIZE_IMG_DATA
 
     EMat eDst(dst.rows, dst.cols);
     cv::cv2eigen(dst, eDst);

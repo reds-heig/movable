@@ -28,9 +28,9 @@
 class JSONSerializable
 {
 public:
-	virtual ~JSONSerializable(void) { };
-	virtual void Serialize(Json::Value &root) = 0;
-	virtual void Deserialize(Json::Value &root) = 0;
+    virtual ~JSONSerializable(void) { };
+    virtual void Serialize(Json::Value &root) = 0;
+    virtual void Deserialize(Json::Value &root) = 0;
 };
 
 #endif /* JSON_SERIALIZABLE_HPP_ */

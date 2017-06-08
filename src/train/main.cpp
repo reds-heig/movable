@@ -30,48 +30,58 @@
 int
 main(int argc, char **argv)
 {
-	/* Initialize RNG */
-	srand(time(0));
+    /* Initialize RNG */
+    srand(time(0));
 
-	log_info("Loading parameters...");
-	Parameters params(argc, argv);
-	if (params.simName == "") {
-		/* Requested 'help' in command line args */
-		return EXIT_SUCCESS;
-	}
+    std::chrono::time_point< std::chrono::system_clock > start;
+    std::chrono::time_point< std::chrono::system_clock > end;
+    start = std::chrono::system_clock::now();
 
-	log_info("Loading dataset...");
-	Dataset dataset(params);
+    log_info("Loading parameters...");
+    Parameters params(argc, argv);
+    if (params.simName == "") {
+        /* Requested 'help' in command line args */
+        return EXIT_SUCCESS;
+    }
 
-	log_info("Creating directories...");
-	if (createDirectories(params, dataset) == -EXIT_FAILURE) {
-		return -EXIT_FAILURE;
-	}
+    log_info("Loading dataset...");
+    Dataset dataset(params);
 
-	log_info("Pre-allocating smoothing matrices...\n");
-	SmoothingMatrices SM(params.minFilterSize,
-			     params.maxFilterSize,
-			     params.smoothingValues);
+    log_info("Creating directories...");
+    if (createDirectories(params, dataset) == -EXIT_FAILURE) {
+        return -EXIT_FAILURE;
+    }
 
-	/* Checking that we can open the file, to avoid wasting time without
-	   being able to do so later! */
-	std::ofstream file(params.classifierPath);
-	if (!file.is_open()) {
-		log_err("Unable to open destination file %s",
-			params.classifierPath.c_str());
-		return -EXIT_FAILURE;
-	}
+    log_info("Pre-allocating smoothing matrices...\n");
+    SmoothingMatrices SM(params.minFilterSize,
+                         params.maxFilterSize,
+                         params.smoothingValues);
 
-	log_info("Learning KernelBoost classifier...");
-	KernelBoost kb(params, SM, dataset);
+    /*
+     * Checking that we can open the file, to avoid wasting time without
+     * being able to do so later!
+     */
+    std::ofstream file(params.classifierPath);
+    if (!file.is_open()) {
+        log_err("Unable to open destination file %s",
+                params.classifierPath.c_str());
+        return -EXIT_FAILURE;
+    }
 
-	std::string KBClassifier_json;
-	Json::Value root;
-	kb.serialize(root, params);
-	Json::StyledWriter writer;
-	KBClassifier_json = writer.write(root);
-	file << KBClassifier_json;
-	file.close();
+    log_info("Learning KernelBoost classifier...");
+    KernelBoost kb(params, SM, dataset);
 
-	return EXIT_SUCCESS;
+    std::string KBClassifier_json;
+    Json::Value root;
+    kb.serialize(root, params);
+    Json::StyledWriter writer;
+    KBClassifier_json = writer.write(root);
+    file << KBClassifier_json;
+    file.close();
+
+    end = std::chrono::system_clock::now();
+    std::chrono::duration< double > elapsed_s = end-start;
+    log_info("TRAINING COMPLETED, TOOK %.3fs", elapsed_s.count());
+
+    return EXIT_SUCCESS;
 }

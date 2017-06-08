@@ -29,37 +29,37 @@
 int
 main(int argc, char **argv)
 {
-	log_info("Loading parameters...");
-	Parameters params(argc, argv);
-	if (params.simName == "") {
-		/* Requested 'help' in command line args */
-		return EXIT_SUCCESS;
-	}
+    log_info("Loading parameters...");
+    Parameters params(argc, argv);
+    if (params.simName == "") {
+        /* Requested 'help' in command line args */
+        return EXIT_SUCCESS;
+    }
 
-	log_info("Loading dataset...");
-	Dataset dataset(params);
+    log_info("Loading dataset...");
+    Dataset dataset(params);
 
-	log_info("Creating directories...");
-	if (createDirectories(params) == -EXIT_FAILURE) {
-		return -EXIT_FAILURE;
-	}
+    log_info("Creating directories...");
+    if (createDirectories(params) == -EXIT_FAILURE) {
+        return -EXIT_FAILURE;
+    }
 
-	std::ifstream file(params.classifierPath);
-	if (!file.is_open()) {
-		log_err("Unable to open classifier file %s",
-			params.classifierPath.c_str());
-		return -EXIT_FAILURE;
-	}
+    std::ifstream file(params.classifierPath);
+    if (!file.is_open()) {
+        log_err("Unable to open classifier file %s",
+                params.classifierPath.c_str());
+        return -EXIT_FAILURE;
+    }
 
-	log_info("Loading KernelBoost classifier and performing "
-		 "classification...");
-	std::stringstream KBClassifier_json;
-	KBClassifier_json << file.rdbuf();
-	file.close();
-	std::string KBC_json = KBClassifier_json.str();
+    log_info("Loading KernelBoost classifier and performing "
+             "classification...");
+    std::stringstream KBClassifier_json;
+    KBClassifier_json << file.rdbuf();
+    file.close();
+    std::string KBC_json = KBClassifier_json.str();
 
-	log_info("Performing classification...");
-	KernelBoost kb(KBC_json, params, dataset);
+    log_info("Performing classification...");
+    KernelBoost kb(KBC_json, params, dataset);
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

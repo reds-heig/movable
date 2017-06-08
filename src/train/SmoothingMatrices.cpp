@@ -33,141 +33,141 @@
  *
  * Note: requires the variables queue, size, and connections to be defined!
  */
-#define TRY(dx, dy)							\
-	do {								\
-		PixLoc newLoc(loc.r + (dx), loc.c + (dy), (int)size);	\
-		if (!newLoc.isValid()) {				\
-			break;						\
-		}							\
-		if (tmp.coeff(newLoc.r, newLoc.c) != 0) {		\
-			break;						\
-		}							\
-		queue.push(newLoc);					\
-									\
-		connections.push_back(Connection(loc,			\
-						 newLoc, size));	\
-	} while (0);
+#define TRY(dx, dy)                                             \
+    do {                                                        \
+        PixLoc newLoc(loc.r + (dx), loc.c + (dy), (int)size);   \
+        if (!newLoc.isValid()) {                                \
+            break;                                              \
+        }                                                       \
+        if (tmp.coeff(newLoc.r, newLoc.c) != 0) {               \
+            break;                                              \
+        }                                                       \
+        queue.push(newLoc);                                     \
+                                                                \
+        connections.push_back(Connection(loc,                   \
+                                         newLoc, size));        \
+    } while (0);
 
 SmoothingMatrices::SmoothingMatrices(const unsigned int minSize,
-				     const unsigned int maxSize,
-				     const std::vector< float > &smoothingValues)
-	: smoothingValues(smoothingValues)
+                                     const unsigned int maxSize,
+                                     const std::vector< float > &smoothingValues)
+    : smoothingValues(smoothingValues)
 {
-	assert(minSize > 1);
-	assert(minSize % 2 == 1);
-	assert(maxSize >= minSize);
-	assert(maxSize % 2 == 1);
-	assert(smoothingValues.size() > 0);
+    assert(minSize > 1);
+    assert(minSize % 2 == 1);
+    assert(maxSize >= minSize);
+    assert(maxSize % 2 == 1);
+    assert(smoothingValues.size() > 0);
 
-	for (unsigned int i = minSize; i <= maxSize; i+=2) {
-		sizes.push_back(i);
-	}
+    for (unsigned int i = minSize; i <= maxSize; i+=2) {
+        sizes.push_back(i);
+    }
 
-	const unsigned int nSize = sizes.size();
+    const unsigned int nSize = sizes.size();
 
-	M.resize(nSize);
+    M.resize(nSize);
 
-	/* Valgrind will complain a lot about this -- but this is a problem in
-	   the way Valgrind detects issues, not a real leak */
+    /* Valgrind will complain a lot about this -- but this is a problem in
+       the way Valgrind detects issues, not a real leak */
 #pragma omp parallel for schedule(dynamic)
-	for (unsigned int iS = 0; iS < nSize; ++iS) {
-		M[iS].resize(smoothingValues.size());
+    for (unsigned int iS = 0; iS < nSize; ++iS) {
+        M[iS].resize(smoothingValues.size());
 
-		EMat smOnes = createSmoothingMatrixOnes(sizes[iS]);
-		for (unsigned int iL = 0; iL < smoothingValues.size(); ++iL) {
-			assert (smoothingValues[iL] > 0);
-			M[iS][iL] = smOnes*sqrt(smoothingValues[iL]);
-		}
-	}
+        EMat smOnes = createSmoothingMatrixOnes(sizes[iS]);
+        for (unsigned int iL = 0; iL < smoothingValues.size(); ++iL) {
+            assert (smoothingValues[iL] > 0);
+            M[iS][iL] = smOnes*sqrt(smoothingValues[iL]);
+        }
+    }
 }
 
 EMat
 SmoothingMatrices::createSmoothingMatrixOnes(const unsigned int size) const
 {
-	assert(size > 0);
+    assert(size > 0);
 
-	const unsigned int connectionsNo = ((size-2) * (size-2) * 4 + 8 +
-					    (size-2) * 12) / 2;
+    const unsigned int connectionsNo = ((size-2) * (size-2) * 4 + 8 +
+                                        (size-2) * 12) / 2;
 
-	/* Connection vector pairs */
-	std::vector< Connection > connections;
-	connections.reserve(connectionsNo);
+    /* Connection vector pairs */
+    std::vector< Connection > connections;
+    connections.reserve(connectionsNo);
 
-	/* Temporary matrix used to mark already-explored neighborhoods */
-	EMat tmp(size, size);
-	tmp.setZero();
+    /* Temporary matrix used to mark already-explored neighborhoods */
+    EMat tmp(size, size);
+    tmp.setZero();
 
-	/* Exploring queue */
-	std::queue< PixLoc > queue;
-	queue.push(PixLoc((int)size/2, (int)size/2, (int)size));
+    /* Exploring queue */
+    std::queue< PixLoc > queue;
+    queue.push(PixLoc((int)size/2, (int)size/2, (int)size));
 
-	/* Visit all neighboring pixels and put them as pairs in the connections
-	   vector */
-	while (!queue.empty()) {
-		PixLoc loc = queue.front();
-		queue.pop();
+    /* Visit all neighboring pixels and put them as pairs in the connections
+       vector */
+    while (!queue.empty()) {
+        PixLoc loc = queue.front();
+        queue.pop();
 
-		if (tmp.coeff(loc.r, loc.c) != 0) {
-			/* We've already explored this pixel */
-			continue;
-		}
+        if (tmp.coeff(loc.r, loc.c) != 0) {
+            /* We've already explored this pixel */
+            continue;
+        }
 
-		/* Check pixels in a 4-neighborhood */
-		TRY( 1,	 0);
-		TRY( 0,	 1);
-		TRY(-1,	 0);
-		TRY( 0, -1);
+        /* Check pixels in a 4-neighborhood */
+        TRY( 1,  0);
+        TRY( 0,  1);
+        TRY(-1,  0);
+        TRY( 0, -1);
 
-		/* Mark as visited */
-		tmp.coeffRef(loc.r, loc.c) = 1;
-	}
+        /* Mark as visited */
+        tmp.coeffRef(loc.r, loc.c) = 1;
+    }
 
-	EMat X(connectionsNo, size * size);
-	X.setZero();
+    EMat X(connectionsNo, size * size);
+    X.setZero();
 
-	for (unsigned int iR = 0; iR < connectionsNo; ++iR) {
-		X.coeffRef(iR, connections[iR].p1) = 1.0;
-		X.coeffRef(iR, connections[iR].p2) = -1.0;
-	}
+    for (unsigned int iR = 0; iR < connectionsNo; ++iR) {
+        X.coeffRef(iR, connections[iR].p1) = 1.0;
+        X.coeffRef(iR, connections[iR].p2) = -1.0;
+    }
 
-	return X;
+    return X;
 }
 
 const EMat&
 SmoothingMatrices::getSmoothingMatrix(const unsigned int filterSize,
-				      const float lambda) const
+                                      const float lambda) const
 {
-	const int XPos_size = getPosSize(filterSize);
-	const int XPos_lambda = getPosLambda(lambda);
+    const int XPos_size = getPosSize(filterSize);
+    const int XPos_lambda = getPosLambda(lambda);
 
-	if (XPos_size < 0 || XPos_lambda < 0) {
-		log_err("The requested smoothing matrix does not exist "
-			"(filter size = %d, lambda = %f)",
-			filterSize, lambda);
-		/* Return an empty EMat */
-		static EMat nullresult;
-		return nullresult;
-	}
-	return M[XPos_size][XPos_lambda];
+    if (XPos_size < 0 || XPos_lambda < 0) {
+        log_err("The requested smoothing matrix does not exist "
+                "(filter size = %d, lambda = %f)",
+                filterSize, lambda);
+        /* Return an empty EMat */
+        static EMat nullresult;
+        return nullresult;
+    }
+    return M[XPos_size][XPos_lambda];
 }
 
 int
 SmoothingMatrices::getPosLambda(const float lambda) const {
-	std::vector< float >::const_iterator it;
-	if ((it = std::find(smoothingValues.begin(),
-			    smoothingValues.end(),
-			    lambda)) != smoothingValues.end()) {
-		return std::distance(smoothingValues.begin(), it);
-	}
-	return -1;
+    std::vector< float >::const_iterator it;
+    if ((it = std::find(smoothingValues.begin(),
+                        smoothingValues.end(),
+                        lambda)) != smoothingValues.end()) {
+        return std::distance(smoothingValues.begin(), it);
+    }
+    return -1;
 }
 
 int
 SmoothingMatrices::getPosSize(const unsigned int size) const {
-	std::vector< unsigned int >::const_iterator it;
-	if ((it = std::find(sizes.begin(), sizes.end(),
-			    size)) != sizes.end()) {
-		return std::distance(sizes.begin(), it);
-	}
-	return -1;
+    std::vector< unsigned int >::const_iterator it;
+    if ((it = std::find(sizes.begin(), sizes.end(),
+                        size)) != sizes.end()) {
+        return std::distance(sizes.begin(), it);
+    }
+    return -1;
 }
