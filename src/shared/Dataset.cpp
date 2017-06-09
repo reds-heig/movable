@@ -230,7 +230,11 @@ Dataset::Dataset(const Parameters &params,
      * Warning! srcDataset.imagesNo might include additional rotations, and we
      * are not willing to consider them at this point.
      */
-    this->imagesNo = srcDataset.imagesNo/params.nRotations;
+    if (params.nRotations > 0) {
+        this->imagesNo = srcDataset.imagesNo/params.nRotations;
+    } else {
+        this->imagesNo = srcDataset.imagesNo;
+    }
     this->imageNames = srcDataset.imageNames;
     this->imagePaths = srcDataset.imagePaths;
     this->sampleSize = srcDataset.sampleSize;
@@ -341,6 +345,11 @@ Dataset::Dataset(const Parameters &params,
     }
 }
 #else // !MOVABLE_TRAIN
+
+/*
+ * This function is called when we want to obtain the results of the first
+ * classifier to perform AutoContext
+ */
 Dataset::Dataset(const Dataset &srcDataset,
                  const std::vector< BoostedClassifier * > &boostedClassifiers)
 {
@@ -1436,7 +1445,7 @@ Dataset::imageGrayCh(const cv::Mat &src, EMat &dst, const void *opaque)
 }
 
 int
-Dataset::imageCLAHE(const cv::Mat &src, EMat &dst, const void *opaque)
+Dataset::imageCLAHE(const cv::Mat &src, EMat &dst, const void * /* opaque */)
 {
     cv::Mat gray;
     cv::Mat tmp;

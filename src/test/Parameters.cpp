@@ -171,7 +171,7 @@ Parameters::Parameters(int argc, char **argv)
         RBCdetection =
             KB_root["KernelBoost"].get("RBCdetection", false).asBool();
         useAutoContext =
-            KB_root["useAutoContext"].get("useAutoContext", false).asBool();
+            KB_root["KernelBoost"]["useAutoContext"].asBool();
 
         for (Json::Value::iterator it =
                  KB_root["KernelBoost"]["Channels"].begin();
