@@ -268,9 +268,9 @@ FilterBank::evaluateFiltersOnImage(const std::vector< cv::Mat > &imgVec,
         cv::filter2D(imgVec[filters[iF].chNo], tmp,
                      -1, filters[iF].Xsq);
         const unsigned int startRow = borderSize+filters[iF].row+
-            floor(filters[iF].size/2);
+            floor(filters[iF].size/2)-1;
         const unsigned int startCol = borderSize+filters[iF].col+
-            floor(filters[iF].size/2);
+            floor(filters[iF].size/2)-1;
         /* We copy data since we cannot reshape a cv::Range
            (non-contiguous in memory) */
         for (unsigned int r = 0; r < nRows; ++r) {
