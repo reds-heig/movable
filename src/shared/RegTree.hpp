@@ -15,6 +15,8 @@
 #ifndef REGTREE_HPP_
 #define REGTREE_HPP_
 
+#include <numeric>
+
 #include "json/json.h"
 
 #include "JSONSerializable.hpp"
