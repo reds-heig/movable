@@ -28,12 +28,12 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 set (EXT_PROJECTS_DIR ${CMAKE_SOURCE_DIR}/libs)
 
 find_package (Jsoncpp REQUIRED)
-include_directories (${JSONCPP_INCLUDE_DIRS})
+include_directories (SYSTEM ${JSONCPP_INCLUDE_DIRS})
 
 find_package (OpenCV REQUIRED)
-include_directories (${OpenCV_INCLUDE_DIRS})
+include_directories (SYSTEM ${OpenCV_INCLUDE_DIRS})
 
-include_directories (${EXT_PROJECTS_DIR}/Catch/include)
+include_directories (SYSTEM ${EXT_PROJECTS_DIR}/Catch/include)
 enable_testing (true)
 
 link_directories (${EXT_PROJECTS_DIR}/liblbfgs/lib/.libs)
@@ -43,7 +43,7 @@ set (EIGEN3_INCLUDE_DIR "${EXT_PROJECTS_DIR}/eigen")
 if (NOT EIGEN3_INCLUDE_DIR)
     message (FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
 endif ()
-include_directories ("${EIGEN3_INCLUDE_DIR}")
+include_directories (SYSTEM "${EIGEN3_INCLUDE_DIR}")
 
 find_package (OpenMP)
 if (OPENMP_FOUND)
@@ -52,8 +52,8 @@ if (OPENMP_FOUND)
 endif ()
 
 include_directories (${EXT_PROJECTS_DIR})
-include_directories (${EXT_PROJECTS_DIR}/liblbfgs/include)
-include_directories (${EXT_PROJECTS_DIR}/argtable_3.0.1)
+include_directories (SYSTEM ${EXT_PROJECTS_DIR}/liblbfgs/include)
+include_directories (SYSTEM ${EXT_PROJECTS_DIR}/argtable_3.0.1)
 
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING

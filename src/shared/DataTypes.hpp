@@ -20,6 +20,9 @@
 #ifndef DATATYPES_HPP_
 #define DATATYPES_HPP_
 
+#include <iostream>
+#include <vector>
+
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <Eigen/Core>
 #include <Eigen/Dense>
