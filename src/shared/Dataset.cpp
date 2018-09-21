@@ -1198,8 +1198,6 @@ Dataset::addRotatedImage(const unsigned int imageID,
 
     cv::Mat gt = cv::imread(gtPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
     gt.convertTo(tmp, CV_32FC1);
-    cv::resize(tmp, tmp, cv::Size(mask.cols, mask.rows), 0, 0,
-               cv::INTER_NEAREST);
     cv::Point gt_center = cv::Point(gt.cols/2, gt.rows/2);
     cv::Mat gt_rot_mat = cv::getRotationMatrix2D(gt_center, rot, 1.0);
 
@@ -1208,6 +1206,10 @@ Dataset::addRotatedImage(const unsigned int imageID,
                    (rotated_tmp.rows-tmp.rows)/2,
                    tmp.cols, tmp.rows);
     cropped_rotated_tmp = rotated_tmp(roi);
+
+    cv::resize(cropped_rotated_tmp, cropped_rotated_tmp,
+               cv::Size(mask.cols, mask.rows), 0, 0,
+               cv::INTER_NEAREST);
 
     addGt(imageID, cropped_rotated_tmp);
     for (unsigned int i = 0; i < gtPairsNo; ++i) {
@@ -1950,21 +1952,21 @@ Dataset::LBP(const cv::Mat &src, EMat &dst, const void *opaque)
 
     cv::Mat greenCh = colorCh[1];
     cv::Mat tmpDst = cv::Mat::zeros(greenCh.rows-2, greenCh.cols-2, CV_8UC1);
-    for(int i=1;i<greenCh.rows-1;i++) {
-        for(int j=1;j<greenCh.cols-1;j++) {
-            float center = greenCh.at<float>(i,j);
-            unsigned char code = 0;
-            code |= (greenCh.at<float>(i-1,j-1) > center) << 7;
-            code |= (greenCh.at<float>(i-1,j) > center) << 6;
-            code |= (greenCh.at<float>(i-1,j+1) > center) << 5;
-            code |= (greenCh.at<float>(i,j+1) > center) << 4;
-            code |= (greenCh.at<float>(i+1,j+1) > center) << 3;
-            code |= (greenCh.at<float>(i+1,j) > center) << 2;
-            code |= (greenCh.at<float>(i+1,j-1) > center) << 1;
-            code |= (greenCh.at<float>(i,j-1) > center) << 0;
-            tmpDst.at<unsigned char>(i-1,j-1) = code;
-        }
-    }
+	for(int i=1;i<greenCh.rows-1;i++) {
+		for(int j=1;j<greenCh.cols-1;j++) {
+			float center = greenCh.at<float>(i,j);
+			unsigned char code = 0;
+			code |= (greenCh.at<float>(i-1,j-1) > center) << 7;
+			code |= (greenCh.at<float>(i-1,j) > center) << 6;
+			code |= (greenCh.at<float>(i-1,j+1) > center) << 5;
+			code |= (greenCh.at<float>(i,j+1) > center) << 4;
+			code |= (greenCh.at<float>(i+1,j+1) > center) << 3;
+			code |= (greenCh.at<float>(i+1,j) > center) << 2;
+			code |= (greenCh.at<float>(i+1,j-1) > center) << 1;
+			code |= (greenCh.at<float>(i,j-1) > center) << 0;
+			tmpDst.at<unsigned char>(i-1,j-1) = code;
+		}
+	}
     tmpDst.convertTo(greenCh, CV_32FC1);
 
     cv::Mat imgCenter = greenCh(cv::Range(borderSize,
