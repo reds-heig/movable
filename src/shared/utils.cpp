@@ -264,7 +264,7 @@ saveOverlayedImage(const std::string &imageFName,
                                     CV_LOAD_IMAGE_COLOR);
     /* Invert image */
     // cv::threshold(detections, detections, 127,
-    //        255, cv::THRESH_BINARY_INV);
+    //            255, cv::THRESH_BINARY_INV);
     // cv::Mat tmp(img.rows, img.cols, CV_8UC1);
     // tmp = cv::Scalar(0);
     // overlayedDet[0] = tmp;

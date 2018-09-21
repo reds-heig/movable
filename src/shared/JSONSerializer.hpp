@@ -32,32 +32,32 @@
 class JSONSerializer
 {
 private:
-    /* Private to prevent class instantiation */
-    JSONSerializer(void) { };
+	/* Private to prevent class instantiation */
+	JSONSerializer(void) { };
 public:
-    /**
-     * Serialize() - Serialize a given object as a JSON string
-     *
-     * @obj   : object to serialize
-     *
-     * @output: resulting JSON representation
-     *
-     * Return: true if the object has been serialized, false if the pointer
-     *     to the object in invalid (NULL)
-     */
-    static bool Serialize(JSONSerializable *obj, std::string &output);
+	/**
+	 * Serialize() - Serialize a given object as a JSON string
+	 *
+	 * @obj	  : object to serialize
+	 *
+	 * @output: resulting JSON representation
+	 *
+	 * Return: true if the object has been serialized, false if the pointer
+	 *	   to the object in invalid (NULL)
+	 */
+	static bool Serialize(JSONSerializable *obj, std::string &output);
 
-    /**
-     * Deserialize() - Deserialize an object from a given JSON string
-     *
-     * @obj  : deserialized object
-     *
-     * @input: input JSON representation
-     *
-     * Return: true if the object has been deserialized, false if an error
-     *     occurred
-     */
-    static bool Deserialize(JSONSerializable *obj, std::string &input);
+	/**
+	 * Deserialize() - Deserialize an object from a given JSON string
+	 *
+	 * @obj	 : deserialized object
+	 *
+	 * @input: input JSON representation
+	 *
+	 * Return: true if the object has been deserialized, false if an error
+	 *	   occurred
+	 */
+	static bool Deserialize(JSONSerializable *obj, std::string &input);
 };
 
 #endif /* JSON_SERIALIZER_HPP_ */

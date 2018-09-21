@@ -52,6 +52,13 @@ main(int argc, char **argv)
         return -EXIT_FAILURE;
     }
 
+    // Since we were able to parse the configuration file correctly, store a copy
+    // of it in the results directory (in this way it will be possible to
+    // replicate the experiment in the future).
+    std::ifstream cp_src(params.configFName, std::ios::binary);
+    std::ofstream cp_dst(params.configBkpPath, std::ios::binary);
+    cp_dst << cp_src.rdbuf();
+
     log_info("Pre-allocating smoothing matrices...\n");
     SmoothingMatrices SM(params.minFilterSize,
                          params.maxFilterSize,

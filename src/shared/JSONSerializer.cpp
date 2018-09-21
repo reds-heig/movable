@@ -22,34 +22,34 @@
 bool
 JSONSerializer::Serialize(JSONSerializable *obj, std::string &output)
 {
-    if (obj == NULL) {
-        return false;
-    }
+	if (obj == NULL) {
+		return false;
+	}
 
-    Json::Value root;
-    obj->Serialize(root);
+	Json::Value root;
+	obj->Serialize(root);
 
-    Json::StyledWriter writer;
-    output = writer.write(root);
+	Json::StyledWriter writer;
+	output = writer.write(root);
 
-    return true;
+	return true;
 }
 
 bool
 JSONSerializer::Deserialize(JSONSerializable *obj, std::string &input)
 {
-    if (obj == NULL) {
-        return false;
-    }
+	if (obj == NULL) {
+		return false;
+	}
 
-    Json::Value root;
-    Json::Reader reader;
+	Json::Value root;
+	Json::Reader reader;
 
-    if (!reader.parse(input, root)) {
-        return false;
-    }
+	if (!reader.parse(input, root)) {
+		return false;
+	}
 
-    obj->Deserialize(root);
+	obj->Deserialize(root);
 
-    return true;
+	return true;
 }

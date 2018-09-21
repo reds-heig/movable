@@ -44,8 +44,8 @@
 
 /**
  * checkChannelPresent() - Check if a given channel is requested by the
- *             user (that is, if the corresponding string
- *             has been specified in the list of channels)
+ *                         user (that is, if the corresponding string
+ *                         has been specified in the list of channels)
  *
  * @sought: sought channel
  * @chList: list of requested channels
@@ -57,11 +57,11 @@ bool checkChannelPresent(const std::string &sought,
 
 /**
  * computeF1Score() - Compute the F1 score for an image-threshold pair,
- *            where the thresholded image undergoes morphological
- *            transformations before the score computation
+ *                    where the thresholded image undergoes morphological
+ *                    transformations before the score computation
  *
  * @warning: the function does NOT compute exactly the F1 score, it computes
- *       instead a value that is proportional to it
+ *           instead a value that is proportional to it
  *
  * @scoreImage: input score image in [-1, 1]
  * @gt        : corresponding ground-truth in {NEG_GT_CLASS, POS_GT_CLASS}
@@ -75,7 +75,7 @@ float computeF1Score(const cv::Mat &scoreImage,
 
 /**
  * computeMR() - Given an image and the corresponding ground-truth, compute the
- *       misclassification rate
+ *               misclassification rate
  *
  * @img       : image to evaluate
  * @gt        : corresponding ground-truth
@@ -97,7 +97,7 @@ bool cvMatEquals(const cv::Mat m1, const cv::Mat m2);
 
 /**
  * normalizeImage() - Normalize an image in [-1, 1] after having converted it in
- *            OpenCV format
+ *                    OpenCV format
  *
  * @resultImage: image obtained from the classification algorithm
  * @bordersize : size of the border to drop
@@ -109,8 +109,8 @@ void normalizeImage(const EMat &resultImage,
 
 /**
  * randomSamplingWithoutReplacement() - Sample a given number (M) of indexes
- *                  from a pool (ranging from 0 to N-1)
- *                  without remplacement
+ *                                      from a pool (ranging from 0 to N-1)
+ *                                      without remplacement
  *
  * Modified version of the RandomSamplingWithoutReplacement() function written
  * by Gael Beaunée - http://gaelbn.com/random-sampling-without-replacement/
@@ -126,8 +126,8 @@ randomSamplingWithoutReplacement(const unsigned int M,
 
 /**
  * randomWeightedSamplingWithReplacement() - Sample a vector of number of the
- *                       desired size according to the given
- *                       distribution
+ *                                           desired size according to the given
+ *                                           distribution
  *
  * @M: number of values to sample
  * @W: weights describing the distribution
@@ -158,22 +158,22 @@ randomWeightedSamplingWithReplacement(const unsigned int M,
 
 /**
  * removeSmallBlobs() - Equivalent of Matlab's bwareaopen(), taken from
- *          http://opencv-code.com/quick-tips/code-replacement-for-matlabs-bwareaopen/
+ *                      http://opencv-code.com/quick-tips/code-replacement-for-matlabs-bwareaopen/
  *
  * @img : image where small blobs have to be filtered out, 8 bits/1ch and with
- *    values {0, 255} only
+ *        values {0, 255} only
  * @size: size of the smallest blob to keep
  */
 void removeSmallBlobs(cv::Mat& img, float size);
 
 /**
  * saveClassifiedImage() - Save the result of a classification as an image on
- *             disk
+ *                         disk
  *
  * @classResult: classification result to store
  * @dirPath    : path of the destination directory
  * @imgName    : name of the destination image (it is the same as the original
- *       image name)
+ *               image name)
  * @borderSize : size of the border to drop
  */
 void saveClassifiedImage(const EMat &classResult,
@@ -189,7 +189,7 @@ void saveClassifiedImage(const EMat &classResult,
  * @threshold   : threshold to apply
  * @dirPath     : path of the destination directory
  * @imgName     : name of the destination image (it is the same as the original
- *        image name)
+ *                image name)
  * @originalSize: original image dimensions
  * @borderSize  : size of the border to drop
  */
@@ -209,7 +209,7 @@ saveThresholdedImage(const cv::Mat &classResult,
  * @imageFName      : input image path
  * @dirPath         : path of the destination directory
  * @imgName         : name of the destination image (it is the same as the
- *            original image name)
+ *                    original image name)
  */
 void
 saveOverlayedImage(const std::string &imageFName,
@@ -218,20 +218,20 @@ saveOverlayedImage(const std::string &imageFName,
 
 /**
  * splitSampleSet() - Split a set of samples in two distinct groups of the
- *            desired size, one for learning of the filters and the
- *            other for learning the tree
+ *                    desired size, one for learning of the filters and the
+ *                    other for learning the tree
  *
- * @samples    : original sample set
- * @Y          : corresponding set of labels
- * @W          : corresponding weights
+ * @samples        : original sample set
+ * @Y              : corresponding set of labels
+ * @W              : corresponding weights
  * @subsetSamplesNo: cardinality of the desired subsets
  *
  * @samples_fl     : extracted subset for filter learning
  * @samples_tree   : extracted subset for tree learning
- * @Y_fl       : labels of the filter learning subset
- * @Y_tree     : labels of the tree learning subset
- * @W_fl       : weights of the filter learning subset
- * @W_tree     : weights of the tree learning subset
+ * @Y_fl           : labels of the filter learning subset
+ * @Y_tree         : labels of the tree learning subset
+ * @W_fl           : weights of the filter learning subset
+ * @W_tree         : weights of the tree learning subset
  *
  * Return: -EXIT_FAILURE in case of error, EXIT_SUCCESS otherwise
  */

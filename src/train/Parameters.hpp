@@ -93,6 +93,8 @@ const std::string defaultConfigFName = "train_config.json";
  * @finalResDir     : directory where final results will be stored
  * @channelList     : list of channels requested by user
  * @configFName     : path of the configuration file
+ * @configBkpPath   : path of the copy of the configuration file that is put in
+ *                    the results directory
  */
 class Parameters {
 public:
@@ -148,6 +150,9 @@ public:
     std::vector< std::string > intermedResDir;
     std::string finalResDir;
 
+    std::string configFName;
+    std::string configBkpPath;
+
     /**
      * Parameters() - Empty constructor for testing
      */
@@ -161,9 +166,6 @@ public:
      * @argv: command line's argument list
      */
     Parameters(int argc, char **argv);
-
-private:
-    std::string configFName;
 };
 
 #endif /* PARAMETERS_HPP_ */

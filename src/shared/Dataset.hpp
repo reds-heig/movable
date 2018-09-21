@@ -119,14 +119,14 @@ public:
 #ifdef MOVABLE_TRAIN
     /**
      * Dataset() - Create a new dataset where the channels are those
-     *             inherited by the source dataset complemented with the
-     *             results obtained by applying the specified boosted
-     *             classifiers to these images
+     *         inherited by the source dataset complemented with the
+     *         results obtained by applying the specified boosted
+     *         classifiers to these images
      *
-     * @params            : simulation's parameters
+     * @params        : simulation's parameters
      * @srcDataset        : source dataset
      * @boostedClassifiers: classifiers used for the generation of the
-     *                      additional channels
+     *          additional channels
      */
     Dataset(const Parameters &params,
             const Dataset &srcDataset,
@@ -134,13 +134,13 @@ public:
 #else // !MOVABLE_TRAIN
     /**
      * Dataset() - Create a new dataset where the channels are those
-     *             inherited by the source dataset complemented with the
-     *             results obtained by applying the specified boosted
-     *             classifiers to these images
+     *         inherited by the source dataset complemented with the
+     *         results obtained by applying the specified boosted
+     *         classifiers to these images
      *
      * @srcDataset        : source dataset
      * @boostedClassifiers: classifiers used for the generation of the
-     *                      additional channels
+     *          additional channels
      */
     Dataset(const Dataset &srcDataset,
             const std::vector< BoostedClassifier * > &boostedClassifiers);
@@ -149,20 +149,20 @@ public:
 #ifdef MOVABLE_TRAIN
     /**
      * getGt() - Get a reference to a specific ground-truth for the
-     *           specified gt pair
+     *       specified gt pair
      *
      * @pairNo : image pair to which the ground-truth belongs to
      * @imageNo: number of the image for which to return the ground-truth
      *
      * Return: reference to the specified gt if available, reference to an
-     *         empty EMat otherwise
+     *     empty EMat otherwise
      */
     const EMat& getGt(const int pairNo,
                       const unsigned int imageNo) const;
 
     /**
      * getGtNegativePairValue() - Get the value of the negative class for a
-     *                            given gt pair
+     *                given gt pair
      *
      * @gtPair: considered gt pair
      *
@@ -172,7 +172,7 @@ public:
 
     /**
      * getGtPositivePairValue() - Get the value of the positive class for a
-     *                            given gt pair
+     *                given gt pair
      *
      * @gtPair: considered gt pair
      *
@@ -201,34 +201,34 @@ public:
      * @pairNo: number of the desired gt pair
      *
      * Return: reference to the specified gt vector if set, reference to an
-     *         empty one otherwise
+     *     empty one otherwise
      */
     const gtVector& getGtVector(const int pairNo) const;
 
     /**
      * getOriginalGt() - Get a reference to a specific original ground-truth
-     *                   image
+     *           image
      *
      * @imageNo: number of the image for which to return the ground-truth
      *
      * Return: reference to the specified gt if available, reference to an
-     *         empty EMat otherwise
+     *     empty EMat otherwise
      */
     const EMat& getOriginalGt(const unsigned int imageNo) const;
 
     /**
      * getSamplePositions() - Get a set of sampling positions from the
-     *                        dataset
+     *            dataset
      *
      * @sampleClass    : class to sample (either POS_GT_CLASS or
-     *                   NEG_GT_CLASS)
-     * @gtPair         : specify which gt pair has to be considered
+     *           NEG_GT_CLASS)
+     * @gtPair     : specify which gt pair has to be considered
      * @samplesNo      : number of samples requested
      *
      * @samplePositions: output sampled positions
      *
      * Return: Number of sampling positions collected on success,
-     *         -EXIT_FAILURE otherwise
+     *     -EXIT_FAILURE otherwise
      */
     int getSamplePositions(const int sampleClass,
                            const unsigned int gtPair,
@@ -237,8 +237,8 @@ public:
 
     /**
      * isFeedbackImage() - Returns whether an image given as a parameter has
-     *                     been returned by a technician as feedback or not
-     *                     (this increases the weight of its samples)
+     *             been returned by a technician as feedback or not
+     *             (this increases the weight of its samples)
      *
      * @imageNo: number of the image to check
      *
@@ -253,11 +253,11 @@ public:
      *
      * @samplePositions: list of available sampling positions
      * @samplesIdx     : indexes of the subset of patches to sample
-     * @chNo           : channel from which to sample from
+     * @chNo       : channel from which to sample from
      * @rowOffset      : row offset to impose while sampling
      * @colOffset      : col offset to impose while sampling
-     * @size           : size of the samples to extract
-     * @samples        : resulting matrix filled with the extracted samples
+     * @size       : size of the samples to extract
+     * @samples    : resulting matrix filled with the extracted samples
      *
      * Samples are taken from the given upper-left corner plus the offsets.
      * Samples are row-major (that is, each sample is taken row-by-row).
@@ -272,7 +272,7 @@ public:
 
     /**
      * shrinkSamplePositions() - Drop samples from a sample set until the
-     *                           desired size is reached
+     *               desired size is reached
      *
      * @samplePositions: considered sampling points
      * @desiredSize    : desired size of the sampling set
@@ -289,7 +289,7 @@ public:
 
     /**
      * getChsForImage() - Get the channels corresponding to a specified
-     *                    image in OpenCV format and enlarged by borderSize
+     *            image in OpenCV format and enlarged by borderSize
      *
      * @n  : image number
      * @chs: resulting vector containing the desired data in OpenCV format
@@ -299,13 +299,13 @@ public:
 
     /**
      * getData() - Get a reference to the data of a specific image-channel
-     *             pair
+     *         pair
      *
      * @channelNo: number of the desired channel
      * @imageNo  : number of the desired image
      *
      * Return: reference to the specified data if available, reference to an
-     *         empty EMat otherwise
+     *     empty EMat otherwise
      */
     const EMat& getData(const unsigned int channelNo,
                         const unsigned int imageNo) const;
@@ -319,12 +319,12 @@ public:
 
     /**
      * getDataVector() - Get a reference to the specific data channel
-     *                   vector
+     *           vector
      *
      * @channelNo: number of the desired channel
      *
      * Return: reference to the desired channel if available, reference to
-     *         an empty one otherwise
+     *     an empty one otherwise
      */
     const dataVector& getDataVector(const unsigned int channelNo) const;
 
@@ -334,27 +334,27 @@ public:
      * @imageNo: number of the image whose set of candidates is requested
      *
      * Return: reference to the desired set if available, reference to
-     *         an empty set otherwise
+     *     an empty set otherwise
      */
     const sampleSet& getEPoints(const unsigned int imageNo) const;
 
     /**
      * getImageName() - Return the filename of an input image
      *
-     * @imageNo: number of the desired image
+     * @imageNo  : number of the desired image
      *
      * Return: filename of the desired image if found, an empty string
-     *         otherwise
+     *     otherwise
      */
     std::string getImageName(const unsigned int imageNo) const;
 
     /**
      * getImagePath() - Return the path of an input image
      *
-     * @imageNo: number of the desired image
+     * @imageNo  : number of the desired image
      *
      * Return: path of the desired image if found, an empty string
-     *         otherwise
+     *     otherwise
      */
     std::string getImagePath(const unsigned int imageNo) const;
 
@@ -371,7 +371,7 @@ public:
      * @imageNo: number of the image whose mask is requested
      *
      * Return: reference to the desired mask if available, reference to
-     *         an empty EMat otherwise
+     *     an empty EMat otherwise
      */
     const EMat& getMask(const unsigned int imageNo) const;
 
@@ -449,11 +449,11 @@ private:
 
     /**
      * addGt() - Preprocess the ground-truth image passed as parameter, and
-     *           then push it into the dataset, exploding it on the
-     *           different gt pairs
+     *       then push it into the dataset, exploding it on the
+     *       different gt pairs
      *
      * @imageID: image ID (corresponding to its position)
-     * @src    : input ground-truth image
+     * @src: input ground-truth image
      *
      * Return: EXIT_SUCCESS
      */
@@ -461,15 +461,15 @@ private:
 
     /**
      * addImage() - Add an image along with its ground-truth and mask,
-     *              computing the additional channels from the image itself
+     *      computing the additional channels from the image itself
      *
-     * @imageID : image ID (corresponding to its position)
+     * @imageID   : image ID (corresponding to its position)
      * @imgPath : path of the input image
      * @maskPath: path of the input mask
      * @gtPath  : path of the input ground-truth
      *
      * Return: -EXIT_FAILURE if one of more of the input paths are invalid
-     *         or an image has invalid size, EXIT_SUCCESS otherwise
+     *     or an image has invalid size, EXIT_SUCCESS otherwise
      */
     int addImage(const unsigned int imageID,
                  const std::string &imgPath,
@@ -501,12 +501,12 @@ private:
      *               given class from the specified gt
      *               vector
      *
-     * @gt               : vector of gt images used in sampling
+     * @gt           : vector of gt images used in sampling
      * @sampleClass      : identifier of the class to sample
      * @availableSamples : returned vector of samples, where samples are
-     *                     split over images
+     *             split over images
      * @samplesPerImageNo: number of samples of the desired class for each
-     *                     separate image
+     *             separate image
      *
      * Return: total number of sampled points
      */
@@ -518,7 +518,7 @@ private:
 
     /**
      * createGtPairs() - Create a set of gt pairs, starting from a list of
-     *                   values
+     *           values
      *
      * @gtValues: set of desired ground-truth values to classify
      */
@@ -526,9 +526,9 @@ private:
 
     /**
      * getAvailableSamples() - Extract a set of samples of the desired size
-     *                         from the given gt vector
+     *             from the given gt vector
      *
-     * @gt             : vector of gt images used in sampling
+     * @gt         : vector of gt images used in sampling
      * @sampleClass    : identifier of the class to sample
      * @samplesNo      : requested number of samples
      * @samplePositions: output sampled positions
@@ -558,14 +558,14 @@ private:
 #else // !MOVABLE_TRAIN
     /**
      * addImage() - Add an image along with its mask, computing the
-     *              additional channels from the image itself
+     *      additional channels from the image itself
      *
      * @imageID : image ID (corresponding to its position)
      * @imgPath : path of the input image
      * @maskPath: path of the input mask
      *
      * Return: -EXIT_FAILURE if one of more of the input paths are invalid
-     *         or an image has invalid size, EXIT_SUCCESS otherwise
+     *     or an image has invalid size, EXIT_SUCCESS otherwise
      */
 
     int addImage(const unsigned int imageID,
@@ -588,8 +588,8 @@ private:
 
     /**
      * imageGrayCh() - Process an image, converting it to grayscale and
-     *                 pushing it into the corresponding channel of the
-     *                 dataset
+     *         pushing it into the corresponding channel of the
+     *         dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -631,8 +631,8 @@ private:
 
     /**
      * imageRedCh() - Process an image, taking the red channel only and
-     *                pushing it into the corresponding channel of the
-     *                dataset
+     *        pushing it into the corresponding channel of the
+     *        dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -645,8 +645,8 @@ private:
 
     /**
      * imageBlueCh() - Process an image, taking the blue channel only and
-     *                 pushing it into the corresponding channel of the
-     *                 dataset
+     *         pushing it into the corresponding channel of the
+     *         dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -659,8 +659,8 @@ private:
 
     /**
      * imageHueCh() - Process an image, taking the hue channel only and
-     *                pushing it into the corresponding channel of the
-     *                dataset
+     *        pushing it into the corresponding channel of the
+     *        dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -673,8 +673,8 @@ private:
 
     /**
      * imageSaturCh() - Process an image, taking the saturation channel only
-     *                  and pushing it into the corresponding channel of the
-     *                  dataset
+     *          and pushing it into the corresponding channel of the
+     *          dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -687,8 +687,8 @@ private:
 
     /**
      * imageValueCh() - Process an image, taking the value channel only and
-     *                  pushing it into the corresponding channel of the
-     *                  dataset
+     *          pushing it into the corresponding channel of the
+     *          dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -701,8 +701,8 @@ private:
 
     /**
      * imageLCh() - Process an image, taking the CIE L channel only and
-     *              pushing it into the corresponding channel of the
-     *              dataset
+     *      pushing it into the corresponding channel of the
+     *      dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -715,8 +715,8 @@ private:
 
     /**
      * imageACh() - Process an image, taking the CIE A channel only and
-     *              pushing it into the corresponding channel of the
-     *              dataset
+     *      pushing it into the corresponding channel of the
+     *      dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -729,8 +729,8 @@ private:
 
     /**
      * imageBCh() - Process an image, taking the CIE B channel only and
-     *              pushing it into the corresponding channel of the
-     *              dataset
+     *      pushing it into the corresponding channel of the
+     *      dataset
      *
      * @src   : input image
      * @dst   : converted image
@@ -743,8 +743,8 @@ private:
 
     /**
      * gaussianFiltering() - Process an image, taking its green channel and
-     *                       passing it through a Gaussian filter with sigma
-     *                       1
+     *           passing it through a Gaussian filter with sigma
+     *           1
      *
      * @src   : input image
      * @dst   : converted image
@@ -757,7 +757,7 @@ private:
 
     /**
      * laplacianFiltering() - Process an image, taking its green channel and
-     *                        passing it through a Laplacian filter of size 9
+     *            passing it through a Laplacian filter of size 9
      *
      * @src   : input image
      * @dst   : converted image
@@ -783,9 +783,9 @@ private:
 
     /**
      * medianFiltering() - Process an image, converting it to grayscale and
-     *                     then passing it through a median filter with 3
-     *                     pixel of radius (1.5 would have been better, but
-     *                     must be > 1, odd, and not fractional in OpenCV)
+     *             then passing it through a median filter with 3
+     *             pixel of radius (1.5 would have been better, but
+     *             must be > 1, odd, and not fractional in OpenCV)
      *
      * @src   : input image
      * @dst   : converted image
@@ -798,8 +798,8 @@ private:
 
     /**
      * sobelDrvX() - Process an image, taking its green channel and
-     *               passing it through a Sobel derivative filter in the X
-     *               direction
+     *       passing it through a Sobel derivative filter in the X
+     *       direction
      *
      * @src   : input image
      * @dst   : converted image
@@ -812,8 +812,8 @@ private:
 
     /**
      * sobelDrvY() - Process an image, taking its green channel and
-     *               passing it through a Sobel derivative filter in the Y
-     *               direction
+     *       passing it through a Sobel derivative filter in the Y
+     *       direction
      *
      * @src   : input image
      * @dst   : converted image
@@ -826,7 +826,7 @@ private:
 
     /**
      * addMask() - Preprocess the mask passed as parameter, and then push it
-     *             into the dataset
+     *         into the dataset
      *
      * @imageID: image ID (corresponding to its position)
      * @src    : input image mask
@@ -839,7 +839,7 @@ private:
      * loadPathFile() - Load a list of paths from a file
      *
      * @dataset_path: path of the dataset
-     * @fname       : name of the file containing the path list
+     * @fname   : name of the file containing the path list
      * @loaded_paths: output list of file paths
      *
      * Return: -EXIT_FAILURE on error, EXIT_SUCCESS OTHERWISE

@@ -113,6 +113,7 @@ Parameters::Parameters(int argc, char **argv)
             throw std::runtime_error("resultsDirAlreadyExists");
         }
         classifierPath = baseResDir+std::string("/")+"classifier.json";
+        configBkpPath = baseResDir+std::string("/")+"train_config.json";
 
         GET_STRING_PARAM(datasetPath);
         CHECK_DIR_EXISTS(datasetPath.c_str());
