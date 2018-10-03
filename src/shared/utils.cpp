@@ -221,33 +221,33 @@ saveClassifiedImage(const EMat &classResult,
     std::string dstPath = dirPath + "/" + imgName;
     cv::imwrite(dstPath.c_str(), img);
 
-    /* Save the raw-format image too */
-    EMat roi = classResult.block(borderSize, borderSize,
-                                 classResult.rows()-2*borderSize,
-                                 classResult.cols()-2*borderSize);
-    dstPath += std::string(".raw");
-    FILE *fp = fopen(dstPath.c_str(), "wb");
-    if (fp == NULL) {
-        log_err("Unable to open destination raw binary file %s",
-                dstPath.c_str());
-        return;
-    }
-    for (size_t r = 0, nRows = roi.rows(); r < nRows; ++r) {
-        for (size_t c = 0, nCols = roi.cols(); c < nCols; ++c) {
-            fwrite(&roi(r,c), sizeof(float), 1, fp);
-        }
-    }
-    fclose(fp);
+    // /* Save the raw-format image too */
+    // EMat roi = classResult.block(borderSize, borderSize,
+    //                              classResult.rows()-2*borderSize,
+    //                              classResult.cols()-2*borderSize);
+    // dstPath += std::string(".raw");
+    // FILE *fp = fopen(dstPath.c_str(), "wb");
+    // if (fp == NULL) {
+    //     log_err("Unable to open destination raw binary file %s",
+    //             dstPath.c_str());
+    //     return;
+    // }
+    // for (size_t r = 0, nRows = roi.rows(); r < nRows; ++r) {
+    //     for (size_t c = 0, nCols = roi.cols(); c < nCols; ++c) {
+    //         fwrite(&roi(r,c), sizeof(float), 1, fp);
+    //     }
+    // }
+    // fclose(fp);
 
-    dstPath += std::string(".txt");
-    std::ofstream fileTxt(dstPath);
-    if (!fileTxt.is_open()) {
-        log_err("Unable to open destination raw text file %s",
-                dstPath.c_str());
-        return;
-    }
-    fileTxt << roi;
-    fileTxt.close();
+    // dstPath += std::string(".txt");
+    // std::ofstream fileTxt(dstPath);
+    // if (!fileTxt.is_open()) {
+    //     log_err("Unable to open destination raw text file %s",
+    //             dstPath.c_str());
+    //     return;
+    // }
+    // fileTxt << roi;
+    // fileTxt.close();
 }
 
 void
@@ -274,7 +274,7 @@ saveOverlayedImage(const std::string &imageFName,
     // cv::cvtColor(detections, detections, CV_GRAY2BGR);
 
     cv::Mat dst;
-    cv::addWeighted(img, 0.3, detections, 0.7, 0.0, dst);
+    cv::addWeighted(img, 1, detections, 0.5, 0.0, dst);
     // cv::merge(overlayedDet, 3, dst);
     std::string dstPath = dirPath + "/" + imgName + "_overlayed.png";
     cv::imwrite(dstPath.c_str(), dst);
@@ -290,6 +290,17 @@ saveThresholdedImage(const cv::Mat &classResult,
                      const unsigned int borderSize)
 {
     cv::Mat tmp;
+
+    /* Normalize image in [0..255] to apply threshold */
+    double min, max;
+    cv::Mat localResult = classResult;
+    cv::minMaxLoc(classResult, &min, &max);
+    if (max-min > 1e-4) {
+        localResult = (localResult-min)/(max-min)*255;
+    } else {
+        localResult.setTo(cv::Scalar(0));
+    }
+
     /* Apply threshold */
     cv::threshold(classResult, tmp, threshold,
                   255, cv::THRESH_BINARY);
@@ -297,6 +308,8 @@ saveThresholdedImage(const cv::Mat &classResult,
     /* Apply mask */
     cv::Mat c_mask(mask.rows(), mask.cols(), CV_8UC1);
     cv::eigen2cv(mask, c_mask);
+    tmp = tmp(cv::Range(borderSize, tmp.rows-borderSize),
+              cv::Range(borderSize, tmp.cols-borderSize));
     c_mask = c_mask(cv::Range(borderSize, c_mask.rows-borderSize),
                     cv::Range(borderSize, c_mask.cols-borderSize));
     cv::bitwise_and(tmp, c_mask, tmp);
@@ -307,9 +320,12 @@ saveThresholdedImage(const cv::Mat &classResult,
     removeSmallBlobs(toClean, 20);
 
     /* Perform morphological close */
+    // cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+    //                                             cv::Size(3, 3),
+    //                                             cv::Point(1, 1));
     cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                cv::Size(3, 3),
-                                                cv::Point(1, 1));
+                                                cv::Size(5, 5));
+
     cv::morphologyEx(toClean, toClean, cv::MORPH_CLOSE, element);
 
     /* Now replace each blob by its convex hull -- this will prevent weird

@@ -115,8 +115,7 @@ KernelBoost::KernelBoost(Parameters &params,
 #endif // !TESTS
     }
 
-    /* For the moment, use a fixed threshold */
-    binaryThreshold = 0;
+    binaryThreshold = params.threshold;
 
 #ifndef TESTS
     /* Dumping the thresholded images for reference */
@@ -132,6 +131,9 @@ KernelBoost::KernelBoost(Parameters &params,
 
     /* Save WL distribution statistics */
     std::string statsFName = params.baseResDir + "/statistics.txt";
+
+    std::cerr << "SAVING STATS TO : " << statsFName << "\n";
+
     FILE *fp = fopen(statsFName.c_str(), "wt");
     if (fp != NULL) {
         for (unsigned int i = 0; i < boostedClassifiers.size(); ++i) {
@@ -240,7 +242,7 @@ KernelBoost::KernelBoost(std::string &descr_json,
     start = std::chrono::system_clock::now();
 #endif // !TESTS
 
-#pragma omp parallel for schedule(dynamic)
+// #pragma omp parallel for schedule(dynamic)
     for (unsigned int i = 0; i < data_to_use->getImagesNo(); ++i) {
         EMat result;
         if (params.fastClassifier) {
@@ -265,6 +267,21 @@ KernelBoost::KernelBoost(std::string &descr_json,
                             params.baseResDir,
                             data_to_use->getImageName(i),
                             data_to_use->getBorderSize());
+
+        cv::Mat imgToThreshold(result.rows(), result.cols(), CV_32FC1);
+        // cv::Mat imgToThreshold(result.rows(), result.cols(), CV_8UC1);
+        cv::eigen2cv(result, imgToThreshold);
+        saveThresholdedImage(imgToThreshold,
+                             data_to_use->getMask(i),
+                             params.threshold,
+                             params.baseResDir,
+                             data_to_use->getImageName(i),
+                             data_to_use->getOriginalImgSize(i),
+                             data_to_use->getBorderSize());
+
+        saveOverlayedImage(data_to_use->getImagePath(i),
+                           params.baseResDir,
+                           data_to_use->getImageName(i));
 
         /* Removed for initial H3PoC tests */
 #if 0
@@ -437,7 +454,7 @@ KernelBoost::serialize(Json::Value &root, const Parameters &params)
         finalClassifier->Serialize(final_bc_json);
         kb_json["FinalClassifier"] = final_bc_json;
     }
-    kb_json["binaryThreshold"] = binaryThreshold;
+    kb_json["binaryThreshold"] = 0.0;
     kb_json["fastClassifier"] = params.fastClassifier;
     kb_json["RBCdetection"] = params.RBCdetection;
     kb_json["useAutoContext"] = params.useAutoContext;

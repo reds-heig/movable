@@ -1,7 +1,7 @@
 {
-    "resultsDir" : "results",
-    "datasetPath": "../../../test_data/datasets/h3poc_dataset_01",
-    "datasetName": "h3poc_dataset_01",
+    "resultsDir" : "results_test",
+    "datasetPath": "../../../test_data/datasets/imgs_corrMK_QS.2016_V2",
+    "datasetName": "imgs_corrMK_QS.2016_V2",
     "imgPathsFName": "test_imgs.txt",
     "maskPathsFName": "test_masks.txt",
     "threshold": 0.0
